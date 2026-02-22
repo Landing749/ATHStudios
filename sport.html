@@ -348,18 +348,18 @@
 
     /* ─── BOTTOM NAV (phones & tablets ≤1024px) ─── */
     #bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;z-index:60;background:var(--s1);border-top:1px solid var(--bord2);padding-bottom:env(safe-area-inset-bottom)}
-    .bn-inner{display:flex;align-items:stretch;height:56px}
-    .bn-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.22rem;background:none;color:var(--faint);font-family:var(--sc);font-size:.52rem;letter-spacing:.1em;transition:color .18s,background .18s;position:relative;padding:.25rem .125rem;min-width:0;-webkit-tap-highlight-color:transparent}
+    .bn-inner{display:flex;align-items:stretch;height:72px}
+    .bn-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.4rem;background:none;color:var(--faint);font-family:var(--sc);font-size:.6rem;letter-spacing:.08em;transition:color .18s,background .18s;position:relative;padding:.5rem .25rem;min-width:0;-webkit-tap-highlight-color:transparent}
     .bn-item:active{background:rgba(237,237,237,.04)}
-    .bn-item svg{flex-shrink:0;transition:transform .2s var(--ease)}
+    .bn-item svg{flex-shrink:0;width:22px;height:22px;transition:transform .2s var(--ease)}
     .bn-item.active{color:var(--plat)}
     .bn-item.active svg{transform:translateY(-1px)}
-    .bn-item.active::after{content:'';position:absolute;top:0;left:25%;right:25%;height:2px;background:linear-gradient(90deg,var(--blue2),var(--blue));border-radius:0 0 2px 2px}
-    .bn-badge{position:absolute;top:.35rem;right:calc(50% - .85rem);min-width:.85rem;height:.85rem;border-radius:10px;background:var(--blue);color:#fff;font-size:.5rem;font-weight:700;display:none;align-items:center;justify-content:center;padding:0 .22rem;line-height:1}
+    .bn-item.active::after{content:'';position:absolute;top:0;left:20%;right:20%;height:2px;background:linear-gradient(90deg,var(--blue2),var(--blue));border-radius:0 0 3px 3px}
+    .bn-badge{position:absolute;top:.45rem;right:calc(50% - 1rem);min-width:.9rem;height:.9rem;border-radius:10px;background:var(--blue);color:#fff;font-size:.52rem;font-weight:700;display:none;align-items:center;justify-content:center;padding:0 .25rem;line-height:1}
     .bn-badge.show{display:flex}
 
     /* ─── MORE DRAWER (slides up from bottom on mobile) ─── */
-    #more-drawer{position:fixed;bottom:56px;left:0;right:0;z-index:70;background:var(--s1);border-top:1px solid var(--bord2);border-radius:12px 12px 0 0;transform:translateY(110%);transition:transform .3s var(--ease);max-height:70vh;overflow-y:auto}
+    #more-drawer{position:fixed;bottom:72px;left:0;right:0;z-index:70;background:var(--s1);border-top:1px solid var(--bord2);border-radius:12px 12px 0 0;transform:translateY(110%);transition:transform .3s var(--ease);max-height:70vh;overflow-y:auto}
     #more-drawer.open{transform:translateY(0)}
     .md-handle{width:2.5rem;height:.25rem;background:var(--bord2);border-radius:2px;margin:.75rem auto .5rem}
     .md-head{padding:.25rem 1.25rem .625rem;font-family:var(--sc);font-weight:300;font-size:.6rem;letter-spacing:.2em;color:var(--faint)}
@@ -382,39 +382,104 @@
     @media(pointer: coarse){
       :root{--sw:0px}
       aside#sb{display:none}
-      main#main{margin-left:0;padding-bottom:calc(56px + env(safe-area-inset-bottom))}
+      main#main{margin-left:0;padding-bottom:calc(72px + env(safe-area-inset-bottom))}
       #bottom-nav{display:block}
       .topbar{padding:0 1rem;gap:.5rem}
       .tb-clock{display:none}
       .panel{padding:1rem}
-      .stat-row{grid-template-columns:repeat(2,1fr);gap:.75rem}
-      .sg{grid-template-columns:1fr}
-      .sh{flex-wrap:wrap;gap:.5rem}
-      .sh-right{overflow-x:auto;padding-bottom:.125rem}
-      .tbl-toolbar{flex-direction:column;align-items:stretch;gap:.5rem}
+      .sh{flex-wrap:wrap;gap:.625rem}
+      .sh-right{overflow-x:auto;padding-bottom:.125rem;gap:.5rem}
+
+      /* ── Buttons: bigger tap targets ── */
+      .btn{padding:.65rem 1rem;font-size:.875rem;min-height:44px}
+      .btn-sm{padding:.55rem .875rem;font-size:.8125rem;min-height:40px}
+      .btn-xs{padding:.45rem .7rem;font-size:.775rem;min-height:38px}
+      .btn-icon{padding:.65rem;min-height:44px;min-width:44px;display:inline-flex;align-items:center;justify-content:center}
+
+      /* ── Badges / status tags: readable size ── */
+      .badge{padding:.3rem .7rem;font-size:.7rem;letter-spacing:.08em;gap:.35rem}
+      .bd{width:.4rem;height:.4rem}
+
+      /* ── Table: taller rows, bigger text ── */
+      tbody td{padding:.875rem 1rem;font-size:.875rem}
+      thead th{padding:.7rem 1rem;font-size:.68rem}
+
+      /* ── Toolbar inputs & selects ── */
+      .tbl-toolbar{flex-direction:column;align-items:stretch;gap:.625rem}
       .tbl-toolbar .si,.tbl-toolbar .fs{width:100%}
       .tbl-toolbar span[id="inq-count"]{margin-left:0!important}
-      thead th:nth-child(2),tbody td:nth-child(2){display:none}
-      thead th:nth-child(4),tbody td:nth-child(4){display:none}
+      .si{padding:.625rem .875rem;font-size:.875rem;height:44px}
+      .fs{padding:.625rem .875rem;font-size:.875rem;height:44px}
+
+      /* ── Drawer ── */
       #dr{width:100vw;max-width:100vw}
       #dr-overlay{z-index:200}
-      .dr-actions{overflow-x:auto;flex-wrap:nowrap;padding:.75rem 1rem;gap:.4rem}
+      .dr-actions{overflow-x:auto;flex-wrap:nowrap;padding:.875rem 1rem;gap:.5rem}
       .dr-actions .btn{flex-shrink:0}
+      .dr-notes{font-size:.9rem;padding:.75rem;min-height:100px}
+      .fi p{font-size:.9rem}
+      .ff p{font-size:.875rem}
+
+      /* ── Grid forms ── */
       .proc-2{grid-template-columns:1fr}
       .te-2{grid-template-columns:1fr}
       .f2{grid-template-columns:1fr}
       .proc-panel-layout{grid-template-columns:1fr;gap:1rem}
       #proc-placeholder{display:none}
+
+      /* ── Fields & inputs inside cards ── */
+      .field input,.field textarea,.field select{padding:.7rem .875rem;font-size:.9rem;min-height:44px}
+      .proc-field input,.proc-field textarea,.proc-field select{padding:.625rem .75rem;font-size:.875rem;min-height:44px}
+      .te-f input,.te-f textarea{padding:.625rem .75rem;font-size:.875rem;min-height:44px}
+      .lf input{padding:.75rem .875rem;font-size:.9375rem;min-height:48px}
+      .login-btn{min-height:52px;font-size:.9375rem}
+
+      /* ── Toggles: bigger hit area ── */
+      .tog{width:3rem;height:1.625rem}
+      .tog-sl::after{width:1.1rem;height:1.1rem}
+      .tog input:checked+.tog-sl::after{left:1.6rem}
+      .tog-row{min-height:44px;align-items:center}
+
+      /* ── Stat cards ── */
+      .stat-row{grid-template-columns:repeat(2,1fr);gap:.75rem}
+      .sc{padding:1.25rem}
+      .sc-val{font-size:2.125rem}
+
+      /* ── Quick action grid ── */
+      .qa-grid{grid-template-columns:repeat(3,1fr);gap:.625rem}
+      .qa-btn{padding:1rem .75rem;min-height:72px}
+
+      /* ── Settings cards ── */
+      .sg{grid-template-columns:1fr}
+      .card{padding:1.25rem}
+
+      /* ── Process steps ── */
+      .proc-step-head{padding:.875rem 1rem;min-height:52px}
+      .proc-drag{padding:.5rem}
+      .proc-inq-item{padding:.875rem 1rem;min-height:52px}
+
+      /* ── Modals ── */
       #em-box{max-width:100%;border-radius:0}
       #em-ov{padding:0;align-items:flex-end}
       #chat-box{width:100%;max-width:100%;height:90vh;border-radius:0}
       #chat-ov{padding:0;align-items:flex-end}
-      .cfm-box{max-width:calc(100vw - 2rem)}
-      .qa-grid{grid-template-columns:repeat(3,1fr);gap:.625rem}
-      .qa-btn{padding:.75rem .625rem}
+      .chat-composer textarea{min-height:52px;font-size:.9rem;padding:.75rem}
+      .cfm-box{max-width:calc(100vw - 2rem);padding:1.75rem}
+      .cfm-box p{font-size:.9375rem}
+
+      /* ── Nav items in more drawer ── */
+      .md-item{min-height:56px;font-size:.9375rem;padding:.875rem 1.25rem}
+      .md-item svg{width:20px;height:20px;opacity:.7}
+
+      /* ── Misc ── */
       .btn-label{display:none}
-      .tb-right > a.btn{padding:.38rem .5rem}
+      .tb-right > a.btn{padding:.55rem .65rem;min-height:40px}
       .login-box{max-width:calc(100vw - 2rem);padding:1.75rem}
+      .nav-grp{padding:1rem 1.25rem .3rem}
+
+      /* ── Table column hiding ── */
+      thead th:nth-child(2),tbody td:nth-child(2){display:none}
+      thead th:nth-child(4),tbody td:nth-child(4){display:none}
     }
 
     /* Touch + small screen (phones) */
@@ -456,7 +521,7 @@
 <nav id="bottom-nav">
   <div class="bn-inner">
     <button class="bn-item active" data-bn="overview">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
       Overview
     </button>
     <button class="bn-item" data-bn="inquiries">
