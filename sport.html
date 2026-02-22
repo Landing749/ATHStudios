@@ -65,7 +65,7 @@
     #app.show{display:flex}
 
     /* ─── SIDEBAR ─── */
-    aside#sb{width:var(--sw);flex-shrink:0;background:var(--s1);border-right:1px solid var(--bord);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:50}
+    aside#sb{width:var(--sw);flex-shrink:0;background:var(--s1);border-right:1px solid var(--bord);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:50;transition:transform .3s var(--ease)}
     .sb-logo{padding:1.5rem 1.25rem 1.25rem;border-bottom:1px solid var(--bord)}
     .sb-logo-text{font-family:'Great Vibes','Cormorant Garamond',Georgia,serif;font-weight:400;font-size:1.75rem;letter-spacing:.03em}
     .sb-logo-sub{font-family:var(--sc);font-weight:300;font-size:.6rem;letter-spacing:.2em;color:var(--faint);margin-top:.2rem}
@@ -338,13 +338,170 @@
     .chat-composer textarea:focus{border-color:rgba(58,74,159,.45)}
     .chat-empty{text-align:center;padding:2rem;font-family:var(--sc);font-size:.75rem;letter-spacing:.08em;color:var(--faint)}
 
-    @media(max-width:768px){:root{--sw:0px}aside#sb{transform:translateX(-248px);width:248px}main#main{margin-left:0}.stat-row{grid-template-columns:repeat(2,1fr)}}
+    /* ─── MOBILE SIDEBAR OVERLAY ─── */
+    #sb-overlay{position:fixed;inset:0;z-index:49;background:rgba(9,9,12,.65);backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:opacity .28s}
+    #sb-overlay.open{opacity:1;pointer-events:auto}
+
+    /* ─── HAMBURGER (hidden on mobile – bottom nav is used instead) ─── */
+    .hamburger{display:none;background:none;color:var(--muted);border:1px solid var(--bord);padding:.4rem;transition:color .2s,border-color .2s;flex-shrink:0;align-items:center;justify-content:center;margin-right:.375rem}
+    .hamburger:hover{color:var(--plat);border-color:var(--bord2)}
+
+    /* ─── BOTTOM NAV (phones & tablets ≤1024px) ─── */
+    #bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;z-index:60;background:var(--s1);border-top:1px solid var(--bord2);padding-bottom:env(safe-area-inset-bottom)}
+    .bn-inner{display:flex;align-items:stretch;height:56px}
+    .bn-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.22rem;background:none;color:var(--faint);font-family:var(--sc);font-size:.52rem;letter-spacing:.1em;transition:color .18s,background .18s;position:relative;padding:.25rem .125rem;min-width:0;-webkit-tap-highlight-color:transparent}
+    .bn-item:active{background:rgba(237,237,237,.04)}
+    .bn-item svg{flex-shrink:0;transition:transform .2s var(--ease)}
+    .bn-item.active{color:var(--plat)}
+    .bn-item.active svg{transform:translateY(-1px)}
+    .bn-item.active::after{content:'';position:absolute;top:0;left:25%;right:25%;height:2px;background:linear-gradient(90deg,var(--blue2),var(--blue));border-radius:0 0 2px 2px}
+    .bn-badge{position:absolute;top:.35rem;right:calc(50% - .85rem);min-width:.85rem;height:.85rem;border-radius:10px;background:var(--blue);color:#fff;font-size:.5rem;font-weight:700;display:none;align-items:center;justify-content:center;padding:0 .22rem;line-height:1}
+    .bn-badge.show{display:flex}
+
+    /* ─── MORE DRAWER (slides up from bottom on mobile) ─── */
+    #more-drawer{position:fixed;bottom:56px;left:0;right:0;z-index:70;background:var(--s1);border-top:1px solid var(--bord2);border-radius:12px 12px 0 0;transform:translateY(110%);transition:transform .3s var(--ease);max-height:70vh;overflow-y:auto}
+    #more-drawer.open{transform:translateY(0)}
+    .md-handle{width:2.5rem;height:.25rem;background:var(--bord2);border-radius:2px;margin:.75rem auto .5rem}
+    .md-head{padding:.25rem 1.25rem .625rem;font-family:var(--sc);font-weight:300;font-size:.6rem;letter-spacing:.2em;color:var(--faint)}
+    .md-item{display:flex;align-items:center;gap:.875rem;padding:.75rem 1.25rem;font-size:.875rem;color:var(--muted);background:none;width:100%;text-align:left;transition:background .14s,color .14s;border-bottom:1px solid var(--bord);min-height:52px}
+    .md-item:last-child{border-bottom:0}
+    .md-item:active{background:rgba(237,237,237,.04)}
+    .md-item svg{opacity:.6;flex-shrink:0}
+    .md-item.active{color:var(--plat)}
+    .md-item.active svg{opacity:1}
+    #more-overlay{position:fixed;inset:0;z-index:69;background:rgba(9,9,12,.55);backdrop-filter:blur(3px);opacity:0;pointer-events:none;transition:opacity .25s}
+    #more-overlay.open{opacity:1;pointer-events:auto}
+
+    /* ─── EMAIL MODAL ─── */
+    #em-ov{position:fixed;inset:0;z-index:600;background:rgba(9,9,12,.82);backdrop-filter:blur(8px);opacity:0;pointer-events:none;transition:opacity .25s;display:flex;align-items:center;justify-content:center;padding:1rem}
+    #em-box{background:var(--s1);border:1px solid var(--bord2);width:100%;max-width:520px;max-height:90vh;overflow-y:auto;transform:scale(.96);transition:transform .26s var(--ease)}
+
+    /* ─── RESPONSIVE ─── */
+
+    /* Touch hardware (phones & tablets) — pointer: coarse = finger input */
+    @media(pointer: coarse){
+      :root{--sw:0px}
+      aside#sb{display:none}
+      main#main{margin-left:0;padding-bottom:calc(56px + env(safe-area-inset-bottom))}
+      #bottom-nav{display:block}
+      .topbar{padding:0 1rem;gap:.5rem}
+      .tb-clock{display:none}
+      .panel{padding:1rem}
+      .stat-row{grid-template-columns:repeat(2,1fr);gap:.75rem}
+      .sg{grid-template-columns:1fr}
+      .sh{flex-wrap:wrap;gap:.5rem}
+      .sh-right{overflow-x:auto;padding-bottom:.125rem}
+      .tbl-toolbar{flex-direction:column;align-items:stretch;gap:.5rem}
+      .tbl-toolbar .si,.tbl-toolbar .fs{width:100%}
+      .tbl-toolbar span[id="inq-count"]{margin-left:0!important}
+      thead th:nth-child(2),tbody td:nth-child(2){display:none}
+      thead th:nth-child(4),tbody td:nth-child(4){display:none}
+      #dr{width:100vw;max-width:100vw}
+      #dr-overlay{z-index:200}
+      .dr-actions{overflow-x:auto;flex-wrap:nowrap;padding:.75rem 1rem;gap:.4rem}
+      .dr-actions .btn{flex-shrink:0}
+      .proc-2{grid-template-columns:1fr}
+      .te-2{grid-template-columns:1fr}
+      .f2{grid-template-columns:1fr}
+      .proc-panel-layout{grid-template-columns:1fr;gap:1rem}
+      #proc-placeholder{display:none}
+      #em-box{max-width:100%;border-radius:0}
+      #em-ov{padding:0;align-items:flex-end}
+      #chat-box{width:100%;max-width:100%;height:90vh;border-radius:0}
+      #chat-ov{padding:0;align-items:flex-end}
+      .cfm-box{max-width:calc(100vw - 2rem)}
+      .qa-grid{grid-template-columns:repeat(3,1fr);gap:.625rem}
+      .qa-btn{padding:.75rem .625rem}
+      .btn-label{display:none}
+      .tb-right > a.btn{padding:.38rem .5rem}
+      .login-box{max-width:calc(100vw - 2rem);padding:1.75rem}
+    }
+
+    /* Touch + small screen (phones) */
+    @media(pointer: coarse) and (max-width:600px){
+      .stat-row{grid-template-columns:1fr 1fr}
+      .qa-grid{grid-template-columns:repeat(2,1fr)}
+      .sc-val{font-size:1.625rem}
+      .panel{padding:.75rem}
+      thead th:nth-child(6),tbody td:nth-child(6){display:none}
+      .tbl-foot{flex-direction:column;gap:.25rem;align-items:flex-start}
+    }
+
+    /* Touch + larger screen (tablets) */
+    @media(pointer: coarse) and (min-width:601px){
+      .stat-row{grid-template-columns:repeat(3,1fr)}
+      .sg{grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
+      #dr{width:min(480px,100vw)}
+      #em-box{max-width:min(500px,100vw);border-radius:0}
+    }
+
+    /* Mouse/trackpad hardware (laptops & desktops) — pointer: fine = precise input */
+    @media(pointer: fine){
+      #bottom-nav{display:none}
+      .ov-grid{grid-template-columns:1fr 1fr}
+    }
+
+    /* Fallback for devices that report no pointer at all */
+    @media not all and (pointer){
+      #bottom-nav{display:none}
+    }
   </style>
 </head>
 <body>
 
 <div id="toasts"></div>
 <div id="cfm-ov"><div class="cfm-box"><h3 id="cfm-title">Confirm</h3><p id="cfm-msg"></p><div class="cfm-acts"><button class="btn btn-ghost" id="cfm-no">Cancel</button><button class="btn btn-danger" id="cfm-yes">Confirm</button></div></div></div>
+
+<!-- ── BOTTOM NAV (phones & tablets) ── -->
+<nav id="bottom-nav">
+  <div class="bn-inner">
+    <button class="bn-item active" data-bn="overview">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      Overview
+    </button>
+    <button class="bn-item" data-bn="inquiries">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <span class="bn-badge" id="bn-badge-inq">0</span>
+      Inquiries
+    </button>
+    <button class="bn-item" data-bn="process">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      <span class="bn-badge" id="bn-badge-chat" style="background:var(--green)">0</span>
+      Process
+    </button>
+    <button class="bn-item" data-bn="analytics">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      Analytics
+    </button>
+    <button class="bn-item" id="bn-more-btn">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg>
+      More
+    </button>
+  </div>
+</nav>
+
+<!-- ── MORE DRAWER ── -->
+<div id="more-overlay"></div>
+<div id="more-drawer">
+  <div class="md-handle"></div>
+  <div class="md-head">More Sections</div>
+  <button class="md-item" data-bn="maintenance">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M6.34 17.66l-1.41 1.41M2 12h2M20 12h2M19.07 19.07l-1.41-1.41M6.34 6.34L4.93 4.93M12 2v2M12 20v2"/></svg>
+    Maintenance
+  </button>
+  <button class="md-item" data-bn="testimonials">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="13" y2="14"/></svg>
+    Testimonials
+  </button>
+  <button class="md-item" data-bn="settings">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+    Settings
+  </button>
+  <button class="md-item" data-bn="security">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    Security
+  </button>
+</div>
 
 <!-- ── PAGE LOADER ── -->
 <div id="page-loader">
@@ -367,6 +524,7 @@
 
 <!-- ── APP ── -->
 <div id="app">
+  <div id="sb-overlay"></div>
   <!-- SIDEBAR -->
   <aside id="sb">
     <div class="sb-logo">
@@ -457,7 +615,7 @@
         <span class="tb-clock" id="tb-clock"></span>
         <a href="index.html" target="_blank" class="btn btn-ghost btn-sm">
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-          View Site
+          <span class="btn-label">View Site</span>
         </a>
       </div>
     </div>
@@ -721,8 +879,8 @@
 </div>
 
 <!-- ─── EMAIL SEND MODAL ─── -->
-<div id="em-ov" style="position:fixed;inset:0;z-index:600;background:rgba(9,9,12,.88);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;padding:1rem;opacity:0;pointer-events:none;transition:opacity .25s">
-  <div id="em-box" style="background:#0F0F13;border:1px solid rgba(237,237,237,.13);width:100%;max-width:440px;transform:scale(.96);transition:transform .26s cubic-bezier(.22,1,.36,1)">
+<div id="em-ov">
+  <div id="em-box">
     <div style="padding:1.25rem 1.5rem;border-bottom:1px solid rgba(237,237,237,.07);display:flex;align-items:center;justify-content:space-between">
       <div>
         <div style="font-family:var(--sc);font-size:.6rem;letter-spacing:.22em;color:var(--gold);margin-bottom:.2rem">EMAIL CLIENT</div>
@@ -1723,6 +1881,80 @@ async function doSendEmail(){
   }
 }
 window.doSendEmail = doSendEmail;
+
+/* ─── BOTTOM NAV + MORE DRAWER ─── */
+(function(){
+  // Hardware detection — pointer:coarse = touch device (phone/tablet)
+  // pointer:fine = mouse/trackpad (laptop/desktop)
+  const touchHW = window.matchMedia('(pointer: coarse)');
+  const isTouch  = () => touchHW.matches;
+
+  const bottomNav  = document.getElementById('bottom-nav');
+  const moreBtn    = document.getElementById('bn-more-btn');
+  const moreDrawer = document.getElementById('more-drawer');
+  const moreOv     = document.getElementById('more-overlay');
+
+  function openMore(){ moreDrawer.classList.add('open'); moreOv.classList.add('open'); document.body.style.overflow='hidden'; }
+  function closeMore(){ moreDrawer.classList.remove('open'); moreOv.classList.remove('open'); document.body.style.overflow=''; }
+
+  moreBtn.addEventListener('click', ()=> moreDrawer.classList.contains('open') ? closeMore() : openMore());
+  moreOv.addEventListener('click', closeMore);
+
+  // Bottom nav item click → navigate panel
+  document.querySelectorAll('[data-bn]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const p = btn.dataset.bn;
+      if(typeof nav === 'function') nav(p);
+      updateBnActive(p);
+      closeMore();
+    });
+  });
+
+  function updateBnActive(panel){
+    document.querySelectorAll('.bn-item[data-bn]').forEach(b => b.classList.remove('active'));
+    document.getElementById('bn-more-btn').classList.remove('active');
+    const primary = document.querySelector(`.bn-item[data-bn="${panel}"]`);
+    if(primary) primary.classList.add('active');
+    else document.getElementById('bn-more-btn').classList.add('active');
+  }
+
+  // Patch nav() so bottom nav stays in sync even when called programmatically
+  const _origNav = window.nav;
+  if(_origNav){
+    window.nav = function(panel, filter){
+      _origNav(panel, filter);
+      if(isTouch()) updateBnActive(panel);
+    };
+  }
+
+  // Mirror badges from sidebar spans to bottom nav badges
+  function syncBadges(){
+    const pairs = [['nb-new','bn-badge-inq'],['nb-chat','bn-badge-chat']];
+    pairs.forEach(([srcId, dstId])=>{
+      const src = document.getElementById(srcId);
+      const dst = document.getElementById(dstId);
+      if(!src || !dst) return;
+      const v = src.textContent.trim();
+      dst.textContent = v;
+      dst.classList.toggle('show', v !== '0' && src.classList.contains('show'));
+    });
+  }
+  ['nb-new','nb-chat'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) new MutationObserver(syncBadges).observe(el,{childList:true,subtree:true,attributes:true,characterData:true});
+  });
+  syncBadges();
+
+  // If hardware changes (e.g. stylus attached to tablet) re-evaluate
+  touchHW.addEventListener('change', ()=>{
+    // CSS handles show/hide via pointer media query automatically
+    // Just clean up open more drawer if switching away from touch
+    if(!isTouch()) closeMore();
+  });
+
+  const sbOv = document.getElementById('sb-overlay');
+  if(sbOv) sbOv.style.display='none';
+})();
 
 /* ─── NAV WIRING ─── */
 document.querySelectorAll('.ni[data-p]').forEach(b=>b.addEventListener('click',()=>nav(b.dataset.p,b.dataset.f)));
