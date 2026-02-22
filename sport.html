@@ -338,6 +338,34 @@
     .chat-composer textarea:focus{border-color:rgba(58,74,159,.45)}
     .chat-empty{text-align:center;padding:2rem;font-family:var(--sc);font-size:.75rem;letter-spacing:.08em;color:var(--faint)}
 
+    /* ─── INQUIRY FILTER TABS ─── */
+    .inq-tabs{display:none;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;border-bottom:1px solid var(--bord);margin:-.25rem -1rem .75rem;padding:0 1rem}
+    .inq-tabs::-webkit-scrollbar{display:none}
+    .inq-tab{flex-shrink:0;background:none;color:var(--faint);font-family:var(--sc);font-size:.7rem;letter-spacing:.12em;padding:.75rem .875rem;border-bottom:2px solid transparent;transition:color .18s,border-color .18s,background .15s;white-space:nowrap;position:relative}
+    .inq-tab:active{background:rgba(237,237,237,.03)}
+    .inq-tab.active{color:var(--plat);border-bottom-color:var(--blue)}
+    .inq-tab.active[data-val="new"]{border-bottom-color:#8B97E8}
+    .inq-tab.active[data-val="read"]{border-bottom-color:var(--faint)}
+    .inq-tab.active[data-val="replied"]{border-bottom-color:var(--green)}
+    .inq-tab.active[data-val="underway"]{border-bottom-color:#A78BFA}
+    .inq-tab.active[data-val="completed"]{border-bottom-color:var(--gold)}
+    .inq-tab.active[data-val="rejected"]{border-bottom-color:var(--red)}
+    .inq-tab.active[data-val="archived"]{border-bottom-color:var(--amber)}
+    .inq-tab.active[data-val="multi"]{border-bottom-color:var(--blue)}
+    .inq-tab-badge{display:inline-flex;align-items:center;justify-content:center;background:var(--blue);color:#fff;font-size:.55rem;font-weight:700;min-width:.9rem;height:.9rem;border-radius:10px;padding:0 .22rem;margin-left:.3rem;vertical-align:middle;line-height:1}
+    .inq-tab-badge:empty{display:none}
+    .inq-tabs-hint{font-family:var(--sc);font-size:.58rem;letter-spacing:.1em;color:var(--faint);padding:.35rem 1rem .1rem;display:none}
+    @media(pointer: coarse){.inq-tabs-hint{display:block}}
+
+    @media(pointer: coarse){
+      .inq-tabs{display:flex}
+      .inq-sf-desktop{display:none}
+    }
+    @media(pointer: fine){
+      .inq-tabs{display:none}
+      .inq-sf-desktop{display:block}
+    }
+
     /* ─── MOBILE SIDEBAR OVERLAY ─── */
     #sb-overlay{position:fixed;inset:0;z-index:49;background:rgba(9,9,12,.65);backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:opacity .28s}
     #sb-overlay.open{opacity:1;pointer-events:auto}
@@ -484,12 +512,49 @@
 
     /* Touch + small screen (phones) */
     @media(pointer: coarse) and (max-width:600px){
-      .stat-row{grid-template-columns:1fr 1fr}
-      .qa-grid{grid-template-columns:repeat(2,1fr)}
-      .sc-val{font-size:1.625rem}
+      /* ── Bottom nav: slimmer on phones ── */
+      .bn-inner{height:54px}
+      .bn-item{gap:.2rem;padding:.35rem .125rem;font-size:.52rem;letter-spacing:.06em}
+      .bn-item svg{width:18px;height:18px}
+      main#main{padding-bottom:calc(54px + env(safe-area-inset-bottom))}
+      #more-drawer{bottom:54px}
+
+      /* ── Panel & layout: tighter ── */
+      .stat-row{grid-template-columns:1fr 1fr;gap:.5rem}
+      .sc{padding:.875rem}
+      .sc-val{font-size:1.5rem}
+      .sc-lbl{font-size:.58rem}
+      .sc-sub{font-size:.65rem}
+      .qa-grid{grid-template-columns:repeat(2,1fr);gap:.5rem}
+      .qa-btn{padding:.75rem .5rem;min-height:60px}
+      .qa-ttl{font-size:.8rem}
       .panel{padding:.75rem}
+      .sh h2{font-size:.875rem}
+
+      /* ── Buttons: compact but still tappable ── */
+      .btn{padding:.5rem .75rem;font-size:.8rem;min-height:40px}
+      .btn-sm{padding:.4rem .65rem;font-size:.75rem;min-height:38px}
+      .btn-xs{padding:.35rem .55rem;font-size:.7rem;min-height:34px}
+      .btn-icon{padding:.5rem;min-height:40px;min-width:40px}
+
+      /* ── Table: compact rows ── */
+      tbody td{padding:.6rem .75rem;font-size:.8rem}
+      thead th{padding:.5rem .75rem;font-size:.62rem}
+      .badge{padding:.2rem .5rem;font-size:.62rem}
+
+      /* ── Toolbar ── */
+      .si{padding:.5rem .75rem;font-size:.8rem;height:40px}
+      .fs{padding:.5rem .75rem;font-size:.8rem;height:40px}
+
+      /* ── Hidden columns ── */
+      thead th:nth-child(5),tbody td:nth-child(5){display:none}
       thead th:nth-child(6),tbody td:nth-child(6){display:none}
-      .tbl-foot{flex-direction:column;gap:.25rem;align-items:flex-start}
+      .tbl-foot{flex-direction:column;gap:.25rem;align-items:flex-start;font-size:.6rem}
+
+      /* ── Fields: slightly smaller ── */
+      .field input,.field textarea,.field select{padding:.6rem .75rem;font-size:.875rem;min-height:42px}
+      .lf input{padding:.65rem .75rem;font-size:.9rem;min-height:44px}
+      .login-btn{min-height:48px;font-size:.9rem}
     }
 
     /* Touch + larger screen (tablets) */
@@ -711,10 +776,25 @@
     <!-- INQUIRIES -->
     <div class="panel" id="panel-inquiries">
       <div class="sh"><h2>Inquiries</h2><div class="sh-right"><button class="btn btn-ghost btn-sm" onclick="exportCSV()"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Export</button><button class="btn btn-ghost btn-sm" onclick="loadInq()"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>Refresh</button></div></div>
+
+      <!-- Filter tab strip — visible on touch devices, hidden on desktop -->
+      <div class="inq-tabs-hint">Tap to filter · tap multiple to combine</div>
+      <div class="inq-tabs" id="inq-tabs">
+        <button class="inq-tab active" data-val="all">All</button>
+        <button class="inq-tab" data-val="new">New <span class="inq-tab-badge" id="itb-new"></span></button>
+        <button class="inq-tab" data-val="read">Read</button>
+        <button class="inq-tab" data-val="replied">Replied</button>
+        <button class="inq-tab" data-val="underway">Underway</button>
+        <button class="inq-tab" data-val="completed">Completed</button>
+        <button class="inq-tab" data-val="multi">Multi-Type <span class="inq-tab-badge" id="itb-multi"></span></button>
+        <button class="inq-tab" data-val="rejected">Rejected</button>
+        <button class="inq-tab" data-val="archived">Archived</button>
+      </div>
+
       <div class="tbl-wrap">
         <div class="tbl-toolbar">
           <input class="si" id="inq-q" type="search" placeholder="Search name, email…" oninput="renderTbl()"/>
-          <select class="fs" id="inq-sf" onchange="renderTbl()"><option value="">All Status</option><option value="new">New</option><option value="read">Read</option><option value="replied">Replied</option><option value="underway">Underway</option><option value="completed">Completed</option><option value="rejected">Rejected</option><option value="archived">Archived</option></select>
+          <select class="fs inq-sf-desktop" id="inq-sf" onchange="renderTbl()"><option value="">All Status</option><option value="new">New</option><option value="read">Read</option><option value="replied">Replied</option><option value="underway">Underway</option><option value="completed">Completed</option><option value="rejected">Rejected</option><option value="archived">Archived</option></select>
           <select class="fs" id="inq-tf" onchange="renderTbl()"><option value="">All Types</option></select>
           <span style="font-family:var(--sc);font-size:.65rem;letter-spacing:.1em;color:var(--faint);margin-left:auto" id="inq-count">0 entries</span>
         </div>
@@ -1121,11 +1201,13 @@ function nav(p,f){
       CUR_FILTER=null;
       document.getElementById('inq-sf').value=f;
     }
+    if(typeof window._syncInqTabs==='function') window._syncInqTabs(f==='multi'?'multi':f);
     renderTbl();
   } else if(p==='inquiries'){
     CUR_FILTER=null;
     document.getElementById('inq-sf').value='';
     document.getElementById('inq-q').value='';
+    if(typeof window._syncInqTabs==='function') window._syncInqTabs('');
     renderTbl();
   }
   if(p==='analytics') buildAnalytics();
@@ -1213,6 +1295,7 @@ function initApp(){
     const mb=document.getElementById('nb-multi');
     if(mb){mb.textContent=mc;mb.classList.toggle('show',mc>0);}
     updateStats(); renderTbl(); buildTypeFilter();
+    if(typeof window._updateTabBadges==='function') window._updateTabBadges();
     if(document.getElementById('panel-overview').classList.contains('active')) buildOverview();
     if(document.getElementById('panel-process').classList.contains('active')) renderProcList();
   });
@@ -1306,10 +1389,30 @@ function renderTbl(){
   const q=(document.getElementById('inq-q')?.value||'').toLowerCase();
   const sf=document.getElementById('inq-sf')?.value||'';
   const tf=document.getElementById('inq-tf')?.value||'';
+
+  // Get multi-select tab filter (touch) or fall back to single desktop select
+  const tabSel = typeof window._getTabFilter === 'function' ? window._getTabFilter() : new Set();
+  const useTabFilter = tabSel.size > 0;
+
   let data=ALL.filter(i=>{
-    const ms=!sf||(i.status||'new')===sf;
+    const status = i.status || 'new';
+
+    let ms;
+    if(useTabFilter){
+      const hasMulti = tabSel.has('multi');
+      const statusVals = [...tabSel].filter(v => v !== 'multi');
+      const matchStatus = statusVals.length === 0 || statusVals.includes(status);
+      const matchMulti  = !hasMulti || getTypeArr(i).length > 1;
+      ms = (statusVals.length > 0 && hasMulti) ? (matchStatus && matchMulti)
+         : hasMulti ? matchMulti
+         : matchStatus;
+    } else {
+      ms = !sf || status === sf;
+    }
+
     const mt=!tf||getTypeArr(i).includes(tf);
     const mq=!q||[i.fullName,i.email,i.organization,...getTypeArr(i)].some(f=>(f||'').toLowerCase().includes(q));
+    // Legacy CUR_FILTER multi support (desktop sidebar clicks)
     const mm=CUR_FILTER!=='multi'||getTypeArr(i).length>1;
     return ms&&mt&&mq&&mm;
   });
@@ -1951,6 +2054,85 @@ async function doSendEmail(){
   }
 }
 window.doSendEmail = doSendEmail;
+
+/* ─── INQUIRY FILTER TABS (touch) — multi-select ─── */
+(function(){
+  const tabs = document.querySelectorAll('.inq-tab');
+  // Track selected statuses as a Set. Empty = "All"
+  let SELECTED = new Set();
+
+  function applyTabFilter(){
+    const isAll   = SELECTED.size === 0;
+    const isMulti = SELECTED.has('multi');
+
+    // Sync the hidden desktop <select> (best effort single value)
+    const sf = document.getElementById('inq-sf');
+    if(isAll){ sf.value = ''; }
+    else if(SELECTED.size === 1 && !isMulti){ sf.value = [...SELECTED][0]; }
+    else { sf.value = ''; }
+
+    // Drive CUR_FILTER for multi-type
+    window.CUR_FILTER = isMulti ? 'multi' : null;
+
+    if(typeof renderTbl === 'function') renderTbl();
+  }
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const val = tab.dataset.val;
+
+      if(val === 'all'){
+        // Clear all filters
+        SELECTED.clear();
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+      } else {
+        // Toggle this status
+        if(SELECTED.has(val)){
+          SELECTED.delete(val);
+          tab.classList.remove('active');
+        } else {
+          SELECTED.add(val);
+          tab.classList.add('active');
+        }
+        // Deactivate "All" tab when any specific filter is on
+        document.querySelector('.inq-tab[data-val="all"]')?.classList.remove('active');
+        // If nothing selected, revert to All
+        if(SELECTED.size === 0){
+          SELECTED.clear();
+          document.querySelector('.inq-tab[data-val="all"]')?.classList.add('active');
+        }
+      }
+      applyTabFilter();
+    });
+  });
+
+  // Expose so nav() can reset to All
+  window._syncInqTabs = function(filterVal){
+    SELECTED.clear();
+    tabs.forEach(t => t.classList.remove('active'));
+    if(!filterVal || filterVal === '' || filterVal === 'all'){
+      document.querySelector('.inq-tab[data-val="all"]')?.classList.add('active');
+    } else {
+      SELECTED.add(filterVal);
+      document.querySelector(`.inq-tab[data-val="${filterVal}"]`)?.classList.add('active');
+    }
+  };
+
+  // Expose selected set so renderTbl can use it
+  window._getTabFilter = function(){ return SELECTED; };
+
+  // Update tab badges after data loads
+  window._updateTabBadges = function(){
+    if(typeof ALL === 'undefined') return;
+    const newCount   = ALL.filter(i => !i.status || i.status === 'new').length;
+    const multiCount = ALL.filter(i => getTypeArr(i).length > 1).length;
+    const nb = document.getElementById('itb-new');
+    const mb = document.getElementById('itb-multi');
+    if(nb) nb.textContent = newCount > 0 ? newCount : '';
+    if(mb) mb.textContent = multiCount > 0 ? multiCount : '';
+  };
+})();
 
 /* ─── BOTTOM NAV + MORE DRAWER ─── */
 (function(){
