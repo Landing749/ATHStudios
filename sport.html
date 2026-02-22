@@ -1122,7 +1122,12 @@ function nav(p,f){
       document.getElementById('inq-sf').value=f;
     }
     renderTbl();
-  } else if(p==='inquiries'){ CUR_FILTER=null; }
+  } else if(p==='inquiries'){
+    CUR_FILTER=null;
+    document.getElementById('inq-sf').value='';
+    document.getElementById('inq-q').value='';
+    renderTbl();
+  }
   if(p==='analytics') buildAnalytics();
   if(p==='maintenance') loadMaintPanel();
   if(p==='testimonials') loadTestimonials();
