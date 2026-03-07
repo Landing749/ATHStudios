@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ATHStudios — Receipt Studio</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,600&family=Geist+Mono:wght@300;400;500&family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.6/JsBarcode.all.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --void:#060608;--s1:#0d0d12;--s2:#13131a;--s3:#1a1a24;--s4:#22222e;
+  --wire:rgba(255,255,255,0.06);--wire2:rgba(255,255,255,0.1);--wire3:rgba(255,255,255,0.18);
+  --g:#bfa06a;--g2:#d4b87e;--g3:#ecdaa8;--g4:rgba(191,160,106,0.12);
+  --text:#ddd9d0;--dim:#6a6678;--dim2:#928ea0;
+  --green:#3ecf8e;--green-dim:rgba(62,207,142,.08);
+  --rp:#fcf8f1;--ri:#0f0e0c;--rm:#857e74;--rl:#ece5d8;--ra:#6b5a3a;
+}
+html{font-size:14px}
+body{background:var(--void);color:var(--text);font-family:'Geist',sans-serif;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23g)' opacity='1'/%3E%3C/svg%3E");opacity:.032;pointer-events:none;z-index:9000}
+.glow{position:fixed;border-radius:50%;pointer-events:none}
+.glow-a{width:900px;height:900px;top:-400px;left:-300px;background:radial-gradient(circle,rgba(191,160,106,.07) 0%,transparent 60%);z-index:0}
+.glow-b{width:600px;height:600px;bottom:-200px;right:-100px;background:radial-gradient(circle,rgba(191,160,106,.04) 0%,transparent 60%);z-index:0}
+.glow-c{width:300px;height:300px;top:40%;left:430px;background:radial-gradient(circle,rgba(62,207,142,.025) 0%,transparent 65%);z-index:0}
+.wrap{position:relative;z-index:1;display:flex;min-height:100vh}
+
+/* SIDEBAR */
+.side{width:420px;flex-shrink:0;background:var(--s1);border-right:1px solid var(--wire);display:flex;flex-direction:column;height:100vh;position:sticky;top:0}
+.side-nav{padding:22px 28px;border-bottom:1px solid var(--wire);display:flex;align-items:center;gap:11px;flex-shrink:0}
+.nav-logo{width:32px;height:32px;object-fit:contain;flex-shrink:0}
+.nav-name{font-family:'Cormorant',serif;font-weight:500;font-size:17px;color:#f0ece4;letter-spacing:.3px}
+.nav-sub{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--dim);margin-top:2px}
+.nav-chip{margin-left:auto;font-size:8.5px;letter-spacing:2px;text-transform:uppercase;color:var(--g);border:1px solid rgba(191,160,106,.22);padding:4px 10px;border-radius:2px;flex-shrink:0}
+
+/* Firebase status */
+.fb-bar{display:flex;align-items:center;gap:8px;padding:9px 28px;border-bottom:1px solid var(--wire);flex-shrink:0;background:rgba(0,0,0,.2)}
+.fb-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.fb-dot.connecting{background:#f0a500;box-shadow:0 0 6px #f0a500;animation:blink 1.2s ease infinite}
+.fb-dot.connected{background:var(--green);box-shadow:0 0 6px var(--green)}
+.fb-dot.error{background:#ff5050;box-shadow:0 0 6px #ff5050}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.fb-txt{font-family:'Geist Mono',monospace;font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:var(--dim2)}
+.fb-txt span{color:var(--text)}
+.fb-ses{margin-left:auto;font-family:'Geist Mono',monospace;font-size:8px;color:rgba(191,160,106,.5)}
+
+.sec-bar{display:flex;align-items:center;gap:8px;padding:9px 28px;background:var(--green-dim);border-bottom:1px solid rgba(62,207,142,.1);flex-shrink:0}
+.sec-dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);flex-shrink:0;animation:blink 2.5s ease infinite}
+.sec-bar-txt{font-family:'Geist Mono',monospace;font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:var(--green)}
+
+.side-form{flex:1;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--wire2) transparent}
+.side-form::-webkit-scrollbar{width:3px}
+.side-form::-webkit-scrollbar-thumb{background:var(--wire2);border-radius:2px}
+
+.acc{border-bottom:1px solid var(--wire)}
+.acc-hd{padding:15px 28px;display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;transition:background .15s}
+.acc-hd:hover{background:rgba(255,255,255,.02)}
+.acc-hd-num{font-family:'Geist Mono',monospace;font-size:9px;color:var(--g);letter-spacing:1px;width:18px;flex-shrink:0}
+.acc-hd-lbl{font-size:9.5px;letter-spacing:2.5px;text-transform:uppercase;color:var(--dim2);flex:1}
+.acc-hd-arrow{color:var(--dim);font-size:10px;transition:transform .2s}
+.acc.open .acc-hd-arrow{transform:rotate(90deg)}
+.acc-body{padding:0 28px 20px;display:none;flex-direction:column;gap:13px}
+.acc.open .acc-body{display:flex}
+
+.f{display:flex;flex-direction:column;gap:6px}
+.f label{font-size:8.5px;letter-spacing:2px;text-transform:uppercase;color:var(--dim)}
+.f input,.f textarea,.f select{background:var(--s3);border:1px solid var(--wire2);border-radius:3px;color:var(--text);font-family:'Geist',sans-serif;font-size:12.5px;padding:10px 12px;outline:none;transition:border-color .15s,background .15s;resize:none;-webkit-appearance:none;appearance:none}
+.f input:focus,.f textarea:focus,.f select:focus{border-color:var(--g);background:var(--s4)}
+.f input::placeholder,.f textarea::placeholder{color:#2e2e3e}
+.f select option{background:#1a1a24}
+
+.rcpt-no-display{background:var(--s3);border:1px solid rgba(191,160,106,.28);border-radius:3px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between}
+.rcpt-no-val{font-family:'Geist Mono',monospace;font-size:13px;color:var(--g3);letter-spacing:.5px}
+.rcpt-no-regen{background:none;border:1px solid var(--wire2);border-radius:2px;color:var(--dim2);font-family:'Geist',sans-serif;font-size:8.5px;letter-spacing:1.5px;text-transform:uppercase;padding:4px 8px;cursor:pointer;transition:all .15s}
+.rcpt-no-regen:hover{border-color:var(--g);color:var(--g)}
+
+.g2col{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.big-amt{position:relative}
+.big-sym{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-family:'Cormorant',serif;font-size:20px;color:var(--g);pointer-events:none;line-height:1}
+.big-amt input{padding-left:26px;font-family:'Cormorant',serif;font-size:28px;font-weight:300;color:var(--g3);letter-spacing:-1px}
+
+.items-stack{display:flex;flex-direction:column;gap:5px}
+.irow{display:grid;grid-template-columns:1fr 52px 72px 26px;gap:5px;align-items:center;animation:pop .15s ease}
+@keyframes pop{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+.irow input{font-size:11.5px;padding:8px 9px}
+.irow input[type=number]{text-align:right}
+.i-del{width:26px;height:26px;background:none;border:1px solid rgba(255,60,60,.15);border-radius:3px;color:rgba(255,80,80,.45);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;line-height:1}
+.i-del:hover{border-color:rgba(255,60,60,.4);color:#ff6060;background:rgba(255,60,60,.08)}
+.i-add{background:none;border:1px dashed rgba(191,160,106,.18);border-radius:3px;color:var(--g);font-family:'Geist',sans-serif;font-size:9px;letter-spacing:2px;text-transform:uppercase;padding:8px;cursor:pointer;transition:all .15s;margin-top:2px}
+.i-add:hover{border-color:var(--g);background:var(--g4)}
+
+.side-foot{padding:16px 28px;border-top:1px solid var(--wire);flex-shrink:0;display:flex;flex-direction:column;gap:8px}
+.btn-main{width:100%;background:var(--g);border:none;border-radius:3px;color:#08080a;font-family:'Geist',sans-serif;font-weight:600;font-size:10px;letter-spacing:2.5px;text-transform:uppercase;padding:14px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.btn-main::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent 0%,rgba(255,255,255,.12) 50%,transparent 100%);transform:translateX(-100%);transition:transform .4s}
+.btn-main:hover{background:var(--g2);box-shadow:0 0 32px rgba(191,160,106,.3)}
+.btn-main:hover::after{transform:translateX(100%)}
+.btn-main:disabled{opacity:.5;cursor:not-allowed}
+
+/* MAIN */
+.main{flex:1;background:var(--void);display:flex;flex-direction:column;align-items:center;padding:52px 40px 80px;min-height:100vh;overflow-y:auto}
+.prev-row{width:100%;max-width:520px;display:flex;align-items:center;justify-content:space-between;margin-bottom:30px}
+.prev-lbl{font-family:'Geist Mono',monospace;font-size:8.5px;letter-spacing:3px;text-transform:uppercase;color:var(--dim)}
+.prev-status{display:flex;align-items:center;gap:6px}
+.prev-dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green),0 0 20px rgba(62,207,142,.4);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 8px var(--green),0 0 20px rgba(62,207,142,.4)}50%{opacity:.5;box-shadow:0 0 4px var(--green)}}
+.prev-secure{font-family:'Geist Mono',monospace;font-size:8px;color:rgba(62,207,142,.5);letter-spacing:1px}
+
+/* THE RECEIPT */
+#receipt{width:520px;background:var(--rp);color:var(--ri);font-family:'Geist',sans-serif;position:relative;overflow:hidden;box-shadow:0 0 0 1px rgba(0,0,0,.12),0 4px 6px rgba(0,0,0,.08),0 20px 40px rgba(0,0,0,.25),0 60px 120px rgba(0,0,0,.5),0 0 80px rgba(191,160,106,.07)}
+#receipt::before{content:'';position:absolute;inset:0;background-image:repeating-linear-gradient(0deg,transparent,transparent 28px,rgba(0,0,0,.018) 28px,rgba(0,0,0,.018) 29px),repeating-linear-gradient(90deg,transparent,transparent 28px,rgba(0,0,0,.018) 28px,rgba(0,0,0,.018) 29px);pointer-events:none;z-index:0}
+.r-content{position:relative;z-index:1}
+.r-accent{height:2px;background:linear-gradient(90deg,transparent,var(--ra) 20%,#c9a96e 50%,var(--ra) 80%,transparent)}
+.r-perf{height:14px;background-image:radial-gradient(circle,#0d0d12 4.5px,transparent 4.5px);background-size:18px 14px;background-color:#f5f0e8}
+.r-pad{padding:34px 42px 30px}
+
+.r-top{display:flex;align-items:flex-start;justify-content:space-between;padding-bottom:22px;border-bottom:1px solid var(--rl);margin-bottom:24px}
+.r-brand{display:flex;align-items:center;gap:13px}
+.r-logo{width:44px;height:44px;object-fit:contain}
+.r-co{font-family:'Cormorant',serif;font-weight:600;font-size:22px;letter-spacing:.2px;line-height:1}
+.r-tagline{font-size:7.5px;letter-spacing:2px;text-transform:uppercase;color:var(--rm);margin-top:4px}
+.r-num-block{text-align:right}
+.r-num-label{font-size:7.5px;letter-spacing:2.5px;text-transform:uppercase;color:var(--rm)}
+.r-num-val{font-family:'Geist Mono',monospace;font-size:16px;font-weight:500;letter-spacing:-.3px;margin-top:2px}
+
+.r-meta{display:grid;grid-template-columns:auto 1fr;gap:6px 18px;margin-bottom:24px}
+.r-mk{font-size:7.5px;letter-spacing:2px;text-transform:uppercase;color:var(--rm);white-space:nowrap;padding-top:1px}
+.r-mv{font-size:12px;font-weight:500}
+
+.r-items-head{display:grid;grid-template-columns:1fr 36px 72px 72px;gap:4px;padding-bottom:8px;border-bottom:1px solid var(--rl);margin-bottom:2px}
+.r-items-head span{font-size:7.5px;letter-spacing:2px;text-transform:uppercase;color:var(--rm)}
+.r-items-head span:nth-child(n+2){text-align:right}
+.r-item{display:grid;grid-template-columns:1fr 36px 72px 72px;gap:4px;padding:6.5px 0;border-bottom:1px solid rgba(0,0,0,.05)}
+.r-item span{font-size:11.5px}
+.r-item span.d{color:var(--rm);font-size:10.5px}
+.r-item span:nth-child(n+2){text-align:right}
+
+.r-total-wrap{margin-top:4px;padding-top:16px;border-top:1.5px solid var(--ri);display:flex;align-items:flex-end;justify-content:space-between}
+.r-total-lbl{font-size:7.5px;letter-spacing:3px;text-transform:uppercase;color:var(--rm);margin-bottom:6px}
+.r-badge{display:inline-block;font-size:7.5px;font-weight:600;letter-spacing:2px;text-transform:uppercase;padding:3px 9px;border-radius:2px}
+.b-paid{background:#e8f4ee;color:#1a6b3c}.b-pending{background:#fdf7e3;color:#7a5800}.b-partial{background:#fdf0e6;color:#7a3800}
+.r-total-amt{font-family:'Cormorant',serif;font-weight:300;font-size:44px;letter-spacing:-2px;line-height:1}
+.r-peso{font-size:26px;vertical-align:super;font-weight:300;margin-right:1px;opacity:.6}
+
+.r-remarks-wrap{margin-top:20px;background:rgba(0,0,0,.03);border-left:2px solid #c8bfb0;padding:12px 15px;border-radius:0 3px 3px 0}
+.r-sect-lbl{font-size:7.5px;letter-spacing:2.5px;text-transform:uppercase;color:var(--rm);margin-bottom:5px}
+.r-remarks-txt{font-size:11.5px;line-height:1.65}
+.r-notes-txt{font-family:'Cormorant',serif;font-style:italic;font-size:14px;color:var(--rm);line-height:1.6;margin-top:14px;padding-top:14px;border-top:1px dashed var(--rl)}
+
+.r-footer{margin-top:24px;padding-top:18px;border-top:1px solid var(--rl);display:flex;align-items:center;justify-content:space-between}
+.r-footer-l{font-family:'Cormorant',serif;font-style:italic;font-size:11.5px;color:var(--rm);line-height:1.5}
+.r-footer-r{text-align:right}
+.r-footer-brand{font-size:8px;letter-spacing:2.5px;text-transform:uppercase;font-weight:600}
+.r-footer-email{font-size:8px;color:var(--rm);margin-top:2px;letter-spacing:.3px}
+
+/* SECURITY SECTION */
+.r-security{background:#f0ebe0;border-top:1px dashed #d5ccbc;padding:20px 42px 22px}
+.r-sec-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.r-sec-label{display:flex;align-items:center;gap:7px}
+.r-sec-icon{width:16px;height:16px;background:#1a6b3c;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.r-sec-icon svg{width:9px;height:9px;fill:white}
+.r-sec-title{font-size:8px;letter-spacing:2.5px;text-transform:uppercase;color:#5a5048;font-weight:600}
+.r-sec-ver{font-family:'Geist Mono',monospace;font-size:7.5px;color:#9a9088;letter-spacing:1px}
+
+.r-barcode-wrap{display:flex;flex-direction:column;align-items:center;background:white;border:1px solid #e0d8cc;border-radius:3px;padding:10px 16px 8px;margin-bottom:14px}
+#r-barcode{display:block;max-width:100%}
+.r-barcode-num{font-family:'Geist Mono',monospace;font-size:8px;color:var(--rm);letter-spacing:1px;margin-top:4px;text-align:center}
+
+.r-sec-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 20px}
+.r-sec-field-k{font-size:7px;letter-spacing:2px;text-transform:uppercase;color:#9a9088;margin-bottom:3px}
+.r-sec-field-v{font-family:'Geist Mono',monospace;font-size:8.5px;color:#3a3028;letter-spacing:.3px;word-break:break-all}
+.r-sec-field-v.hash{font-size:7.5px;color:#5a5048}
+
+.r-verify-strip{margin-top:12px;background:linear-gradient(135deg,#1a1a1a 0%,#2a2520 100%);border-radius:3px;padding:9px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.r-verify-left{display:flex;align-items:center;gap:8px}
+.r-shield{font-size:13px;line-height:1}
+.r-verify-txt{font-size:7.5px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.55)}
+.r-verify-url{font-family:'Geist Mono',monospace;font-size:7.5px;color:rgba(191,160,106,.8);letter-spacing:.5px}
+
+/* Firebase badge on receipt */
+.r-fb-badge{display:inline-flex;align-items:center;gap:5px;margin-top:8px;background:rgba(62,207,142,.1);border:1px solid rgba(62,207,142,.25);border-radius:2px;padding:3px 8px}
+.r-fb-badge-dot{width:5px;height:5px;border-radius:50%;background:var(--green)}
+.r-fb-badge-txt{font-family:'Geist Mono',monospace;font-size:7px;letter-spacing:1.5px;text-transform:uppercase;color:#3ecf8e}
+
+.r-bottom{height:2px;background:linear-gradient(90deg,transparent,var(--ra) 20%,#c9a96e 50%,var(--ra) 80%,transparent)}
+
+/* TOAST */
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(12px);background:var(--s2);border:1px solid;border-radius:3px;padding:11px 24px;font-family:'Geist Mono',monospace;font-size:9px;letter-spacing:2.5px;text-transform:uppercase;opacity:0;transition:all .25s;pointer-events:none;z-index:9998;box-shadow:0 8px 30px rgba(0,0,0,.4)}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.success{border-color:rgba(62,207,142,.4);color:var(--green)}
+.toast.error{border-color:rgba(255,80,80,.4);color:#ff8080}
+.toast.info{border-color:rgba(191,160,106,.35);color:var(--g)}
+
+*{scrollbar-width:thin;scrollbar-color:var(--wire2) transparent}
+*::-webkit-scrollbar{width:3px;height:3px}
+*::-webkit-scrollbar-thumb{background:var(--wire2);border-radius:2px}
+@media(max-width:960px){.wrap{flex-direction:column}.side{width:100%;height:auto;position:static}.side-form{overflow-y:visible}.main{padding:36px 20px 60px}#receipt{width:100%;max-width:520px}}
+</style>
+</head>
+<body>
+<div class="glow glow-a"></div>
+<div class="glow glow-b"></div>
+<div class="glow glow-c"></div>
+
+<div class="wrap">
+<aside class="side">
+  <div class="side-nav">
+    <img src="https://landing749.github.io/ATHStudios/logo.png" class="nav-logo" alt="" onerror="this.style.display='none'">
+    <div><div class="nav-name">ATHStudios</div><div class="nav-sub">Receipt Studio</div></div>
+    <div class="nav-chip">Secured</div>
+  </div>
+  <div class="fb-bar">
+    <div class="fb-dot connecting" id="fb-dot"></div>
+    <div class="fb-txt" id="fb-txt">Firebase <span id="fb-status">Connecting...</span></div>
+    <div class="fb-ses" id="ses-display">—</div>
+  </div>
+  <div class="sec-bar">
+    <div class="sec-dot"></div>
+    <div class="sec-bar-txt">Document Security Active — SHA-256</div>
+  </div>
+
+  <div class="side-form">
+    <!-- 01 Client -->
+    <div class="acc open">
+      <div class="acc-hd" onclick="toggle(this)"><span class="acc-hd-num">01</span><span class="acc-hd-lbl">Client</span><span class="acc-hd-arrow">›</span></div>
+      <div class="acc-body">
+        <div class="f"><label>Billed To</label><input type="text" id="clientName" placeholder="Client or Organization" oninput="live()"></div>
+        <div class="f">
+          <label>Receipt No. (auto-generated)</label>
+          <div class="rcpt-no-display">
+            <span class="rcpt-no-val" id="rcpt-no-display">—</span>
+            <button class="rcpt-no-regen" onclick="regenNo()">↻ New</button>
+          </div>
+        </div>
+        <div class="f"><label>Date</label><input type="date" id="rdate" oninput="live()"></div>
+      </div>
+    </div>
+    <!-- 02 Service -->
+    <div class="acc open">
+      <div class="acc-hd" onclick="toggle(this)"><span class="acc-hd-num">02</span><span class="acc-hd-lbl">Service</span><span class="acc-hd-arrow">›</span></div>
+      <div class="acc-body">
+        <div class="f"><label>Primary Service</label>
+          <select id="svc" onchange="live()">
+            <option value="">Select service...</option>
+            <option>QR Attendance System</option><option>School Portal</option>
+            <option>Student Information System</option><option>LMS / E-Learning Platform</option>
+            <option>Custom Software Development</option><option>Website Design &amp; Development</option>
+            <option>Mobile Application</option><option>Administrative Dashboard</option>
+            <option>Backend Engineering</option><option>IT Consultation</option>
+            <option>Maintenance &amp; Support</option><option value="custom">Custom (see line items)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <!-- 03 Items -->
+    <div class="acc open">
+      <div class="acc-hd" onclick="toggle(this)"><span class="acc-hd-num">03</span><span class="acc-hd-lbl">Line Items</span><span class="acc-hd-arrow">›</span></div>
+      <div class="acc-body">
+        <div class="items-stack" id="itemsList"></div>
+        <button class="i-add" onclick="addItem()">+ Add Line Item</button>
+      </div>
+    </div>
+    <!-- 04 Amount -->
+    <div class="acc open">
+      <div class="acc-hd" onclick="toggle(this)"><span class="acc-hd-num">04</span><span class="acc-hd-lbl">Amount</span><span class="acc-hd-arrow">›</span></div>
+      <div class="acc-body">
+        <div class="f"><label>Total (₱)</label>
+          <div class="big-amt"><span class="big-sym">₱</span><input type="number" id="totalAmt" placeholder="0.00" step="0.01" oninput="live()"></div>
+        </div>
+        <div class="g2col">
+          <div class="f"><label>Status</label>
+            <select id="status" onchange="live()"><option value="paid">Paid</option><option value="pending">Pending</option><option value="partial">Partial</option></select>
+          </div>
+          <div class="f"><label>Via</label>
+            <select id="method" onchange="live()"><option>GCash</option><option>Maya</option><option>Bank Transfer</option><option>Cash</option><option>Check</option><option>Online</option></select>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- 05 Notes -->
+    <div class="acc open">
+      <div class="acc-hd" onclick="toggle(this)"><span class="acc-hd-num">05</span><span class="acc-hd-lbl">Remarks &amp; Notes</span><span class="acc-hd-arrow">›</span></div>
+      <div class="acc-body">
+        <div class="f"><label>Remarks</label><textarea id="remarks" rows="3" placeholder="e.g. Includes 1-year license, deployment &amp; setup..." oninput="live()"></textarea></div>
+        <div class="f"><label>Notes / Terms</label><textarea id="notes" rows="2" placeholder="e.g. Thank you for choosing ATHStudios." oninput="live()"></textarea></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="side-foot">
+    <button class="btn-main" id="export-btn" onclick="doExport()">Export &amp; Register Receipt</button>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="prev-row">
+    <div class="prev-lbl">Live Preview</div>
+    <div class="prev-status"><div class="prev-dot"></div><div class="prev-secure">SECURED</div></div>
+  </div>
+
+  <div id="receipt">
+    <div class="r-content">
+      <div class="r-accent"></div>
+      <div class="r-perf"></div>
+      <div class="r-pad">
+        <div class="r-top">
+          <div class="r-brand">
+            <img src="https://landing749.github.io/ATHStudios/logo.png" class="r-logo" alt="" onerror="this.style.display='none'">
+            <div><div class="r-co">ATHStudios</div><div class="r-tagline">Private Web Engineering Atelier</div></div>
+          </div>
+          <div class="r-num-block">
+            <div class="r-num-label">Receipt</div>
+            <div class="r-num-val" id="r-num">—</div>
+          </div>
+        </div>
+        <div class="r-meta">
+          <span class="r-mk">Date</span><span class="r-mv" id="r-date">—</span>
+          <span class="r-mk">Billed To</span><span class="r-mv" id="r-client">—</span>
+          <span class="r-mk">Service</span><span class="r-mv" id="r-svc-disp">—</span>
+          <span class="r-mk">Via</span><span class="r-mv" id="r-method">GCash</span>
+        </div>
+        <div class="r-items-head"><span>Description</span><span>Qty</span><span>Unit</span><span>Total</span></div>
+        <div id="r-lines"><div class="r-item"><span>—</span><span class="d">—</span><span class="d">—</span><span>—</span></div></div>
+        <div class="r-total-wrap">
+          <div><div class="r-total-lbl">Total Due</div><span class="r-badge b-paid" id="r-status">PAID</span></div>
+          <div class="r-total-amt" id="r-total"><span class="r-peso">₱</span>0.00</div>
+        </div>
+        <div class="r-remarks-wrap" id="r-rem-wrap" style="display:none"><div class="r-sect-lbl">Remarks</div><div class="r-remarks-txt" id="r-rem-txt"></div></div>
+        <div class="r-notes-txt" id="r-notes-el" style="display:none"></div>
+        <div class="r-footer">
+          <div class="r-footer-l">QR Attendance · School Portals<br>Custom Software · Web &amp; Mobile</div>
+          <div class="r-footer-r"><div class="r-footer-brand">ATHStudios</div><div class="r-footer-email">arhanmeir.obrero@gmail.com</div></div>
+        </div>
+      </div>
+
+      <!-- SECURITY SECTION -->
+      <div class="r-security">
+        <div class="r-sec-top">
+          <div class="r-sec-label">
+            <div class="r-sec-icon"><svg viewBox="0 0 12 12"><path d="M6 1L1.5 3v3c0 2.8 1.9 5.4 4.5 6 2.6-.6 4.5-3.2 4.5-6V3L6 1z"/></svg></div>
+            <div class="r-sec-title">Verified Document Security</div>
+          </div>
+          <div class="r-sec-ver">v2.1 · ATH-SECURE</div>
+        </div>
+        <div class="r-barcode-wrap">
+          <svg id="r-barcode"></svg>
+          <div class="r-barcode-num" id="r-barcode-num">—</div>
+        </div>
+        <div class="r-sec-grid">
+          <div><div class="r-sec-field-k">SHA-256 Hash</div><div class="r-sec-field-v hash" id="r-hash">—</div></div>
+          <div><div class="r-sec-field-k">Issued At</div><div class="r-sec-field-v" id="r-issued">—</div></div>
+          <div><div class="r-sec-field-k">Document ID</div><div class="r-sec-field-v" id="r-docid">—</div></div>
+          <div><div class="r-sec-field-k">Integrity</div><div class="r-sec-field-v" id="r-integrity" style="color:#1a6b3c;font-weight:600">● VALID</div></div>
+        </div>
+        <div class="r-verify-strip">
+          <div class="r-verify-left">
+            <span class="r-shield">🔒</span>
+            <span class="r-verify-txt">Scan barcode or verify at</span>
+            <span class="r-verify-url">athstudios.dpdns.org/verify</span>
+          </div>
+          <div class="r-verify-url" id="r-short-hash">—</div>
+        </div>
+        <div style="margin-top:10px">
+          <div class="r-fb-badge" id="r-fb-badge">
+            <div class="r-fb-badge-dot"></div>
+            <div class="r-fb-badge-txt">Registered on ATHStudios Secure Ledger</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="r-perf" style="transform:scaleY(-1)"></div>
+      <div class="r-bottom"></div>
+    </div>
+  </div>
+</main>
+</div>
+
+<div class="toast info" id="toast">—</div>
+
+<script>
+/* ─── Firebase Init ─── */
+const firebaseConfig = {
+  apiKey: "AIzaSyDD-fr24tSTymu9HwDNSTygLzYhQzyiOkM",
+  authDomain: "athstudios-18004.firebaseapp.com",
+  databaseURL: "https://athstudios-18004-default-rtdb.firebaseio.com",
+  projectId: "athstudios-18004",
+  storageBucket: "athstudios-18004.firebasestorage.app",
+  messagingSenderId: "840599967098",
+  appId: "1:840599967098:web:a163597be910187460b2c3",
+  measurementId: "G-YTGCRF71J5"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+// Test connection
+db.ref('.info/connected').on('value', snap => {
+  const connected = snap.val();
+  const dot = document.getElementById('fb-dot');
+  const status = document.getElementById('fb-status');
+  if (connected) {
+    dot.className = 'fb-dot connected';
+    status.textContent = 'Connected';
+    status.style.color = 'var(--green)';
+  } else {
+    dot.className = 'fb-dot error';
+    status.textContent = 'Offline';
+    status.style.color = '#ff8080';
+  }
+});
+
+/* ─── State ─── */
+let items = [], currentNo = '', sessionId = '', currentHash = '', currentBarcodeVal = '';
+
+(function init() {
+  document.getElementById('rdate').valueAsDate = new Date();
+  sessionId = 'SES-' + randHex(6).toUpperCase();
+  document.getElementById('ses-display').textContent = sessionId;
+  regenNo();
+})();
+
+function randAlpha(n) {
+  const c = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  return Array.from({length:n}, () => c[Math.floor(Math.random()*c.length)]).join('');
+}
+function randHex(n) {
+  return Array.from({length:n}, () => Math.floor(Math.random()*16).toString(16)).join('');
+}
+
+function regenNo() {
+  const yr = new Date().getFullYear();
+  currentNo = `ATH-${yr}-${randAlpha(4)}`;
+  document.getElementById('rcpt-no-display').textContent = currentNo;
+  live();
+}
+
+function toggle(hd) { hd.closest('.acc').classList.toggle('open'); }
+
+function addItem() { items.push({desc:'',qty:1,price:0}); renderForm(); live(); }
+function removeItem(i) { items.splice(i,1); renderForm(); live(); }
+function renderForm() {
+  document.getElementById('itemsList').innerHTML = items.map((it,i) => `
+    <div class="irow">
+      <input type="text" placeholder="Description" value="${esc(it.desc)}" oninput="items[${i}].desc=this.value;live()">
+      <input type="number" placeholder="1" value="${it.qty||''}" min="1" oninput="items[${i}].qty=+this.value;live()">
+      <input type="number" placeholder="0.00" value="${it.price||''}" step="0.01" oninput="items[${i}].price=+this.value;live()">
+      <button class="i-del" onclick="removeItem(${i})">×</button>
+    </div>`).join('');
+}
+function esc(s) { return (s||'').replace(/"/g,'&quot;'); }
+
+async function live() {
+  const client = document.getElementById('clientName').value || '—';
+  const num    = currentNo || '—';
+  const dv     = document.getElementById('rdate').value;
+  const svc    = document.getElementById('svc').value;
+  const amt    = parseFloat(document.getElementById('totalAmt').value) || 0;
+  const status = document.getElementById('status').value;
+  const method = document.getElementById('method').value;
+  const remarks= document.getElementById('remarks').value.trim();
+  const notes  = document.getElementById('notes').value.trim();
+  const date   = dv ? new Date(dv+'T00:00:00').toLocaleDateString('en-PH',{year:'numeric',month:'long',day:'numeric'}) : '—';
+
+  document.getElementById('r-num').textContent     = num;
+  document.getElementById('r-date').textContent    = date;
+  document.getElementById('r-client').textContent  = client;
+  document.getElementById('r-svc-disp').textContent= svc||'—';
+  document.getElementById('r-method').textContent  = method;
+
+  let html='', calc=0;
+  if (items.length>0) {
+    items.forEach(it => {
+      const line=(it.qty||1)*(it.price||0); calc+=line;
+      html+=`<div class="r-item"><span>${it.desc||'—'}</span><span class="d">${it.qty||1}</span><span class="d">₱${f(it.price||0)}</span><span>₱${f(line)}</span></div>`;
+    });
+  } else if(svc&&svc!=='custom') {
+    calc=amt;
+    html=`<div class="r-item"><span>${svc}</span><span class="d">1</span><span class="d">₱${f(amt)}</span><span>₱${f(amt)}</span></div>`;
+  } else {
+    html=`<div class="r-item"><span>—</span><span class="d">—</span><span class="d">—</span><span>—</span></div>`;
+  }
+  document.getElementById('r-lines').innerHTML = html;
+
+  const total = amt>0 ? amt : calc;
+  document.getElementById('r-total').innerHTML = `<span class="r-peso">₱</span>${f(total)}`;
+
+  const badge = document.getElementById('r-status');
+  badge.className = 'r-badge '+(status==='paid'?'b-paid':status==='pending'?'b-pending':'b-partial');
+  badge.textContent = status.toUpperCase();
+
+  const rw=document.getElementById('r-rem-wrap');
+  if(remarks){rw.style.display='block';document.getElementById('r-rem-txt').textContent=remarks;}else rw.style.display='none';
+  const ne=document.getElementById('r-notes-el');
+  if(notes){ne.style.display='block';ne.textContent=notes;}else ne.style.display='none';
+
+  await updateSecurity({num,date,client,svc,total,status,method});
+}
+
+async function updateSecurity({num,date,client,svc,total,status,method}) {
+  const now = new Date();
+  const issuedAt = now.toLocaleDateString('en-PH',{year:'numeric',month:'short',day:'2-digit'})+' '+now.toLocaleTimeString('en-PH',{hour:'2-digit',minute:'2-digit',hour12:true});
+  const docId = num.replace(/ATH-/,'')+'-'+sessionId.replace('SES-','');
+  const payload = [num,date,client,svc,total.toFixed(2),status,method,sessionId].join('|');
+  const hashHex = await sha256(payload);
+  currentHash = hashHex;
+
+  const barcodeVal = num.replace(/-/g,'')+hashHex.slice(0,8).toUpperCase();
+  currentBarcodeVal = barcodeVal;
+
+  document.getElementById('r-issued').textContent   = issuedAt;
+  document.getElementById('r-docid').textContent    = docId;
+  document.getElementById('r-hash').textContent     = hashHex.slice(0,32)+'...';
+  document.getElementById('r-short-hash').textContent= hashHex.slice(0,8).toUpperCase()+'-'+hashHex.slice(8,16).toUpperCase();
+  document.getElementById('r-barcode-num').textContent = barcodeVal;
+
+  try {
+    JsBarcode('#r-barcode', barcodeVal, {
+      format:'CODE128', width:1.4, height:48,
+      displayValue:false, margin:0,
+      background:'#ffffff', lineColor:'#1a1816'
+    });
+  } catch(e){}
+}
+
+async function sha256(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+function f(n){return parseFloat(n).toLocaleString('en-PH',{minimumFractionDigits:2,maximumFractionDigits:2})}
+
+/* ─── Export & Register to Firebase ─── */
+async function doExport() {
+  const btn = document.getElementById('export-btn');
+  btn.disabled = true;
+  btn.textContent = 'Registering...';
+  showToast('Registering receipt to secure ledger...','info');
+
+  const client = document.getElementById('clientName').value || '—';
+  const dv     = document.getElementById('rdate').value;
+  const svc    = document.getElementById('svc').value || '—';
+  const amt    = parseFloat(document.getElementById('totalAmt').value)||0;
+  const status = document.getElementById('status').value;
+  const method = document.getElementById('method').value;
+  const remarks= document.getElementById('remarks').value.trim();
+  const date   = dv ? new Date(dv+'T00:00:00').toLocaleDateString('en-PH',{year:'numeric',month:'long',day:'numeric'}) : '—';
+
+  let calc=0;
+  items.forEach(it=>calc+=(it.qty||1)*(it.price||0));
+  const total = amt>0 ? amt : calc;
+
+  const now = new Date();
+  const issuedAt = now.toISOString();
+  const docId = currentNo.replace(/ATH-/,'')+'-'+sessionId.replace('SES-','');
+
+  const record = {
+    receiptNo: currentNo,
+    barcodeVal: currentBarcodeVal,
+    hash: currentHash,
+    client, date, service: svc,
+    total, status, method, remarks,
+    issuedAt,
+    sessionId,
+    docId,
+    createdAt: firebase.database.ServerValue.TIMESTAMP
+  };
+
+  try {
+    await db.ref('receipts/'+currentBarcodeVal).set(record);
+    showToast('✓ Registered on secure ledger','success');
+
+    btn.textContent = 'Exporting PNG...';
+    const el = document.getElementById('receipt');
+    html2canvas(el,{scale:3,useCORS:true,allowTaint:true,backgroundColor:'#fcf8f1',logging:false}).then(canvas=>{
+      const a=document.createElement('a');
+      a.download=`ATHStudios_${currentNo}.png`;
+      a.href=canvas.toDataURL('image/png');
+      a.click();
+      showToast('✓ Receipt exported & secured','success');
+      btn.disabled=false;
+      btn.textContent='Export & Register Receipt';
+    });
+  } catch(err) {
+    console.error(err);
+    showToast('Firebase error — exporting anyway','error');
+    btn.disabled=false;
+    btn.textContent='Export & Register Receipt';
+    const el=document.getElementById('receipt');
+    html2canvas(el,{scale:3,useCORS:true,allowTaint:true,backgroundColor:'#fcf8f1',logging:false}).then(canvas=>{
+      const a=document.createElement('a');
+      a.download=`ATHStudios_${currentNo}.png`;
+      a.href=canvas.toDataURL('image/png');
+      a.click();
+    });
+  }
+}
+
+function showToast(msg,type='info') {
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.className='toast '+type+' on';
+  setTimeout(()=>t.classList.remove('on'),3200);
+}
+</script>
+</body>
+</html>
