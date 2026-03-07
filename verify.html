@@ -572,33 +572,18 @@ async function startCamera() {
     return;
   }
 
-  // Stop the permission stream — ZXing will open its own
-  permStream.getTracks().forEach(t => t.stop());
-
+  // Step 2: attach the already-approved stream directly to the video element
   btn.innerHTML = `<div style="width:14px;height:14px;border-radius:50%;border:2px solid rgba(0,0,0,.3);border-top-color:#09090d;animation:spin .7s linear infinite;flex-shrink:0"></div> Starting...`;
 
-  // Step 2: init ZXing now that we have permission
   try {
-    codeReader = new ZXing.BrowserMultiFormatReader();
+    const video  = document.getElementById('cam-video');
+    const canvas = document.getElementById('cam-canvas');
+    const ctx    = canvas.getContext('2d');
 
-    const devices = await ZXing.BrowserCodeReader.listVideoInputDevices();
-    // prefer back/environment camera
-    const device = devices.find(d => /back|rear|environment/i.test(d.label)) || devices[devices.length - 1] || devices[0];
-    const deviceId = device ? device.deviceId : undefined;
+    video.srcObject = permStream;
+    await video.play();
 
-    await codeReader.decodeFromVideoDevice(deviceId, 'cam-video', (result, err) => {
-      if (result) {
-        const text = result.getText();
-        if (text && text !== lastScanned) {
-          lastScanned = text;
-          setScanState('found');
-          stopCamera();
-          verifyCode(text.trim());
-        }
-      }
-    });
-
-    document.getElementById('cam-video').style.display = 'block';
+    video.style.display = 'block';
     idle.style.display  = 'none';
     ov.style.display    = 'flex';
     btn.style.display   = 'none';
@@ -606,11 +591,48 @@ async function startCamera() {
     setScanState('active');
     isScanning = true;
 
+    // ZXing frame-by-frame decode using canvas
+    const hints = new Map();
+    hints.set(ZXing.DecodeHintType.TRY_HARDER, true);
+    const reader = new ZXing.BrowserMultiFormatReader(hints);
+
+    function tick() {
+      if (!isScanning) return;
+      if (video.readyState >= 2) {
+        canvas.width  = video.videoWidth  || 640;
+        canvas.height = video.videoHeight || 480;
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        try {
+          const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          const lum     = new ZXing.RGBLuminanceSource(imgData.data, canvas.width, canvas.height);
+          const bmp     = new ZXing.BinaryBitmap(new ZXing.HybridBinarizer(lum));
+          const result  = reader.decodeBitmap(bmp);
+          if (result) {
+            const text = result.getText();
+            if (text && text !== lastScanned) {
+              lastScanned = text;
+              setScanState('found');
+              // stop tracks
+              permStream.getTracks().forEach(t => t.stop());
+              stopCamera();
+              verifyCode(text.trim());
+              return;
+            }
+          }
+        } catch(e) { /* no barcode found in this frame, keep going */ }
+      }
+      scanLoop = requestAnimationFrame(tick);
+    }
+    scanLoop = requestAnimationFrame(tick);
+
   } catch(err) {
-    console.error('ZXing error:', err);
+    console.error('Camera start error:', err);
+    permStream.getTracks().forEach(t => t.stop());
     setScanState('error');
     btn.disabled = false;
+    btn.style.display = 'flex';
     btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 7V1h-6M1 7V1h6M23 17v6h-6M1 17v6h6"/><rect x="7" y="7" width="10" height="10" rx="1"/></svg> Retry Camera`;
+    idle.style.display = 'flex';
     idle.innerHTML = `
       <div class="cam-idle-icon" style="border-color:rgba(255,68,68,.3)">
         <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity:.6;stroke:var(--red)">
@@ -618,18 +640,25 @@ async function startCamera() {
         </svg>
       </div>
       <div class="cam-idle-txt" style="color:rgba(255,68,68,.75)">
-        Could not start the scanner.<br>
-        <span style="font-size:11px;color:var(--dim2)">Try using the manual input below instead.</span>
+        Camera failed to start.<br>
+        <span style="font-size:11px;color:var(--dim2)">Try refreshing the page or use manual input below.</span>
       </div>`;
   }
 }
 
 function stopCamera() {
+  isScanning = false;
+  if (scanLoop) { cancelAnimationFrame(scanLoop); scanLoop = null; }
   if (codeReader) {
     try { codeReader.reset(); } catch(e){}
     codeReader = null;
   }
   const video = document.getElementById('cam-video');
+  // stop all camera tracks
+  if (video.srcObject) {
+    video.srcObject.getTracks().forEach(t => t.stop());
+    video.srcObject = null;
+  }
   video.style.display = 'none';
   document.getElementById('scan-ov').style.display    = 'none';
   document.getElementById('cam-idle').style.display   = 'flex';
