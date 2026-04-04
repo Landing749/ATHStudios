@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Track Your Report — ATHStudios</title>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;600;700&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --navy: #1a2744;
+    --navy-mid: #243460;
+    --gold: #b8922a;
+    --gold-light: #d4aa4a;
+    --red: #8b1c1c;
+    --green: #1f6b3e;
+    --bg: #f4f1eb;
+    --paper: #fffef9;
+    --border: #c8bfa8;
+    --text: #1e1e1e;
+    --muted: #5a5448;
+    --accent-bg: #eef1f8;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    font-family: 'Source Sans 3', sans-serif;
+    color: var(--text);
+    min-height: 100vh;
+    padding-bottom: 4rem;
+  }
+
+  /* ── TOPBAR ── */
+  .topbar {
+    background: var(--navy);
+    border-bottom: 3px solid var(--gold);
+    padding: 1rem 2rem;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 1rem;
+  }
+  .topbar-left .eyebrow { font-size: .62rem; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; color: var(--gold-light); margin-bottom: .15rem; }
+  .topbar-left h1 { font-family: 'EB Garamond', serif; font-size: 1.4rem; font-weight: 700; color: white; line-height: 1; }
+  .topbar-left h1 span { color: var(--gold-light); }
+  .back-link {
+    font-size: .74rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
+    color: rgba(255,255,255,.65); text-decoration: none; border: 1px solid rgba(255,255,255,.25);
+    padding: .35rem .85rem; border-radius: 3px; transition: all .2s;
+  }
+  .back-link:hover { color: white; border-color: rgba(255,255,255,.5); }
+
+  /* ── SEARCH SECTION ── */
+  .search-section {
+    max-width: 680px;
+    margin: 2.5rem auto 0;
+    padding: 0 1rem;
+  }
+  .search-card {
+    background: var(--paper);
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 30px rgba(0,0,0,.1);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .search-header {
+    background: var(--navy);
+    padding: 1.4rem 1.8rem;
+    border-bottom: 3px solid var(--gold);
+  }
+  .search-header h2 {
+    font-family: 'EB Garamond', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: white;
+    line-height: 1.1;
+  }
+  .search-header p { font-size: .76rem; color: #aab5cc; margin-top: .4rem; line-height: 1.5; }
+  .search-body { padding: 1.5rem 1.8rem; }
+  .search-row {
+    display: flex;
+    gap: .7rem;
+    align-items: flex-end;
+  }
+  .search-row .field { flex: 1; }
+  .search-row .field label {
+    font-size: .7rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--navy-mid);
+    display: block;
+    margin-bottom: .3rem;
+  }
+  .search-row .field input {
+    border: 1.5px solid var(--border);
+    background: #fafaf7;
+    padding: .62rem .85rem;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: .92rem;
+    color: var(--text);
+    border-radius: 3px;
+    width: 100%;
+    transition: border-color .2s, box-shadow .2s;
+    letter-spacing: .03em;
+  }
+  .search-row .field input:focus { outline: none; border-color: var(--navy-mid); box-shadow: 0 0 0 3px rgba(36,52,96,.1); }
+  .btn-search {
+    padding: .62rem 1.5rem;
+    background: var(--navy);
+    border: none;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: .84rem;
+    font-weight: 700;
+    color: white;
+    cursor: pointer;
+    border-radius: 3px;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    transition: background .2s;
+    flex-shrink: 0;
+  }
+  .btn-search:hover { background: var(--navy-mid); }
+  .btn-search:disabled { background: #aaa; cursor: not-allowed; }
+
+  /* ── STATUS BADGE ── */
+  .status-bar {
+    max-width: 680px;
+    margin: 1.2rem auto 0;
+    padding: 0 1rem;
+    display: none;
+  }
+  .status-bar.visible { display: block; }
+  .status-box {
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0,0,0,.07);
+  }
+  .status-box-header {
+    padding: .8rem 1.3rem;
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .status-dir { font-family: 'EB Garamond', serif; font-size: 1.25rem; font-weight: 700; color: var(--navy); }
+  .status-badges { display: flex; gap: .5rem; flex-wrap: wrap; }
+  .sbadge {
+    display: inline-flex; align-items: center; gap: .3rem;
+    font-size: .67rem; font-weight: 700; letter-spacing: .07em; text-transform: uppercase;
+    padding: .22rem .6rem; border-radius: 20px;
+  }
+  .sbadge-pending  { background: #fff8e1; color: #a06000; border: 1px solid #ffe082; }
+  .sbadge-received { background: #e8f5e9; color: #1f6b3e; border: 1px solid #a5d6a7; }
+  .sbadge-severity-Low      { background: #e8f5e9; color: #1f6b3e; }
+  .sbadge-severity-Medium   { background: #fff8e1; color: #a06000; }
+  .sbadge-severity-High     { background: #fbe9e7; color: #bf360c; }
+  .sbadge-severity-Critical { background: #fce4ec; color: #880e4f; }
+
+  .status-timeline {
+    display: flex; align-items: stretch; gap: 0;
+    padding: 1rem 1.3rem;
+  }
+  .tl-step {
+    flex: 1;
+    display: flex; flex-direction: column; align-items: center;
+    position: relative;
+    text-align: center;
+  }
+  .tl-step::after {
+    content: '';
+    position: absolute;
+    top: 13px;
+    left: 50%;
+    width: 100%;
+    height: 2px;
+    background: #ddd;
+    z-index: 0;
+  }
+  .tl-step:last-child::after { display: none; }
+  .tl-dot {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    border: 2px solid #ddd;
+    background: white;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .8rem;
+    z-index: 1;
+    position: relative;
+    transition: all .3s;
+  }
+  .tl-dot.done { border-color: var(--green); background: var(--green); color: white; }
+  .tl-dot.active { border-color: var(--gold); background: var(--gold); color: white; }
+  .tl-label { font-size: .65rem; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin-top: .4rem; line-height: 1.3; max-width: 70px; }
+  .tl-date { font-size: .62rem; color: #aaa; margin-top: .15rem; }
+
+  /* ── REPORT DETAIL VIEW ── */
+  .report-main {
+    max-width: 680px;
+    margin: 1.2rem auto 0;
+    padding: 0 1rem;
+    display: none;
+  }
+  .report-main.visible { display: block; }
+
+  .view-tabs {
+    display: flex;
+    border-bottom: 2px solid var(--border);
+    background: var(--paper);
+    border-radius: 4px 4px 0 0;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-bottom: none;
+  }
+  .view-tab {
+    padding: .65rem 1.3rem;
+    font-size: .76rem; font-weight: 700; letter-spacing: .07em; text-transform: uppercase;
+    cursor: pointer; background: transparent; border: none; color: var(--muted);
+    font-family: 'Source Sans 3', sans-serif;
+    border-bottom: 3px solid transparent;
+    transition: all .2s;
+  }
+  .view-tab.active { color: var(--navy); border-bottom-color: var(--navy); background: var(--accent-bg); }
+  .view-tab:hover:not(.active) { background: #f0ede5; color: var(--navy); }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ── REPORT VIEW PANEL ── */
+  .rc-card {
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-top: none;
+  }
+  .rc-part { padding: 0 1.8rem 1.4rem; }
+  .rc-part-header {
+    display: flex; align-items: center; gap: .7rem;
+    margin-bottom: 1rem; padding: 1rem 0 .4rem;
+    border-bottom: 2px solid var(--navy);
+  }
+  .rc-part-label { font-family: 'EB Garamond', serif; font-size: 1rem; font-weight: 700; color: var(--navy); text-transform: uppercase; letter-spacing: .08em; }
+  .rc-part-title { font-size: .72rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+  .rc-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: .7rem; }
+  .rc-field { display: flex; flex-direction: column; gap: .18rem; margin-bottom: .55rem; }
+  .rc-field .lbl { font-size: .66rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+  .rc-field .val { font-size: .86rem; color: var(--text); padding: .42rem .62rem; background: #f5f3ee; border: 1px solid var(--border); border-radius: 3px; min-height: 2rem; }
+  .rc-field .val.multi { min-height: 60px; white-space: pre-wrap; line-height: 1.6; }
+  .tag-list { display: flex; flex-wrap: wrap; gap: .3rem; padding: .42rem .62rem; background: #f5f3ee; border: 1px solid var(--border); border-radius: 3px; min-height: 2rem; }
+  .tag { background: white; border: 1px solid var(--border); padding: .15rem .5rem; border-radius: 3px; font-size: .74rem; color: var(--navy); }
+  .part-divider { border: none; border-top: 1px dashed var(--border); margin: .4rem 0 1rem; }
+
+  .sig-display-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .sig-display-card { border: 1px solid var(--border); border-radius: 3px; overflow: hidden; }
+  .sig-display-card .sdh { background: var(--navy); color: white; font-size: .63rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; padding: .32rem .65rem; }
+  .sig-display-card img { display: block; width: 100%; max-height: 100px; object-fit: contain; background: white; padding: .35rem; }
+  .sig-display-card .sdm { font-size: .72rem; color: var(--muted); padding: .38rem .65rem; background: #fafaf5; border-top: 1px solid var(--border); }
+  .no-sig { display: flex; align-items: center; justify-content: center; height: 70px; font-size: .73rem; color: #bbb; font-style: italic; background: white; }
+
+  /* ATH receipt status */
+  .ath-status-card {
+    margin: 0 1.8rem 1.4rem;
+    border-radius: 4px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .ath-status-header {
+    padding: .7rem 1rem;
+    font-size: .7rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+    display: flex; align-items: center; gap: .5rem;
+  }
+  .ath-status-header.pending { background: #fff8e1; color: #a06000; }
+  .ath-status-header.received { background: #e8f5e9; color: #1f6b3e; }
+  .ath-status-body { padding: .85rem 1rem; background: var(--paper); }
+  .ath-sig-img { max-width: 100%; max-height: 90px; object-fit: contain; display: block; border: 1px solid var(--border); border-radius: 3px; background: white; padding: .3rem; margin-top: .5rem; }
+
+  /* ── CORRECTIONS PANEL ── */
+  .corrections-panel {
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-top: none;
+  }
+  .correction-intro {
+    margin: 1.5rem 1.8rem 0;
+    padding: .85rem 1.1rem;
+    background: #fdf8ee;
+    border-left: 4px solid var(--gold);
+    border-radius: 0 4px 4px 0;
+    font-size: .79rem;
+    line-height: 1.65;
+    color: #3d3025;
+  }
+  .correction-intro strong { color: var(--navy); }
+  .correction-form { padding: 1.4rem 1.8rem; }
+  .correction-section-title {
+    font-size: .7rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--navy-mid); margin-bottom: .7rem; margin-top: 1.2rem;
+    padding-bottom: .3rem; border-bottom: 1px dashed var(--border);
+  }
+  .correction-section-title:first-child { margin-top: 0; }
+  .cf-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: .9rem; margin-bottom: .8rem; }
+  .cf-field { display: flex; flex-direction: column; gap: .25rem; margin-bottom: .75rem; }
+  .cf-field label {
+    font-size: .68rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--navy-mid);
+  }
+  .cf-field input[type="text"],
+  .cf-field input[type="datetime-local"],
+  .cf-field input[type="number"],
+  .cf-field textarea {
+    border: 1px solid var(--border); background: #fafaf7;
+    padding: .52rem .68rem; font-family: 'Source Sans 3', sans-serif;
+    font-size: .86rem; color: var(--text); border-radius: 3px;
+    transition: border-color .2s, box-shadow .2s; width: 100%;
+  }
+  .cf-field input:focus, .cf-field textarea:focus {
+    outline: none; border-color: var(--navy-mid); box-shadow: 0 0 0 3px rgba(36,52,96,.1);
+  }
+  .cf-field textarea { resize: vertical; min-height: 80px; }
+
+  /* sig in correction form */
+  .cf-sig-block { margin-bottom: 1rem; }
+  .cf-sig-block-title { font-size: .68rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--navy-mid); margin-bottom: .4rem; }
+  .cf-sig-mode-tabs { display: flex; border: 1px solid var(--border); border-radius: 3px; overflow: hidden; width: fit-content; margin-bottom: .5rem; }
+  .cf-sig-tab {
+    padding: .28rem .75rem; font-size: .66rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+    cursor: pointer; background: #f5f2ea; color: var(--muted); border: none;
+    border-right: 1px solid var(--border); font-family: 'Source Sans 3', sans-serif; transition: all .15s;
+  }
+  .cf-sig-tab:last-child { border-right: none; }
+  .cf-sig-tab.active { background: var(--navy); color: white; }
+  .cf-sig-canvas-wrap {
+    border: 1px solid var(--border); border-radius: 3px; background: #fafaf7; position: relative; overflow: hidden;
+  }
+  .cf-sig-canvas-wrap canvas { display: block; width: 100%; height: 100px; cursor: crosshair; touch-action: none; }
+  .cf-sig-placeholder {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    pointer-events: none; font-size: .73rem; color: #aaa; font-style: italic;
+  }
+  .cf-sig-clear {
+    position: absolute; top: 3px; right: 5px; font-size: .65rem; color: var(--red); cursor: pointer;
+    font-weight: 600; letter-spacing: .04em; text-transform: uppercase;
+    background: rgba(255,255,255,.85); padding: 2px 5px; border-radius: 2px; border: 1px solid #e0c0c0;
+  }
+  .cf-sig-upload-wrap {
+    display: none; border: 1.5px dashed var(--border); border-radius: 3px; background: #fafaf7;
+    min-height: 100px; flex-direction: column; align-items: center; justify-content: center;
+    gap: .4rem; padding: .7rem; position: relative; cursor: pointer;
+  }
+  .cf-sig-upload-wrap.active { display: flex; }
+  .cf-sig-upload-wrap input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+  .cf-sig-upload-wrap .icon { font-size: 1.4rem; opacity: .4; }
+  .cf-sig-upload-wrap .lbl { font-size: .72rem; color: var(--muted); text-align: center; line-height: 1.4; pointer-events: none; }
+  .cf-sig-preview { display: none; border: 1px solid var(--border); border-radius: 3px; background: white; position: relative; overflow: hidden; min-height: 100px; align-items: center; justify-content: center; }
+  .cf-sig-preview.active { display: flex; }
+  .cf-sig-preview img { max-width: 100%; max-height: 100px; object-fit: contain; }
+  .cf-sig-preview .cf-sig-clear { position: absolute; top: 3px; right: 5px; }
+  .sig-note { font-size: .69rem; color: var(--muted); font-style: italic; margin-top: .25rem; }
+
+  .correction-note-wrap { margin-bottom: 1rem; }
+
+  .btn-submit-correction {
+    width: 100%;
+    padding: .75rem;
+    background: var(--navy);
+    border: none;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: .86rem; font-weight: 700; color: white; cursor: pointer;
+    border-radius: 3px; letter-spacing: .07em; text-transform: uppercase;
+    transition: background .2s, transform .1s;
+    margin-top: .5rem;
+  }
+  .btn-submit-correction:hover { background: var(--navy-mid); }
+  .btn-submit-correction:disabled { background: #aaa; cursor: not-allowed; }
+
+  /* ── HISTORY PANEL ── */
+  .history-panel {
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-top: none;
+    padding: 1.5rem 1.8rem;
+  }
+  .history-empty { font-size: .82rem; color: #bbb; font-style: italic; text-align: center; padding: 2rem 0; }
+  .history-entry {
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    margin-bottom: .9rem;
+    overflow: hidden;
+  }
+  .history-entry-header {
+    background: var(--accent-bg);
+    padding: .55rem .9rem;
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: .72rem; border-bottom: 1px solid var(--border);
+  }
+  .history-entry-header .he-label { font-weight: 700; color: var(--navy-mid); letter-spacing: .05em; }
+  .history-entry-header .he-date { color: var(--muted); }
+  .history-entry-body { padding: .7rem .9rem; font-size: .8rem; line-height: 1.65; color: var(--muted); }
+  .history-entry-body strong { color: var(--text); }
+
+  /* ── LOADING / EMPTY ── */
+  .tracker-loading, .tracker-error {
+    max-width: 680px; margin: 2rem auto; padding: 0 1rem;
+    display: none;
+  }
+  .tracker-loading.visible, .tracker-error.visible { display: block; }
+  .loading-box {
+    background: var(--paper); border: 1px solid var(--border); border-radius: 4px;
+    padding: 2.5rem; display: flex; flex-direction: column; align-items: center; gap: 1rem; color: var(--muted);
+  }
+  .spinner { width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--navy); border-radius: 50%; animation: spin .7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .error-box {
+    background: #fff5f5; border: 1px solid #f0c0c0; border-radius: 4px; padding: 1.5rem 1.8rem;
+    font-size: .85rem; color: var(--red); line-height: 1.6;
+  }
+  .error-box strong { display: block; margin-bottom: .3rem; font-size: .9rem; }
+
+  #toast {
+    position: fixed; bottom: 2rem; right: 2rem; padding: .85rem 1.4rem; border-radius: 6px;
+    font-size: .83rem; font-weight: 600; color: white; opacity: 0; pointer-events: none; transition: opacity .3s; z-index: 9999;
+  }
+  #toast.show { opacity: 1; }
+  #toast.success { background: var(--green); }
+  #toast.error   { background: var(--red); }
+
+  /* ── FOOTER ── */
+  .page-footer {
+    max-width: 680px;
+    margin: 2rem auto 0;
+    padding: 0 1rem 2rem;
+  }
+  .page-footer-inner {
+    border-top: 1px solid var(--border);
+    padding-top: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: .6rem;
+  }
+  .page-footer-left {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+  }
+  .footer-logo {
+    font-family: 'EB Garamond', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--navy);
+    letter-spacing: -.01em;
+  }
+  .footer-logo span { color: var(--gold); }
+  .footer-divider {
+    width: 1px;
+    height: 14px;
+    background: var(--border);
+  }
+  .footer-tagline {
+    font-size: .68rem;
+    color: var(--muted);
+    letter-spacing: .03em;
+  }
+  .footer-right {
+    font-size: .67rem;
+    color: #aaa;
+    text-align: right;
+    line-height: 1.6;
+  }
+
+  @media (max-width: 600px) {
+    .rc-row-2, .cf-row-2, .sig-display-grid { grid-template-columns: 1fr; }
+    .rc-part { padding: 0 1.2rem 1.2rem; }
+    .correction-form { padding: 1rem 1.2rem; }
+    .correction-intro { margin: 1.2rem 1.2rem 0; }
+    .search-row { flex-direction: column; }
+    .ath-status-card { margin: 0 1.2rem 1.2rem; }
+    .history-panel { padding: 1.2rem; }
+    .page-footer-inner { flex-direction: column; align-items: flex-start; }
+    .footer-right { text-align: left; }
+  }
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-left">
+    <p class="eyebrow">ATHStudios &nbsp;·&nbsp; Incident Reports</p>
+    <h1>Track &amp; <span>Correct</span> Report</h1>
+  </div>
+  <a href="form.html" class="back-link">← Back to Form</a>
+</div>
+
+<!-- SEARCH -->
+<div class="search-section">
+  <div class="search-card">
+    <div class="search-header">
+      <h2>Find Your Report</h2>
+      <p>Enter your DIR No. (e.g. DIR-2026-001) to view your submission, check ATHStudios acknowledgment status, or submit a correction.</p>
+    </div>
+    <div class="search-body">
+      <div class="search-row">
+        <div class="field">
+          <label>Report Reference No. (DIR No.)</label>
+          <input type="text" id="searchInput" placeholder="e.g. DIR-2026-001" autocomplete="off"
+            onkeydown="if(event.key==='Enter') searchReport()"/>
+        </div>
+        <button class="btn-search" id="searchBtn" onclick="searchReport()">🔍 Lookup</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LOADING -->
+<div class="tracker-loading" id="trackerLoading">
+  <div class="loading-box">
+    <div class="spinner"></div>
+    <span style="font-size:.8rem">Looking up report…</span>
+  </div>
+</div>
+
+<!-- ERROR -->
+<div class="tracker-error" id="trackerError">
+  <div class="error-box">
+    <strong>Report Not Found</strong>
+    No report was found for the DIR No. you entered. Please double-check the reference number and try again.
+  </div>
+</div>
+
+<!-- STATUS BAR -->
+<div class="status-bar" id="statusBar">
+  <div class="status-box">
+    <div class="status-box-header">
+      <div class="status-dir" id="statusDirLabel">—</div>
+      <div class="status-badges" id="statusBadges"></div>
+    </div>
+    <div class="status-timeline" id="statusTimeline"></div>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="report-main" id="reportMain">
+
+  <div class="view-tabs">
+    <button class="view-tab active" onclick="switchTab('view', this)">📄 View Report</button>
+    <button class="view-tab" onclick="switchTab('corrections', this)">✏️ Submit Correction</button>
+    <button class="view-tab" onclick="switchTab('history', this)">🕘 Correction History</button>
+  </div>
+
+  <!-- VIEW PANEL -->
+  <div class="tab-panel active rc-card" id="panel-view">
+    <!-- dynamically filled -->
+  </div>
+
+  <!-- CORRECTIONS PANEL -->
+  <div class="tab-panel corrections-panel" id="panel-corrections">
+    <div class="correction-intro">
+      <strong>Submitting a Correction:</strong> Only correct information that was submitted in error. All corrections are logged with a timestamp. ATHStudios will be notified of any changes. Fields left blank will <em>not</em> overwrite the original data.
+    </div>
+    <div class="correction-form">
+
+      <div class="correction-section-title">Part A — Report Identification</div>
+      <div class="cf-row-2">
+        <div class="cf-field">
+          <label>Reported By (Name &amp; Position)</label>
+          <input type="text" id="cf_reportedBy" placeholder="Leave blank to keep original"/>
+        </div>
+        <div class="cf-field">
+          <label>Date &amp; Time of Report</label>
+          <input type="datetime-local" id="cf_reportDateTime"/>
+        </div>
+      </div>
+      <div class="cf-row-2">
+        <div class="cf-field">
+          <label>Date &amp; Time Incident Discovered</label>
+          <input type="datetime-local" id="cf_discoveredDateTime"/>
+        </div>
+      </div>
+
+      <div class="correction-section-title">Part C — Incident Description</div>
+      <div class="cf-field">
+        <label>Detailed Description (corrected)</label>
+        <textarea id="cf_description" rows="4" placeholder="Leave blank to keep original…"></textarea>
+      </div>
+      <div class="cf-field">
+        <label>Estimated Records Affected (corrected)</label>
+        <input type="number" id="cf_recordsAffected" min="0" placeholder="Leave blank to keep original"/>
+      </div>
+
+      <div class="correction-section-title">Part D — Immediate Actions</div>
+      <div class="cf-field">
+        <label>Immediate Actions Taken (corrected)</label>
+        <textarea id="cf_immediateActions" rows="3" placeholder="Leave blank to keep original…"></textarea>
+      </div>
+
+      <div class="correction-section-title">Part E — Root Cause</div>
+      <div class="cf-field">
+        <label>Additional Details / Root Cause Notes (corrected)</label>
+        <textarea id="cf_rootDetails" rows="3" placeholder="Leave blank to keep original…"></textarea>
+      </div>
+
+      <div class="correction-section-title">Part F — Corrective Actions</div>
+      <div class="cf-field">
+        <label>Corrective &amp; Preventive Actions (corrected)</label>
+        <textarea id="cf_correctiveActions" rows="3" placeholder="Leave blank to keep original…"></textarea>
+      </div>
+
+      <div class="correction-section-title">Update Signatures (Optional)</div>
+      <p style="font-size:.76rem;color:var(--muted);margin-bottom:1rem;line-height:1.5;">Only provide new signatures if the original was incorrect or missing. Draw or upload an image of the e-signature.</p>
+
+      <!-- Teacher sig correction -->
+      <div class="cf-sig-block">
+        <div class="cf-sig-block-title">Reporting Teacher's Signature</div>
+        <div class="cf-sig-mode-tabs">
+          <button type="button" class="cf-sig-tab active" data-target="cf_teacher" data-mode="draw">✏ Draw</button>
+          <button type="button" class="cf-sig-tab" data-target="cf_teacher" data-mode="upload">📎 Upload</button>
+        </div>
+        <div id="cf_teacherDrawWrap">
+          <div class="cf-sig-canvas-wrap">
+            <canvas id="cf_sigTeacher" width="400" height="100"></canvas>
+            <div class="cf-sig-placeholder" id="cf_phTeacher">Sign here to update (optional)</div>
+            <span class="cf-sig-clear" onclick="cfClearSig('cf_sigTeacher','cf_phTeacher')">Clear</span>
+          </div>
+        </div>
+        <div id="cf_teacherUploadWrap" style="display:none">
+          <div class="cf-sig-upload-wrap" id="cf_teacherDropZone">
+            <input type="file" id="cf_teacherSigFile" accept="image/*" onchange="cfPreviewSig('cf_teacher', this)"/>
+            <div class="icon">🖊️</div>
+            <div class="lbl">Click or drag to upload signature<br><span style="font-size:.64rem;opacity:.7">PNG, JPG — optional update</span></div>
+          </div>
+          <div class="cf-sig-preview" id="cf_teacherPreview">
+            <img id="cf_teacherPreviewImg" src="" alt=""/>
+            <span class="cf-sig-clear" onclick="cfClearUploadSig('cf_teacher')">Clear</span>
+          </div>
+        </div>
+        <p class="sig-note">Leave empty to keep the existing signature.</p>
+      </div>
+
+      <!-- Principal sig correction -->
+      <div class="cf-sig-block">
+        <div class="cf-sig-block-title">School Head / Principal's Signature</div>
+        <div class="cf-sig-mode-tabs">
+          <button type="button" class="cf-sig-tab active" data-target="cf_principal" data-mode="draw">✏ Draw</button>
+          <button type="button" class="cf-sig-tab" data-target="cf_principal" data-mode="upload">📎 Upload</button>
+        </div>
+        <div id="cf_principalDrawWrap">
+          <div class="cf-sig-canvas-wrap">
+            <canvas id="cf_sigPrincipal" width="400" height="100"></canvas>
+            <div class="cf-sig-placeholder" id="cf_phPrincipal">Sign here to update (optional)</div>
+            <span class="cf-sig-clear" onclick="cfClearSig('cf_sigPrincipal','cf_phPrincipal')">Clear</span>
+          </div>
+        </div>
+        <div id="cf_principalUploadWrap" style="display:none">
+          <div class="cf-sig-upload-wrap" id="cf_principalDropZone">
+            <input type="file" id="cf_principalSigFile" accept="image/*" onchange="cfPreviewSig('cf_principal', this)"/>
+            <div class="icon">🖊️</div>
+            <div class="lbl">Click or drag to upload signature<br><span style="font-size:.64rem;opacity:.7">PNG, JPG — optional update</span></div>
+          </div>
+          <div class="cf-sig-preview" id="cf_principalPreview">
+            <img id="cf_principalPreviewImg" src="" alt=""/>
+            <span class="cf-sig-clear" onclick="cfClearUploadSig('cf_principal')">Clear</span>
+          </div>
+        </div>
+        <p class="sig-note">Leave empty to keep the existing signature.</p>
+      </div>
+
+      <div class="correction-section-title">Correction Note</div>
+      <div class="correction-note-wrap">
+        <div class="cf-field">
+          <label>Reason for Correction <span style="font-weight:400;text-transform:none;letter-spacing:0">(required)</span></label>
+          <textarea id="cf_correctionNote" rows="3" placeholder="Briefly explain what was wrong and what you are correcting…" required></textarea>
+        </div>
+        <div class="cf-field">
+          <label>Corrected By (Full Name &amp; Position)</label>
+          <input type="text" id="cf_correctedBy" placeholder="Full name and position of person making this correction"/>
+        </div>
+      </div>
+
+      <button class="btn-submit-correction" id="submitCorrectionBtn" onclick="submitCorrection()">
+        Submit Correction
+      </button>
+    </div>
+  </div>
+
+  <!-- HISTORY PANEL -->
+  <div class="tab-panel history-panel" id="panel-history">
+    <div id="historyContent">
+      <div class="history-empty">No corrections have been submitted for this report.</div>
+    </div>
+  </div>
+
+</div>
+
+<div id="toast"></div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCOIacPT7b083_Xfyv8cFRZ9YiteVTiuyU",
+    authDomain: "forms-12c42.firebaseapp.com",
+    projectId: "forms-12c42",
+    storageBucket: "forms-12c42.firebasestorage.app",
+    messagingSenderId: "481340176152",
+    appId: "1:481340176152:web:aff50b657a65c4e02dd06d",
+    measurementId: "G-5MVVQ7CXBN",
+    databaseURL: "https://forms-12c42-default-rtdb.firebaseio.com"
+  };
+
+  const CLOUD_NAME    = "damr6r9op";
+  const UPLOAD_PRESET = "org-resources";
+
+  const app = initializeApp(firebaseConfig);
+  const db  = getDatabase(app);
+
+  let currentKey  = null;
+  let currentData = null;
+
+  function sanitizeKey(str) {
+    return str.trim().replace(/[.$#\[\]/]/g, '-').replace(/\s+/g, '_');
+  }
+  function fmtDate(iso) {
+    if (!iso) return '—';
+    try { return new Date(iso).toLocaleString('en-PH', {year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}); }
+    catch { return iso; }
+  }
+  function v(val, fb='—') { return val || fb; }
+
+  function showToast(msg, type='success') {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.className = `show ${type}`;
+    setTimeout(() => t.className = '', 3200);
+  }
+
+  // ── Search ──
+  window.searchReport = async function() {
+    const raw = document.getElementById('searchInput').value.trim();
+    if (!raw) { showToast('Please enter a DIR No.', 'error'); return; }
+    const key = sanitizeKey(raw);
+    currentKey = key;
+
+    document.getElementById('trackerLoading').classList.add('visible');
+    document.getElementById('trackerError').classList.remove('visible');
+    document.getElementById('statusBar').classList.remove('visible');
+    document.getElementById('reportMain').classList.remove('visible');
+    document.getElementById('searchBtn').disabled = true;
+
+    try {
+      const snap = await get(ref(db, `incidentReports/${key}`));
+      document.getElementById('trackerLoading').classList.remove('visible');
+      document.getElementById('searchBtn').disabled = false;
+      if (!snap.exists()) {
+        document.getElementById('trackerError').classList.add('visible');
+        return;
+      }
+      currentData = snap.val();
+      renderReport(currentData);
+    } catch (err) {
+      console.error(err);
+      document.getElementById('trackerLoading').classList.remove('visible');
+      document.getElementById('searchBtn').disabled = false;
+      document.getElementById('trackerError').classList.add('visible');
+    }
+  };
+
+  // ── Render ──
+  function renderReport(d) {
+    const A=d.partA||{}, B=d.partB||{}, C=d.partC||{};
+    const Dp=d.partD||{}, E=d.partE||{}, F=d.partF||{}, S=d.signatures||{};
+    const athSigned  = !!S.ath?.signatureUrl;
+    const corrections = d.corrections || [];
+    const dirNo = d.dirNo || A.refNo || currentKey;
+
+    // Status bar
+    document.getElementById('statusDirLabel').textContent = dirNo;
+    const sev = B.severity || 'Unknown';
+    const sevClass = `sbadge-severity-${sev.split(' ')[0]}`;
+    document.getElementById('statusBadges').innerHTML = `
+      <span class="sbadge ${athSigned ? 'sbadge-received' : 'sbadge-pending'}">
+        ${athSigned ? '✔ Received by ATH' : '⏳ Awaiting ATH Receipt'}
+      </span>
+      <span class="sbadge ${sevClass}">${sev}</span>
+    `;
+
+    // Timeline
+    const tlData = [
+      { label: 'Submitted', done: true, date: fmtDate(d.submittedAt) },
+      { label: 'Received by ATH', done: athSigned, date: athSigned ? fmtDate(S.ath?.dateReceived) : '' },
+      { label: 'Resolved', done: d.status === 'resolved', date: '' }
+    ];
+    document.getElementById('statusTimeline').innerHTML = tlData.map((step, i) => `
+      <div class="tl-step">
+        <div class="tl-dot ${step.done ? 'done' : (i === tlData.findIndex(s=>!s.done) ? 'active' : '')}">
+          ${step.done ? '✓' : (i+1)}
+        </div>
+        <div class="tl-label">${step.label}</div>
+        ${step.date ? `<div class="tl-date">${step.date}</div>` : ''}
+      </div>
+    `).join('');
+
+    document.getElementById('statusBar').classList.add('visible');
+
+    // Tag list helper
+    const tagListHtml = arr => {
+      if (!arr?.length) return '<div style="font-size:.83rem;color:#bbb;font-style:italic">None specified</div>';
+      return `<div class="tag-list">${arr.map(t=>`<span class="tag">${t}</span>`).join('')}</div>`;
+    };
+    const sigCard = (obj, label) => {
+      const url  = obj?.signatureUrl;
+      const name = obj?.printedName || '';
+      const date = obj?.date || obj?.dateReceived || '';
+      return `<div class="sig-display-card">
+        <div class="sdh">${label}</div>
+        ${url ? `<img src="${url}" alt="${label}"/>` : '<div class="no-sig">No signature on file</div>'}
+        <div class="sdm">${name}${name&&date?' · ':''}${date ? fmtDate(date) : ''}</div>
+      </div>`;
+    };
+
+    // View panel
+    document.getElementById('panel-view').innerHTML = `
+      <div class="rc-part" style="padding-top:1.4rem">
+        <div class="rc-part-header"><span class="rc-part-label">Part A</span><span class="rc-part-title">Report Identification</span></div>
+        <div class="rc-row-2">
+          <div class="rc-field"><span class="lbl">Report Reference No.</span><div class="val">${v(A.refNo)}</div></div>
+          <div class="rc-field"><span class="lbl">Date &amp; Time of Report</span><div class="val">${fmtDate(A.reportDateTime)}</div></div>
+          <div class="rc-field"><span class="lbl">Reported By</span><div class="val">${v(A.reportedBy)}</div></div>
+          <div class="rc-field"><span class="lbl">Date &amp; Time Incident Discovered</span><div class="val">${fmtDate(A.discoveredDateTime)}</div></div>
+        </div>
+        ${A.organization ? `<div class="rc-field"><span class="lbl">Organization / School Name</span><div class="val">${A.organization}</div></div>` : ''}
+      </div>
+      <div class="rc-part">
+        <div class="rc-part-header"><span class="rc-part-label">Part B</span><span class="rc-part-title">Incident Classification</span></div>
+        <div class="rc-field"><span class="lbl">Incident Type(s)</span>${tagListHtml(B.incidentTypes)}</div>
+        <hr class="part-divider"/>
+        <div class="rc-field"><span class="lbl">Severity</span>
+          ${B.severity ? `<div class="val"><span class="sbadge ${`sbadge-severity-${(B.severity||'').split(' ')[0]}`}">${B.severity}</span></div>` : '<div class="val" style="color:#bbb;font-style:italic">Not specified</div>'}
+        </div>
+        <hr class="part-divider"/>
+        <div class="rc-field"><span class="lbl">Data Affected</span>${tagListHtml(B.dataAffected)}</div>
+      </div>
+      <div class="rc-part">
+        <div class="rc-part-header"><span class="rc-part-label">Part C</span><span class="rc-part-title">Description of Incident</span></div>
+        <div class="rc-field"><span class="lbl">Detailed Description</span><div class="val multi">${v(C.description,'No description provided.')}</div></div>
+        <div class="rc-field"><span class="lbl">Estimated Records Affected</span><div class="val">${v(C.recordsAffected)}</div></div>
+      </div>
+      <div class="rc-part">
+        <div class="rc-part-header"><span class="rc-part-label">Part D</span><span class="rc-part-title">Immediate Actions Taken</span></div>
+        <div class="rc-field"><span class="lbl">Immediate Actions</span><div class="val multi">${v(Dp.immediateActions,'None specified.')}</div></div>
+        <div class="rc-row-2">
+          <div class="rc-field"><span class="lbl">ATHStudios Notified?</span><div class="val">${v(Dp.athNotified)}${Dp.athDateTime?' — '+fmtDate(Dp.athDateTime):''}${Dp.athReason?' — Reason: '+Dp.athReason:''}</div></div>
+          <div class="rc-field"><span class="lbl">DPO / Principal Notified?</span><div class="val">${v(Dp.dpoNotified)}${Dp.dpoDateTime?' — '+fmtDate(Dp.dpoDateTime):''}${Dp.dpoReason?' — Reason: '+Dp.dpoReason:''}</div></div>
+          <div class="rc-field"><span class="lbl">NPC Notification Required?</span><div class="val">${v(Dp.npcRequired)}</div></div>
+        </div>
+      </div>
+      <div class="rc-part">
+        <div class="rc-part-header"><span class="rc-part-label">Part E</span><span class="rc-part-title">Root Cause Assessment</span></div>
+        <div class="rc-field"><span class="lbl">Root Causes Identified</span>${tagListHtml(E.rootCauses)}</div>
+        <div class="rc-field"><span class="lbl">Additional Details</span><div class="val multi">${v(E.additionalDetails,'None provided.')}</div></div>
+      </div>
+      <div class="rc-part">
+        <div class="rc-part-header"><span class="rc-part-label">Part F</span><span class="rc-part-title">Corrective &amp; Preventive Actions</span></div>
+        <div class="rc-field"><span class="lbl">Actions to Prevent Recurrence</span><div class="val multi">${v(F.correctiveActions,'None specified.')}</div></div>
+      </div>
+      <div class="rc-part">
+        <div class="rc-part-header"><span class="rc-part-label">Certification</span><span class="rc-part-title">&amp; Signatures</span></div>
+        <div class="sig-display-grid">
+          ${sigCard(S.teacher,   'Reporting Teacher')}
+          ${sigCard(S.principal, 'School Head / Principal')}
+        </div>
+      </div>
+      <div class="ath-status-card">
+        <div class="ath-status-header ${athSigned ? 'received' : 'pending'}">
+          ${athSigned ? '✔ Received &amp; Acknowledged by ATHStudios' : '⏳ Pending ATHStudios Acknowledgment'}
+        </div>
+        <div class="ath-status-body">
+          ${athSigned
+            ? `<div style="font-size:.8rem;color:var(--muted);margin-bottom:.4rem">Date received: <strong style="color:var(--text)">${fmtDate(S.ath.dateReceived)}</strong></div>
+               <img src="${S.ath.signatureUrl}" alt="ATHStudios signature" class="ath-sig-img"/>`
+            : `<div style="font-size:.8rem;color:var(--muted);line-height:1.6">ATHStudios has not yet signed this report. You will see the acknowledgment here once they receive and sign it.</div>`
+          }
+        </div>
+      </div>
+      <div style="padding:.7rem 1.8rem 1.2rem;font-size:.67rem;color:var(--muted);border-top:1px solid var(--border);margin-top:.5rem;line-height:1.6;">
+        Submitted: ${fmtDate(d.submittedAt)} &nbsp;·&nbsp;
+        File copies: (1) Teacher, (2) School Head, (3) ATHStudios. Retain for a minimum of 3 years in accordance with DepEd records retention policy.
+      </div>
+    `;
+
+    // History panel
+    renderHistory(corrections);
+
+    document.getElementById('reportMain').classList.add('visible');
+    initCfCanvases();
+  }
+
+  // ── History panel ──
+  function renderHistory(corrections) {
+    const el = document.getElementById('historyContent');
+    if (!corrections || !corrections.length) {
+      el.innerHTML = '<div class="history-empty">No corrections have been submitted for this report yet.</div>';
+      return;
+    }
+    const sorted = [...corrections].sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
+    el.innerHTML = sorted.map((c, i) => {
+      const fields = Object.entries(c.changes || {}).filter(([,v]) => v).map(([k]) => k.replace(/^cf_/,'').replace(/_/g,' ')).join(', ');
+      return `<div class="history-entry">
+        <div class="history-entry-header">
+          <span class="he-label">Correction #${sorted.length - i}</span>
+          <span class="he-date">${fmtDate(c.timestamp)}</span>
+        </div>
+        <div class="history-entry-body">
+          ${c.correctedBy ? `<div><strong>By:</strong> ${c.correctedBy}</div>` : ''}
+          ${c.note ? `<div style="margin:.3rem 0"><strong>Reason:</strong> ${c.note}</div>` : ''}
+          ${fields ? `<div><strong>Fields updated:</strong> ${fields}</div>` : ''}
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // ── Submit correction ──
+  window.submitCorrection = async function() {
+    if (!currentKey || !currentData) { showToast('Please search for a report first.', 'error'); return; }
+    const note = document.getElementById('cf_correctionNote').value.trim();
+    if (!note) { showToast('Please provide a reason for the correction.', 'error'); return; }
+
+    const btn = document.getElementById('submitCorrectionBtn');
+    btn.disabled = true; btn.textContent = 'Uploading signatures…';
+
+    try {
+      // Upload new sigs if drawn/uploaded
+      const [newTeacherUrl, newPrincipalUrl] = await Promise.all([
+        cfUploadSig('cf_teacher', 'teacher_correction'),
+        cfUploadSig('cf_principal', 'principal_correction')
+      ]);
+
+      const changes = {};
+      const grab = id => document.getElementById(id).value.trim();
+      if (grab('cf_reportedBy'))       changes.reportedBy       = grab('cf_reportedBy');
+      if (grab('cf_reportDateTime'))   changes.reportDateTime   = grab('cf_reportDateTime');
+      if (grab('cf_discoveredDateTime')) changes.discoveredDateTime = grab('cf_discoveredDateTime');
+      if (grab('cf_description'))      changes.description      = grab('cf_description');
+      if (grab('cf_recordsAffected'))  changes.recordsAffected  = grab('cf_recordsAffected');
+      if (grab('cf_immediateActions')) changes.immediateActions = grab('cf_immediateActions');
+      if (grab('cf_rootDetails'))      changes.rootDetails      = grab('cf_rootDetails');
+      if (grab('cf_correctiveActions')) changes.correctiveActions = grab('cf_correctiveActions');
+      if (newTeacherUrl)   changes.teacherSignatureUrl   = newTeacherUrl;
+      if (newPrincipalUrl) changes.principalSignatureUrl = newPrincipalUrl;
+
+      if (!Object.keys(changes).length) {
+        showToast('No changes detected. Please fill in at least one field to correct.', 'error');
+        btn.disabled = false; btn.textContent = 'Submit Correction';
+        return;
+      }
+
+      const correctionEntry = {
+        timestamp:   new Date().toISOString(),
+        note,
+        correctedBy: grab('cf_correctedBy'),
+        changes
+      };
+
+      // Build the update patches
+      const patches = {};
+
+      // Apply field corrections to the main record
+      if (changes.reportedBy)          patches['partA/reportedBy']           = changes.reportedBy;
+      if (changes.reportDateTime)      patches['partA/reportDateTime']       = changes.reportDateTime;
+      if (changes.discoveredDateTime)  patches['partA/discoveredDateTime']   = changes.discoveredDateTime;
+      if (changes.description)         patches['partC/description']          = changes.description;
+      if (changes.recordsAffected)     patches['partC/recordsAffected']      = changes.recordsAffected;
+      if (changes.immediateActions)    patches['partD/immediateActions']     = changes.immediateActions;
+      if (changes.rootDetails)         patches['partE/additionalDetails']    = changes.rootDetails;
+      if (changes.correctiveActions)   patches['partF/correctiveActions']    = changes.correctiveActions;
+      if (changes.teacherSignatureUrl)   patches['signatures/teacher/signatureUrl']   = changes.teacherSignatureUrl;
+      if (changes.principalSignatureUrl) patches['signatures/principal/signatureUrl'] = changes.principalSignatureUrl;
+
+      // Append to corrections array
+      const existingCorrections = currentData.corrections || [];
+      patches['corrections'] = [...existingCorrections, correctionEntry];
+      patches['lastCorrectedAt'] = new Date().toISOString();
+
+      btn.textContent = 'Saving…';
+      await update(ref(db, `incidentReports/${currentKey}`), patches);
+
+      // Refresh local data
+      const snap = await get(ref(db, `incidentReports/${currentKey}`));
+      currentData = snap.val();
+      renderReport(currentData);
+
+      showToast('✔ Correction submitted successfully!', 'success');
+      switchTab('view', document.querySelector('.view-tab'));
+      btn.textContent = 'Submit Correction';
+      btn.disabled = false;
+
+      // Clear correction fields
+      ['cf_reportedBy','cf_reportDateTime','cf_discoveredDateTime','cf_description',
+       'cf_recordsAffected','cf_immediateActions','cf_rootDetails','cf_correctiveActions',
+       'cf_correctionNote','cf_correctedBy'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+      });
+      cfClearSig('cf_sigTeacher','cf_phTeacher');
+      cfClearSig('cf_sigPrincipal','cf_phPrincipal');
+
+    } catch (err) {
+      console.error(err);
+      showToast('Error submitting correction. Please try again.', 'error');
+      btn.disabled = false; btn.textContent = 'Submit Correction';
+    }
+  };
+
+  // ── CF canvas draw ──
+  const cfDrawStates = {};
+
+  function initCfCanvases() {
+    ['cf_sigTeacher','cf_sigPrincipal'].forEach(id => {
+      const canvas = document.getElementById(id);
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      canvas.width = canvas.offsetWidth || 400;
+      cfDrawStates[id] = { hasDrawn: false };
+      let drawing=false, lx=0, ly=0;
+      canvas.onmousedown = canvas.ontouchstart = e => {
+        e.preventDefault(); drawing=true;
+        const r=canvas.getBoundingClientRect(), s=e.touches?e.touches[0]:e;
+        [lx,ly]=[(s.clientX-r.left)*(canvas.width/r.width),(s.clientY-r.top)*(canvas.height/r.height)];
+      };
+      canvas.onmousemove = canvas.ontouchmove = e => {
+        if (!drawing) return; e.preventDefault();
+        const r=canvas.getBoundingClientRect(), s=e.touches?e.touches[0]:e;
+        const [x,y]=[(s.clientX-r.left)*(canvas.width/r.width),(s.clientY-r.top)*(canvas.height/r.height)];
+        ctx.strokeStyle='#1a2744'; ctx.lineWidth=2; ctx.lineCap='round';
+        ctx.beginPath(); ctx.moveTo(lx,ly); ctx.lineTo(x,y); ctx.stroke();
+        [lx,ly]=[x,y]; cfDrawStates[id].hasDrawn=true;
+        document.getElementById(id.replace('cf_sig','cf_ph')).style.display='none';
+      };
+      canvas.onmouseup = canvas.onmouseleave = canvas.ontouchend = () => drawing=false;
+    });
+  }
+
+  window.cfClearSig = (id, phId) => {
+    const canvas = document.getElementById(id);
+    if (!canvas) return;
+    canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+    if (cfDrawStates[id]) cfDrawStates[id].hasDrawn = false;
+    document.getElementById(phId).style.display = 'flex';
+  };
+
+  window.cfSigMode  = { cf_teacher: 'draw', cf_principal: 'draw' };
+  window.cfSigFiles = { cf_teacher: null, cf_principal: null };
+
+  window.cfPreviewSig = (who, input) => {
+    const file = input.files[0];
+    if (!file) return;
+    window.cfSigFiles[who] = file;
+    const reader = new FileReader();
+    reader.onload = e => {
+      document.getElementById(who + 'PreviewImg').src = e.target.result;
+      document.getElementById(who + 'DropZone').style.display = 'none';
+      const prev = document.getElementById(who + 'Preview');
+      prev.classList.add('active'); prev.style.display = 'flex';
+    };
+    reader.readAsDataURL(file);
+  };
+
+  window.cfClearUploadSig = (who) => {
+    window.cfSigFiles[who] = null;
+    document.getElementById(who + 'SigFile').value = '';
+    document.getElementById(who + 'PreviewImg').src = '';
+    const prev = document.getElementById(who + 'Preview');
+    prev.classList.remove('active'); prev.style.display = 'none';
+    const drop = document.getElementById(who + 'DropZone');
+    drop.style.display = 'flex'; drop.classList.add('active');
+  };
+
+  async function cfUploadSig(who, label) {
+    const mode = window.cfSigMode[who] || 'draw';
+    let blob;
+    if (mode === 'draw') {
+      const canvasId = who.replace('cf_', 'cf_sig').replace('teacher','Teacher').replace('principal','Principal');
+      if (!cfDrawStates[canvasId]?.hasDrawn) return null;
+      blob = await new Promise(res => document.getElementById(canvasId).toBlob(res, 'image/png'));
+    } else {
+      const file = window.cfSigFiles[who];
+      if (!file) return null;
+      blob = file;
+    }
+    const fd = new FormData();
+    fd.append('file', blob, `${label}_${Date.now()}.png`);
+    fd.append('upload_preset', UPLOAD_PRESET);
+    fd.append('folder', 'incident_reports/corrections');
+    const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, { method:'POST', body:fd });
+    const json = await res.json();
+    return json.secure_url || null;
+  }
+
+  // ── Tab switching ──
+  window.switchTab = function(name, btn) {
+    document.querySelectorAll('.view-tab').forEach(b => b.classList.remove('active'));
+    if (btn) {
+      document.querySelectorAll('.view-tab').forEach(b => {
+        if (b.textContent.toLowerCase().includes(name) || b === btn) b.classList.remove('active');
+      });
+    }
+    // Find and activate the button that matches
+    document.querySelectorAll('.view-tab').forEach(b => {
+      const txt = b.getAttribute('onclick');
+      if (txt && txt.includes(`'${name}'`)) b.classList.add('active');
+    });
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById(`panel-${name}`)?.classList.add('active');
+    if (name === 'history' && currentData) {
+      renderHistory(currentData.corrections || []);
+    }
+  };
+
+  // ── CF sig mode tabs ──
+  document.querySelectorAll('.cf-sig-tab').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const target = this.dataset.target;
+      const mode   = this.dataset.mode;
+      document.querySelectorAll(`.cf-sig-tab[data-target="${target}"]`).forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      window.cfSigMode = window.cfSigMode || {};
+      window.cfSigMode[target] = mode;
+      const suffix = target.replace('cf_', '');
+      const Suffix = suffix.charAt(0).toUpperCase() + suffix.slice(1);
+      document.getElementById(`cf_${suffix}DrawWrap`).style.display   = mode === 'draw'   ? 'block' : 'none';
+      document.getElementById(`cf_${suffix}UploadWrap`).style.display = mode === 'upload' ? 'block' : 'none';
+      if (mode === 'upload') {
+        const drop = document.getElementById(`cf_${suffix}DropZone`);
+        const prev = document.getElementById(`cf_${suffix}Preview`);
+        if (window.cfSigFiles && window.cfSigFiles[target]) {
+          drop.style.display = 'none'; prev.style.display = 'flex';
+        } else {
+          drop.style.display = 'flex'; drop.classList.add('active'); prev.style.display = 'none';
+        }
+      }
+    });
+  });
+
+  // ── Auto-search from URL param ──
+  const params = new URLSearchParams(window.location.search);
+  const dirParam = params.get('dir');
+  if (dirParam) {
+    document.getElementById('searchInput').value = dirParam;
+    searchReport();
+  }
+</script>
+
+<footer class="page-footer">
+  <div class="page-footer-inner">
+    <div class="page-footer-left">
+      <div class="footer-logo">ATH<span>Studios</span></div>
+      <div class="footer-divider"></div>
+      <div class="footer-tagline">QR Attendance System &nbsp;·&nbsp; Official Incident Reporting</div>
+    </div>
+    <div class="footer-right">
+      File copies: (1) Teacher, (2) School Head, (3) ATHStudios<br>
+      Retain for a minimum of 3 years · DepEd records retention policy
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
