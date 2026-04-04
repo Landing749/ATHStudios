@@ -210,6 +210,46 @@
     .detail { padding: 0; }
     .report-card { box-shadow: none; border: none; }
   }
+
+  /* ATH SIG MODE TABS */
+  .ath-sig-mode-tabs {
+    display: flex; border: 1px solid var(--border); border-radius: 4px;
+    overflow: hidden; width: fit-content; margin-bottom: .7rem;
+  }
+  .ath-sig-tab {
+    padding: .35rem 1rem; font-size: .72rem; font-weight: 700; letter-spacing: .06em;
+    text-transform: uppercase; cursor: pointer; background: #f5f2ea; color: var(--muted);
+    border: none; border-right: 1px solid var(--border);
+    font-family: 'Source Sans 3', sans-serif; transition: all .15s;
+  }
+  .ath-sig-tab:last-child { border-right: none; }
+  .ath-sig-tab.active { background: var(--navy); color: white; }
+
+  /* ATH UPLOAD ZONE */
+  .ath-upload-wrap {
+    display: none; border: 2px dashed #b0c0d8; border-radius: 4px; background: #f5f8ff;
+    min-height: 130px; flex-direction: column; align-items: center; justify-content: center;
+    gap: .5rem; padding: .9rem; position: relative; cursor: pointer;
+    transition: border-color .2s, background .2s;
+  }
+  .ath-upload-wrap:hover { border-color: var(--navy-mid); background: #eef1f8; }
+  .ath-upload-wrap.active { display: flex; }
+  .ath-upload-wrap input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+  .ath-upload-wrap .upload-icon { font-size: 1.8rem; opacity: .5; }
+  .ath-upload-wrap .upload-lbl { font-size: .75rem; color: var(--navy-mid); text-align: center; line-height: 1.45; pointer-events: none; }
+  .ath-upload-preview {
+    display: none; border: 1.5px solid #b0c0d8; border-radius: 4px; background: white;
+    position: relative; overflow: hidden; min-height: 130px;
+    align-items: center; justify-content: center;
+  }
+  .ath-upload-preview.active { display: flex; }
+  .ath-upload-preview img { max-width: 100%; max-height: 130px; object-fit: contain; display: block; }
+  .ath-upload-preview .ath-remove {
+    position: absolute; top: 5px; right: 7px; background: rgba(139,28,28,.9);
+    color: white; border: none; border-radius: 3px; padding: 3px 8px;
+    font-size: .66rem; font-weight: 700; letter-spacing: .04em;
+    text-transform: uppercase; cursor: pointer; font-family: 'Source Sans 3', sans-serif;
+  }
 </style>
 </head>
 <body>
@@ -407,7 +447,7 @@
           <div class="ath-section-title">Received by ATHStudios</div>
           <div class="ath-banner">
             <span class="icon">🔏</span>
-            <span>ATHStudios acknowledges receipt of this report. Draw your signature and click <strong>Save Signature</strong> to record your acknowledgment permanently.</span>
+            <span>ATHStudios acknowledges receipt of this report. <strong>Draw</strong> or <strong>upload an image</strong> of your signature, then click <strong>Save Signature</strong> to record your acknowledgment permanently.</span>
           </div>
 
           ${athSigned ? `
@@ -415,21 +455,45 @@
               <div class="signed-badge">✔ Signature on record — ${fmtDate(S.ath?.dateReceived)}</div>
               <img src="${athSigned}" alt="ATHStudios signature"/>
             </div>
-            <p style="font-size:.74rem;color:var(--muted);margin-bottom:1rem;font-style:italic;">You may draw below to update the signature.</p>
+            <p style="font-size:.74rem;color:var(--muted);margin-bottom:1rem;font-style:italic;">You may draw or upload below to update the signature.</p>
           ` : ''}
 
           <div class="ath-sig-grid">
             <div>
-              <div class="sig-canvas-wrap">
-                <canvas id="sigATH" width="400" height="130"></canvas>
-                <div class="sig-placeholder" id="phATH">Sign here</div>
-                <span class="sig-clear" id="athClearBtn">Clear</span>
+              <!-- Mode tabs -->
+              <div class="ath-sig-mode-tabs">
+                <button type="button" class="ath-sig-tab active" id="athTabDraw">✏️ Draw</button>
+                <button type="button" class="ath-sig-tab" id="athTabUpload">📎 Upload Image</button>
               </div>
-              <p class="sig-upload-note">Draw your signature above using mouse or touch.</p>
+
+              <!-- Draw mode -->
+              <div id="athDrawWrap">
+                <div class="sig-canvas-wrap">
+                  <canvas id="sigATH" width="400" height="130"></canvas>
+                  <div class="sig-placeholder" id="phATH">Sign here</div>
+                  <span class="sig-clear" id="athClearBtn">Clear</span>
+                </div>
+                <p class="sig-upload-note">Draw using mouse or touch.</p>
+              </div>
+
+              <!-- Upload mode -->
+              <div id="athUploadWrap" style="display:none">
+                <div class="ath-upload-wrap active" id="athDropZone">
+                  <input type="file" id="athSigFile" accept="image/*"/>
+                  <div class="upload-icon">🖼️</div>
+                  <div class="upload-lbl"><strong>Click or drag</strong> to upload a signature image<br><span style="font-size:.65rem;opacity:.7">PNG, JPG, GIF — max 5 MB</span></div>
+                </div>
+                <div class="ath-upload-preview" id="athUploadPreview">
+                  <img id="athPreviewImg" src="" alt="Signature preview"/>
+                  <button class="ath-remove" id="athRemoveBtn">✕ Remove</button>
+                </div>
+                <p class="sig-upload-note">Upload a photo or scan of the ATHStudios e-signature.</p>
+              </div>
             </div>
+
             <div class="ath-date-wrap">
               <label>Date &amp; Time Received</label>
-              <input type="datetime-local" id="athReceivedDate" value="${S.ath?.dateReceived||''}"/>
+              <input type="datetime-local" id="athReceivedDate" value="${S.ath?.dateReceived||\'\'}""/>
             </div>
           </div>
 
@@ -442,7 +506,7 @@
       </div>
     `;
 
-    // Init canvas
+    // ── Init canvas ──
     const canvas = document.getElementById('sigATH');
     const ctx    = canvas.getContext('2d');
     canvas.width = canvas.offsetWidth || 400;
@@ -475,13 +539,72 @@
       document.getElementById('phATH').style.display='flex';
     });
 
+    // ── Sig mode — track which mode is active ──
+    let athSigMode = 'draw';
+    let athUploadFile = null;
+
+    document.getElementById('athTabDraw').addEventListener('click', () => {
+      athSigMode = 'draw';
+      document.getElementById('athTabDraw').classList.add('active');
+      document.getElementById('athTabUpload').classList.remove('active');
+      document.getElementById('athDrawWrap').style.display = 'block';
+      document.getElementById('athUploadWrap').style.display = 'none';
+    });
+
+    document.getElementById('athTabUpload').addEventListener('click', () => {
+      athSigMode = 'upload';
+      document.getElementById('athTabUpload').classList.add('active');
+      document.getElementById('athTabDraw').classList.remove('active');
+      document.getElementById('athDrawWrap').style.display = 'none';
+      document.getElementById('athUploadWrap').style.display = 'block';
+    });
+
+    // ── Upload file input handler ──
+    document.getElementById('athSigFile').addEventListener('change', function() {
+      const file = this.files[0];
+      if (!file) return;
+      athUploadFile = file;
+      const reader = new FileReader();
+      reader.onload = e => {
+        document.getElementById('athPreviewImg').src = e.target.result;
+        document.getElementById('athDropZone').style.display = 'none';
+        const prev = document.getElementById('athUploadPreview');
+        prev.classList.add('active'); prev.style.display = 'flex';
+      };
+      reader.readAsDataURL(file);
+    });
+
+    document.getElementById('athRemoveBtn').addEventListener('click', () => {
+      athUploadFile = null;
+      document.getElementById('athSigFile').value = '';
+      document.getElementById('athPreviewImg').src = '';
+      const prev = document.getElementById('athUploadPreview');
+      prev.classList.remove('active'); prev.style.display = 'none';
+      const drop = document.getElementById('athDropZone');
+      drop.style.display = 'flex';
+    });
+
+    // ── Save handler (draw OR upload) ──
     document.getElementById('athSignBtn').addEventListener('click', async () => {
       const btn = document.getElementById('athSignBtn');
-      if (!athDrawState.hasDrawn) { showToast('Please draw your signature first.','error'); return; }
-      btn.disabled=true; btn.textContent='Uploading signature…';
+
+      // Validate
+      if (athSigMode === 'draw' && !athDrawState.hasDrawn) {
+        showToast('Please draw your signature first.','error'); return;
+      }
+      if (athSigMode === 'upload' && !athUploadFile) {
+        showToast('Please upload a signature image first.','error'); return;
+      }
+
+      btn.disabled=true; btn.textContent='Uploading…';
       try {
-        const blob = await new Promise(res=>canvas.toBlob(res,'image/png'));
-        const fd   = new FormData();
+        let blob;
+        if (athSigMode === 'draw') {
+          blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
+        } else {
+          blob = athUploadFile;
+        }
+        const fd = new FormData();
         fd.append('file', blob, `ath_${key}_${Date.now()}.png`);
         fd.append('upload_preset', UPLOAD_PRESET);
         fd.append('folder','incident_reports/ath_signatures');
