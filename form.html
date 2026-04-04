@@ -660,8 +660,12 @@
       </div>
       <div class="row-2">
         <div class="field">
-          <label>Report Reference No. (assign sequential)</label>
-          <input type="text" id="refNo" placeholder="e.g. DIR-2026-001" required />
+          <label>Report Reference No. <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted)">(auto-generated)</span></label>
+          <div style="display:flex;gap:.5rem;align-items:center;">
+            <input type="text" id="refNo" placeholder="Generating…" required style="flex:1"/>
+            <button type="button" id="regenDirBtn" style="display:none;align-items:center;gap:.3rem;padding:.5rem .8rem;background:var(--navy);color:white;border:none;border-radius:3px;font-size:.72rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;font-family:'Source Sans 3',sans-serif;white-space:nowrap;flex-shrink:0;">↻ Regenerate</button>
+          </div>
+          <div style="font-size:.66rem;color:var(--muted);margin-top:.25rem;line-height:1.4;">Generated automatically based on existing reports. Click Regenerate if submitting simultaneously with others.</div>
         </div>
         <div class="field">
           <label>Date &amp; Time of Report</label>
@@ -1051,6 +1055,47 @@
 
   const app = initializeApp(firebaseConfig);
   const db  = getDatabase(app);
+
+  // ── Auto-generate DIR No. ──
+  async function generateDirNo() {
+    const year = new Date().getFullYear();
+    try {
+      const snap = await get(ref(db, 'incidentReports'));
+      let maxNum = 0;
+      if (snap.exists()) {
+        Object.keys(snap.val()).forEach(key => {
+          const m = key.match(/^DIR[_-](\d{4})[_-](\d+)$/i);
+          if (m && parseInt(m[1]) === year) {
+            maxNum = Math.max(maxNum, parseInt(m[2]));
+          }
+        });
+      }
+      const next = String(maxNum + 1).padStart(3, '0');
+      return `DIR-${year}-${next}`;
+    } catch { return `DIR-${year}-001`; }
+  }
+
+  (async () => {
+    const dirNo = await generateDirNo();
+    const el = document.getElementById('refNo');
+    el.value = dirNo;
+    el.readOnly = true;
+    el.style.background = '#eef1f8';
+    el.style.color = 'var(--navy)';
+    el.style.fontWeight = '600';
+    el.style.letterSpacing = '.04em';
+    el.style.cursor = 'default';
+    // Update the regenerate button label
+    const regenBtn = document.getElementById('regenDirBtn');
+    if (regenBtn) regenBtn.style.display = 'inline-flex';
+    regenBtn.onclick = async () => {
+      regenBtn.textContent = '↻';
+      regenBtn.disabled = true;
+      el.value = await generateDirNo();
+      regenBtn.textContent = '↻ Regenerate';
+      regenBtn.disabled = false;
+    };
+  })();
 
   // ── Cloudinary config ──
   const CLOUDINARY_CLOUD_NAME = "damr6r9op";
