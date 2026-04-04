@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Incident Reports — Admin Viewer | ATHStudios</title>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;600;700&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --navy: #1a2744;
+    --navy-mid: #243460;
+    --gold: #b8922a;
+    --gold-light: #d4aa4a;
+    --red: #8b1c1c;
+    --green: #1f6b3e;
+    --bg: #eef0f5;
+    --paper: #fffef9;
+    --border: #c8bfa8;
+    --text: #1e1e1e;
+    --muted: #5a5448;
+    --accent-bg: #eef1f8;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); font-family: 'Source Sans 3', sans-serif; color: var(--text); min-height: 100vh; }
+
+  /* TOPBAR */
+  .topbar {
+    background: var(--navy); border-bottom: 3px solid var(--gold);
+    padding: 1rem 2rem; display: flex; align-items: center;
+    justify-content: space-between; position: sticky; top: 0; z-index: 100; gap: 1rem;
+  }
+  .topbar-left .eyebrow { font-size: .62rem; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; color: var(--gold-light); margin-bottom: .15rem; }
+  .topbar-left h1 { font-family: 'EB Garamond', serif; font-size: 1.4rem; font-weight: 700; color: white; line-height: 1; }
+  .topbar-left h1 span { color: var(--gold-light); }
+  .topbar-right { display: flex; align-items: center; gap: .7rem; flex-shrink: 0; }
+  .badge-count { background: var(--gold); color: white; font-size: .72rem; font-weight: 700; padding: .28rem .65rem; border-radius: 20px; }
+  .top-btn {
+    padding: .38rem .9rem; background: transparent; border: 1px solid rgba(255,255,255,.3);
+    color: white; font-family: 'Source Sans 3', sans-serif; font-size: .75rem; font-weight: 600;
+    cursor: pointer; border-radius: 3px; letter-spacing: .05em; text-transform: uppercase; transition: background .2s;
+  }
+  .top-btn:hover { background: rgba(255,255,255,.1); }
+
+  /* LAYOUT */
+  .layout { display: grid; grid-template-columns: 270px 1fr; min-height: calc(100vh - 62px); }
+
+  /* SIDEBAR */
+  .sidebar {
+    background: var(--paper); border-right: 1px solid var(--border);
+    overflow-y: auto; max-height: calc(100vh - 62px); position: sticky; top: 62px;
+  }
+  .sidebar-header {
+    padding: .9rem 1.2rem .6rem; border-bottom: 1px solid var(--border);
+    font-size: .64rem; font-weight: 700; letter-spacing: .13em; text-transform: uppercase;
+    color: var(--muted); position: sticky; top: 0; background: var(--paper); z-index: 2;
+  }
+  .report-item {
+    padding: .8rem 1.2rem; border-bottom: 1px solid #ebe6da;
+    cursor: pointer; transition: background .15s; border-left: 3px solid transparent;
+  }
+  .report-item:hover { background: #f5f2ea; }
+  .report-item.active { background: var(--accent-bg); border-left-color: var(--navy); }
+  .report-item .ri-ref  { font-size: .78rem; font-weight: 700; color: var(--navy); margin-bottom: .18rem; }
+  .report-item .ri-by   { font-size: .74rem; color: var(--muted); margin-bottom: .25rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .report-item .ri-date { font-size: .66rem; color: #aaa; }
+  .pill {
+    display: inline-block; font-size: .62rem; font-weight: 700;
+    letter-spacing: .06em; text-transform: uppercase; padding: .12rem .45rem; border-radius: 20px; margin-top: .25rem;
+  }
+  .pill-Low      { background: #e8f5e9; color: #1f6b3e; }
+  .pill-Medium   { background: #fff8e1; color: #a06000; }
+  .pill-High     { background: #fbe9e7; color: #bf360c; }
+  .pill-Critical { background: #fce4ec; color: #880e4f; }
+  .pill-Unknown  { background: #eee;    color: #666; }
+  .pill-signed   { background: #e3f2fd; color: #0d47a1; margin-left: .3rem; }
+
+  /* DETAIL */
+  .detail { padding: 2rem 1.5rem; overflow-y: auto; }
+
+  .empty-state {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    height: 60vh; color: var(--muted); gap: .8rem; text-align: center;
+  }
+  .empty-state .icon { font-size: 3rem; opacity: .25; }
+  .empty-state p { font-size: .85rem; }
+
+  /* ACTION BAR */
+  .action-bar { display: flex; gap: .7rem; justify-content: flex-end; margin-bottom: 1rem; max-width: 820px; }
+  .action-bar button {
+    padding: .42rem 1rem; border: 1px solid var(--border); background: var(--paper);
+    font-family: 'Source Sans 3', sans-serif; font-size: .76rem; font-weight: 600;
+    color: var(--navy); cursor: pointer; border-radius: 3px; letter-spacing: .04em;
+    text-transform: uppercase; transition: background .2s;
+  }
+  .action-bar button:hover { background: var(--accent-bg); border-color: var(--navy); }
+
+  /* REPORT CARD — same aesthetic as form */
+  .report-card { max-width: 820px; background: var(--paper); border: 1px solid var(--border); box-shadow: 0 4px 30px rgba(0,0,0,.1); }
+
+  .rc-header { background: var(--navy); color: white; padding: 2rem 2.2rem 1.6rem; border-bottom: 4px solid var(--gold); }
+  .rc-header .eyebrow { font-size: .66rem; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; color: var(--gold-light); margin-bottom: .3rem; }
+  .rc-header h2 { font-family: 'EB Garamond', serif; font-size: 1.9rem; font-weight: 700; line-height: 1.05; color: white; }
+  .rc-header h2 span { color: var(--gold-light); }
+  .rc-header .rc-meta { margin-top: .7rem; font-size: .74rem; color: #8fa0be; line-height: 1.7; }
+  .rc-header .rc-meta strong { color: #ccd3e0; }
+
+  .rc-part { padding: 0 2.2rem 1.6rem; }
+  .rc-part-header { display: flex; align-items: center; gap: .8rem; margin-bottom: 1.1rem; padding-bottom: .45rem; border-bottom: 2px solid var(--navy); }
+  .rc-part-label { font-family: 'EB Garamond', serif; font-size: 1rem; font-weight: 700; color: var(--navy); text-transform: uppercase; letter-spacing: .08em; }
+  .rc-part-title { font-size: .74rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+
+  .rc-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: .9rem; }
+  .rc-field { display: flex; flex-direction: column; gap: .2rem; margin-bottom: .6rem; }
+  .rc-field .lbl { font-size: .68rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+  .rc-field .val { font-size: .88rem; color: var(--text); padding: .45rem .65rem; background: #f5f3ee; border: 1px solid var(--border); border-radius: 3px; min-height: 2rem; }
+  .rc-field .val.empty { color: #bbb; font-style: italic; }
+  .rc-field .val.multi { min-height: 60px; white-space: pre-wrap; line-height: 1.6; }
+
+  .tag-list { display: flex; flex-wrap: wrap; gap: .35rem; padding: .45rem .65rem; background: #f5f3ee; border: 1px solid var(--border); border-radius: 3px; min-height: 2rem; }
+  .tag { background: white; border: 1px solid var(--border); padding: .18rem .55rem; border-radius: 3px; font-size: .76rem; color: var(--navy); }
+
+  .part-divider { border: none; border-top: 1px dashed var(--border); margin: .5rem 0 1.1rem; }
+
+  /* SUBMITTED SIGS */
+  .sig-display-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
+  .sig-display-card { border: 1px solid var(--border); border-radius: 3px; overflow: hidden; }
+  .sig-display-card .sdh { background: var(--navy); color: white; font-size: .64rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; padding: .35rem .7rem; }
+  .sig-display-card img { display: block; width: 100%; max-height: 110px; object-fit: contain; background: white; padding: .4rem; }
+  .sig-display-card .sdm { font-size: .74rem; color: var(--muted); padding: .4rem .7rem; background: #fafaf5; border-top: 1px solid var(--border); }
+  .sig-display-card .no-sig { display: flex; align-items: center; justify-content: center; height: 80px; font-size: .75rem; color: #bbb; font-style: italic; background: white; }
+
+  /* ATH SIGNATURE SECTION */
+  .ath-sig-section { padding: 1.6rem 2.2rem 2rem; background: #f0f4ff; border-top: 2px dashed #b0bce8; }
+  .ath-section-title {
+    font-family: 'EB Garamond', serif; font-size: 1.05rem; font-weight: 700;
+    color: var(--navy); margin-bottom: 1rem; display: flex; align-items: center; gap: .6rem;
+  }
+  .ath-section-title::after { content: ''; flex: 1; height: 2px; background: var(--navy); border-radius: 2px; }
+  .ath-banner {
+    background: var(--navy-mid); color: white; padding: .8rem 1.1rem; border-radius: 4px;
+    font-size: .8rem; line-height: 1.6; margin-bottom: 1.2rem;
+    display: flex; align-items: flex-start; gap: .7rem;
+  }
+  .ath-banner .icon { font-size: 1.3rem; flex-shrink: 0; margin-top: .05rem; }
+
+  .ath-sig-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; align-items: start; }
+  .sig-canvas-wrap { border: 1.5px solid var(--border); border-radius: 3px; background: white; position: relative; overflow: hidden; }
+  .sig-canvas-wrap canvas { display: block; width: 100%; height: 130px; cursor: crosshair; touch-action: none; }
+  .sig-canvas-wrap .sig-placeholder {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    pointer-events: none; font-size: .78rem; color: #b0b0a8; font-style: italic;
+  }
+  .sig-canvas-wrap .sig-clear {
+    position: absolute; top: 5px; right: 7px; font-size: .66rem; color: var(--red);
+    cursor: pointer; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+    background: rgba(255,255,255,.9); padding: 2px 6px; border-radius: 2px; border: 1px solid #e0c0c0;
+  }
+  .sig-upload-note { font-size: .7rem; color: var(--muted); margin-top: .35rem; font-style: italic; }
+
+  .ath-date-wrap { display: flex; flex-direction: column; gap: .4rem; }
+  .ath-date-wrap label { font-size: .68rem; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--navy-mid); }
+  .ath-date-wrap input {
+    border: 1px solid var(--border); background: white; padding: .55rem .7rem;
+    font-family: 'Source Sans 3', sans-serif; font-size: .86rem; color: var(--text);
+    border-radius: 3px; width: 100%;
+  }
+  .ath-date-wrap input:focus { outline: none; border-color: var(--navy-mid); box-shadow: 0 0 0 3px rgba(36,52,96,.1); }
+
+  .signed-existing { border: 1px solid #b0c4f0; border-radius: 3px; overflow: hidden; margin-bottom: 1rem; }
+  .signed-existing .signed-badge { background: #e3f2fd; color: #0d47a1; font-size: .72rem; font-weight: 700; padding: .35rem .7rem; display: flex; align-items: center; gap: .4rem; }
+  .signed-existing img { display: block; width: 100%; max-height: 90px; object-fit: contain; background: white; padding: .3rem; }
+
+  .btn-save-sig {
+    margin-top: 1.2rem; width: 100%; padding: .75rem;
+    background: var(--navy); border: none; font-family: 'Source Sans 3', sans-serif;
+    font-size: .85rem; font-weight: 700; color: white; cursor: pointer;
+    border-radius: 3px; letter-spacing: .07em; text-transform: uppercase; transition: background .2s, transform .1s;
+  }
+  .btn-save-sig:hover { background: var(--navy-mid); }
+  .btn-save-sig:active { transform: scale(.98); }
+  .btn-save-sig:disabled { background: #aaa; cursor: not-allowed; }
+
+  .rc-footer { text-align: center; font-size: .67rem; color: var(--muted); padding: .9rem 2rem; border-top: 1px solid var(--border); }
+
+  /* LOADING */
+  .loading { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 60vh; gap: 1rem; color: var(--muted); }
+  .spinner { width: 34px; height: 34px; border: 3px solid var(--border); border-top-color: var(--navy); border-radius: 50%; animation: spin .7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  #toast {
+    position: fixed; bottom: 2rem; right: 2rem; padding: .85rem 1.4rem; border-radius: 6px;
+    font-size: .83rem; font-weight: 600; color: white; opacity: 0; pointer-events: none; transition: opacity .3s; z-index: 9999;
+  }
+  #toast.show { opacity: 1; }
+  #toast.success { background: var(--green); }
+  #toast.error   { background: var(--red); }
+
+  @media (max-width: 720px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { max-height: 260px; position: static; }
+    .rc-row-2, .sig-display-grid, .ath-sig-grid { grid-template-columns: 1fr; }
+    .rc-part { padding: 0 1.2rem 1.4rem; }
+    .rc-header { padding: 1.5rem 1.2rem; }
+    .ath-sig-section { padding: 1.2rem; }
+    .detail { padding: 1rem; }
+  }
+  @media print {
+    .topbar, .sidebar, .action-bar, .ath-sig-section { display: none !important; }
+    .layout { grid-template-columns: 1fr; }
+    .detail { padding: 0; }
+    .report-card { box-shadow: none; border: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <p class="eyebrow">ATHStudios &nbsp;·&nbsp; Admin Receiver</p>
+    <h1>Incident <span>Report</span> Viewer</h1>
+  </div>
+  <div class="topbar-right">
+    <span class="badge-count" id="countBadge">0 Reports</span>
+    <button class="top-btn" id="refreshBtn">↻ Refresh</button>
+  </div>
+</div>
+
+<div class="layout">
+  <div class="sidebar">
+    <div class="sidebar-header">Submitted Reports</div>
+    <div id="reportList">
+      <div class="loading"><div class="spinner"></div><span style="font-size:.78rem">Loading…</span></div>
+    </div>
+  </div>
+
+  <div class="detail" id="detailPanel">
+    <div class="empty-state">
+      <div class="icon">📋</div>
+      <p>Select a report from the left to view its full details.</p>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script type="module">
+  import { initializeApp }   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+  const CLOUD_NAME   = "damr6r9op";
+  const UPLOAD_PRESET= "org-resources";
+
+  const app = initializeApp({
+    apiKey: "AIzaSyCOIacPT7b083_Xfyv8cFRZ9YiteVTiuyU",
+    authDomain: "forms-12c42.firebaseapp.com",
+    projectId: "forms-12c42",
+    storageBucket: "forms-12c42.firebasestorage.app",
+    messagingSenderId: "481340176152",
+    appId: "1:481340176152:web:aff50b657a65c4e02dd06d",
+    measurementId: "G-5MVVQ7CXBN",
+    databaseURL: "https://forms-12c42-default-rtdb.firebaseio.com"
+  });
+  const db = getDatabase(app);
+
+  let allReports = [];
+  let activeKey  = null;
+  let athDrawState = { hasDrawn: false };
+
+  const fmtDate = iso => {
+    if (!iso) return '—';
+    try { return new Date(iso).toLocaleString('en-PH',{year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}); }
+    catch { return iso; }
+  };
+  const v  = (val, fb='—') => val || fb;
+  const pc = sev => 'pill-' + (sev||'Unknown').split(' ')[0];
+
+  function showToast(msg, type='success') {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.className = `show ${type}`;
+    setTimeout(() => t.className = '', 3200);
+  }
+
+  function renderSidebar() {
+    const list = document.getElementById('reportList');
+    if (!allReports.length) {
+      list.innerHTML = '<div style="padding:1.4rem 1.2rem;font-size:.8rem;color:#aaa;font-style:italic;">No reports yet.</div>';
+      return;
+    }
+    list.innerHTML = allReports.map(({key,data}) => {
+      const sev    = data.partB?.severity || 'Unknown';
+      const ref_   = data.partA?.refNo || 'No Ref';
+      const by     = data.partA?.reportedBy || 'Unknown';
+      const hasSig = !!data.signatures?.ath?.signatureUrl;
+      const org    = data.partA?.organization || '';
+      return `<div class="report-item ${key===activeKey?'active':''}" data-key="${key}">
+        <div class="ri-ref">${ref_}</div>
+        <div class="ri-by">${by}${org ? ' · ' + org : ''}</div>
+        <div class="ri-date">${fmtDate(data.submittedAt)}</div>
+        <span class="pill ${pc(sev)}">${sev}</span>
+        ${hasSig?'<span class="pill pill-signed">✔ Signed</span>':''}
+      </div>`;
+    }).join('');
+    list.querySelectorAll('.report-item').forEach(el =>
+      el.addEventListener('click', () => showReport(el.dataset.key))
+    );
+  }
+
+  function tagListHtml(arr) {
+    if (!arr?.length) return '<div class="val empty">None specified</div>';
+    return `<div class="tag-list">${arr.map(t=>`<span class="tag">${t}</span>`).join('')}</div>`;
+  }
+  function sigCard(obj, label) {
+    const url  = obj?.signatureUrl;
+    const name = obj?.printedName || '';
+    const date = obj?.date || obj?.dateReceived || '';
+    return `<div class="sig-display-card">
+      <div class="sdh">${label}</div>
+      ${url ? `<img src="${url}" alt="${label}"/>` : '<div class="no-sig">No signature</div>'}
+      <div class="sdm">${name}${name&&date?' · ':''}${date?fmtDate(date):''}</div>
+    </div>`;
+  }
+
+  function showReport(key) {
+    activeKey = key;
+    renderSidebar();
+    const rep = allReports.find(r=>r.key===key);
+    if (!rep) return;
+    const d=rep.data, A=d.partA||{}, B=d.partB||{}, C=d.partC||{};
+    const Dp=d.partD||{}, E=d.partE||{}, F=d.partF||{}, S=d.signatures||{};
+    const athSigned = S.ath?.signatureUrl;
+
+    document.getElementById('detailPanel').innerHTML = `
+      <div class="action-bar"><button onclick="window.print()">🖨 Print / Save PDF</button></div>
+
+      <div class="report-card">
+
+        <div class="rc-header">
+          <p class="eyebrow">Data Incident / Data Loss Report &nbsp;·&nbsp; ATHStudios Official Form</p>
+          <h2>Data Incident / <span>Data Loss</span> Report</h2>
+          <p class="rc-meta">
+            <strong>QR Attendance System</strong><br>
+            Prepared by ATHStudios &nbsp;|&nbsp; For Admin &amp; Teacher Use &nbsp;|&nbsp; Version 20 &nbsp;|&nbsp; March 2026<br>
+            Submitted: ${fmtDate(d.submittedAt)}
+          </p>
+        </div>
+
+        <div class="rc-part" style="padding-top:1.6rem">
+          <div class="rc-part-header"><span class="rc-part-label">Part A</span><span class="rc-part-title">Report Identification</span></div>
+          <div class="rc-row-2">
+            <div class="rc-field"><span class="lbl">Report Reference No.</span><div class="val">${v(A.refNo)}</div></div>
+            <div class="rc-field"><span class="lbl">Date &amp; Time of Report</span><div class="val">${fmtDate(A.reportDateTime)}</div></div>
+            <div class="rc-field"><span class="lbl">Reported By (Name &amp; Position)</span><div class="val">${v(A.reportedBy)}</div></div>
+            <div class="rc-field"><span class="lbl">Date &amp; Time Incident Discovered</span><div class="val">${fmtDate(A.discoveredDateTime)}</div></div>
+          </div>
+          ${A.organization ? `<div class="rc-field"><span class="lbl">Organization / School Name</span><div class="val">${A.organization}</div></div>` : ''}
+        </div>
+
+        <div class="rc-part">
+          <div class="rc-part-header"><span class="rc-part-label">Part B</span><span class="rc-part-title">Incident Classification</span></div>
+          <div class="rc-field"><span class="lbl">Incident Type(s)</span>${tagListHtml(B.incidentTypes)}</div>
+          <hr class="part-divider"/>
+          <div class="rc-field">
+            <span class="lbl">Severity Level</span>
+            ${B.severity?`<div class="val"><span class="pill ${pc(B.severity)}">${B.severity}</span></div>`:'<div class="val empty">Not specified</div>'}
+          </div>
+          <hr class="part-divider"/>
+          <div class="rc-field"><span class="lbl">Data Affected</span>${tagListHtml(B.dataAffected)}</div>
+        </div>
+
+        <div class="rc-part">
+          <div class="rc-part-header"><span class="rc-part-label">Part C</span><span class="rc-part-title">Description of Incident</span></div>
+          <div class="rc-field"><span class="lbl">Detailed Description</span><div class="val multi">${v(C.description,'No description provided.')}</div></div>
+          <div class="rc-field"><span class="lbl">Estimated Student Records Affected</span><div class="val">${v(C.recordsAffected)}</div></div>
+        </div>
+
+        <div class="rc-part">
+          <div class="rc-part-header"><span class="rc-part-label">Part D</span><span class="rc-part-title">Immediate Actions Taken</span></div>
+          <div class="rc-field"><span class="lbl">Immediate Actions</span><div class="val multi">${v(Dp.immediateActions,'None specified.')}</div></div>
+          <div class="rc-row-2">
+            <div class="rc-field"><span class="lbl">ATHStudios Notified?</span><div class="val">${v(Dp.athNotified)}${Dp.athDateTime?' — '+fmtDate(Dp.athDateTime):''}${Dp.athReason?' — Reason: '+Dp.athReason:''}</div></div>
+            <div class="rc-field"><span class="lbl">DPO / Principal Notified?</span><div class="val">${v(Dp.dpoNotified)}${Dp.dpoDateTime?' — '+fmtDate(Dp.dpoDateTime):''}${Dp.dpoReason?' — Reason: '+Dp.dpoReason:''}</div></div>
+            <div class="rc-field"><span class="lbl">NPC Notification Required?</span><div class="val">${v(Dp.npcRequired)}</div></div>
+          </div>
+        </div>
+
+        <div class="rc-part">
+          <div class="rc-part-header"><span class="rc-part-label">Part E</span><span class="rc-part-title">Root Cause Assessment</span></div>
+          <div class="rc-field"><span class="lbl">Root Causes Identified</span>${tagListHtml(E.rootCauses)}</div>
+          <div class="rc-field"><span class="lbl">Additional Details</span><div class="val multi">${v(E.additionalDetails,'None provided.')}</div></div>
+        </div>
+
+        <div class="rc-part">
+          <div class="rc-part-header"><span class="rc-part-label">Part F</span><span class="rc-part-title">Corrective &amp; Preventive Actions</span></div>
+          <div class="rc-field"><span class="lbl">Actions to Prevent Recurrence</span><div class="val multi">${v(F.correctiveActions,'None specified.')}</div></div>
+        </div>
+
+        <div class="rc-part">
+          <div class="rc-part-header"><span class="rc-part-label">Certification</span><span class="rc-part-title">&amp; Signatures</span></div>
+          <div class="sig-display-grid">
+            ${sigCard(S.teacher,   'Reporting Teacher')}
+            ${sigCard(S.principal, 'School Head / Principal')}
+          </div>
+        </div>
+
+        <!-- ATH SIGNATURE -->
+        <div class="ath-sig-section">
+          <div class="ath-section-title">Received by ATHStudios</div>
+          <div class="ath-banner">
+            <span class="icon">🔏</span>
+            <span>ATHStudios acknowledges receipt of this report. Draw your signature and click <strong>Save Signature</strong> to record your acknowledgment permanently.</span>
+          </div>
+
+          ${athSigned ? `
+            <div class="signed-existing">
+              <div class="signed-badge">✔ Signature on record — ${fmtDate(S.ath?.dateReceived)}</div>
+              <img src="${athSigned}" alt="ATHStudios signature"/>
+            </div>
+            <p style="font-size:.74rem;color:var(--muted);margin-bottom:1rem;font-style:italic;">You may draw below to update the signature.</p>
+          ` : ''}
+
+          <div class="ath-sig-grid">
+            <div>
+              <div class="sig-canvas-wrap">
+                <canvas id="sigATH" width="400" height="130"></canvas>
+                <div class="sig-placeholder" id="phATH">Sign here</div>
+                <span class="sig-clear" id="athClearBtn">Clear</span>
+              </div>
+              <p class="sig-upload-note">Draw your signature above using mouse or touch.</p>
+            </div>
+            <div class="ath-date-wrap">
+              <label>Date &amp; Time Received</label>
+              <input type="datetime-local" id="athReceivedDate" value="${S.ath?.dateReceived||''}"/>
+            </div>
+          </div>
+
+          <button class="btn-save-sig" id="athSignBtn">💾 Save ATHStudios Signature</button>
+        </div>
+
+        <div class="rc-footer">
+          File copies: (1) Teacher, (2) School Head, (3) ATHStudios &nbsp;·&nbsp; Retain for a minimum of 3 years in accordance with DepEd records retention policy.
+        </div>
+      </div>
+    `;
+
+    // Init canvas
+    const canvas = document.getElementById('sigATH');
+    const ctx    = canvas.getContext('2d');
+    canvas.width = canvas.offsetWidth || 400;
+    athDrawState = { hasDrawn: false };
+    let drawing=false, lx=0, ly=0;
+
+    const pos = e => {
+      const r=canvas.getBoundingClientRect(), s=e.touches?e.touches[0]:e;
+      return [(s.clientX-r.left)*(canvas.width/r.width),(s.clientY-r.top)*(canvas.height/r.height)];
+    };
+    const start = e => { e.preventDefault(); drawing=true; [lx,ly]=pos(e); };
+    const draw  = e => {
+      if (!drawing) return; e.preventDefault();
+      const [x,y]=pos(e);
+      ctx.strokeStyle='#1a2744'; ctx.lineWidth=2.2; ctx.lineCap='round';
+      ctx.beginPath(); ctx.moveTo(lx,ly); ctx.lineTo(x,y); ctx.stroke();
+      [lx,ly]=[x,y]; athDrawState.hasDrawn=true;
+      document.getElementById('phATH').style.display='none';
+    };
+    const stop = () => drawing=false;
+    canvas.addEventListener('mousedown',start); canvas.addEventListener('mousemove',draw);
+    canvas.addEventListener('mouseup',stop);    canvas.addEventListener('mouseleave',stop);
+    canvas.addEventListener('touchstart',start,{passive:false});
+    canvas.addEventListener('touchmove',draw,{passive:false});
+    canvas.addEventListener('touchend',stop);
+
+    document.getElementById('athClearBtn').addEventListener('click', () => {
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      athDrawState.hasDrawn=false;
+      document.getElementById('phATH').style.display='flex';
+    });
+
+    document.getElementById('athSignBtn').addEventListener('click', async () => {
+      const btn = document.getElementById('athSignBtn');
+      if (!athDrawState.hasDrawn) { showToast('Please draw your signature first.','error'); return; }
+      btn.disabled=true; btn.textContent='Uploading signature…';
+      try {
+        const blob = await new Promise(res=>canvas.toBlob(res,'image/png'));
+        const fd   = new FormData();
+        fd.append('file', blob, `ath_${key}_${Date.now()}.png`);
+        fd.append('upload_preset', UPLOAD_PRESET);
+        fd.append('folder','incident_reports/ath_signatures');
+        const res  = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,{method:'POST',body:fd});
+        const json = await res.json();
+        if (!json.secure_url) throw new Error('Upload failed');
+        const dateReceived = document.getElementById('athReceivedDate').value || new Date().toISOString();
+        await update(ref(db,`incidentReports/${key}/signatures/ath`),{
+          signatureUrl: json.secure_url, dateReceived
+        });
+        showToast('✔ ATHStudios signature saved!','success');
+        btn.textContent='✔ Saved';
+        setTimeout(()=>{btn.disabled=false;btn.textContent='💾 Save ATHStudios Signature';},2500);
+      } catch(err) {
+        console.error(err);
+        showToast('Error saving signature. Please try again.','error');
+        btn.disabled=false; btn.textContent='💾 Save ATHStudios Signature';
+      }
+    });
+  }
+
+  function load() {
+    onValue(ref(db,'incidentReports'), snap => {
+      const raw=snap.val(); allReports=[];
+      if (raw) {
+        Object.entries(raw).forEach(([key,data])=>allReports.push({key,data}));
+        allReports.sort((a,b)=>new Date(b.data.submittedAt||0)-new Date(a.data.submittedAt||0));
+      }
+      document.getElementById('countBadge').textContent=`${allReports.length} Report${allReports.length!==1?'s':''}`;
+      renderSidebar();
+      if (activeKey) showReport(activeKey);
+    });
+  }
+
+  load();
+  document.getElementById('refreshBtn').addEventListener('click', load);
+</script>
+</body>
+</html>
