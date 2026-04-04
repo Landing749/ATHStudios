@@ -1,0 +1,1406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Data Incident / Data Loss Report — ATHStudios</title>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;600;700&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --navy: #1a2744;
+    --navy-mid: #243460;
+    --gold: #b8922a;
+    --gold-light: #d4aa4a;
+    --red: #8b1c1c;
+    --bg: #f4f1eb;
+    --paper: #fffef9;
+    --border: #c8bfa8;
+    --text: #1e1e1e;
+    --muted: #5a5448;
+    --accent-bg: #eef1f8;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    font-family: 'Source Sans 3', sans-serif;
+    color: var(--text);
+    min-height: 100vh;
+    padding: 2rem 1rem 4rem;
+  }
+  .page {
+    max-width: 860px;
+    margin: 0 auto;
+    background: var(--paper);
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 40px rgba(0,0,0,.13);
+  }
+
+  /* ── HEADER ── */
+  .form-header {
+    background: var(--navy);
+    color: white;
+    padding: 2.2rem 2.5rem 1.8rem;
+    border-bottom: 4px solid var(--gold);
+  }
+  .form-header .eyebrow {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: .7rem;
+    font-weight: 600;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--gold-light);
+    margin-bottom: .4rem;
+  }
+  .form-header h1 {
+    font-family: 'EB Garamond', serif;
+    font-size: 2.1rem;
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -.01em;
+  }
+  .form-header h1 span { color: var(--gold-light); }
+  .form-header .sub {
+    margin-top: .9rem;
+    font-size: .78rem;
+    color: #aab5cc;
+    line-height: 1.6;
+  }
+  .form-header .sub strong { color: #ccd3e0; }
+
+  /* ── INSTRUCTION BOX ── */
+  .instruction-box {
+    margin: 1.8rem 2.2rem;
+    border-left: 4px solid var(--gold);
+    background: #fdf8ee;
+    padding: .95rem 1.2rem;
+    font-size: .8rem;
+    line-height: 1.65;
+    color: #3d3025;
+    border-radius: 0 4px 4px 0;
+  }
+  .instruction-box strong { color: var(--navy); }
+
+  /* ── PARTS ── */
+  .part {
+    padding: 0 2.2rem 1.6rem;
+  }
+  .part-header {
+    display: flex;
+    align-items: center;
+    gap: .8rem;
+    margin-bottom: 1.2rem;
+    padding-bottom: .5rem;
+    border-bottom: 2px solid var(--navy);
+  }
+  .part-label {
+    font-family: 'EB Garamond', serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--navy);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+  }
+  .part-title {
+    font-size: .78rem;
+    font-weight: 600;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* ── GRID ROWS ── */
+  .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+
+  /* ── FIELD ── */
+  .field { display: flex; flex-direction: column; gap: .3rem; }
+  .field label {
+    font-size: .72rem;
+    font-weight: 600;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--navy-mid);
+  }
+  .field input[type="text"],
+  .field input[type="datetime-local"],
+  .field input[type="number"],
+  .field textarea,
+  .field select {
+    border: 1px solid var(--border);
+    background: #fafaf7;
+    padding: .55rem .7rem;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: .88rem;
+    color: var(--text);
+    border-radius: 3px;
+    transition: border-color .2s, box-shadow .2s;
+    width: 100%;
+  }
+  .field input:focus,
+  .field textarea:focus,
+  .field select:focus {
+    outline: none;
+    border-color: var(--navy-mid);
+    box-shadow: 0 0 0 3px rgba(36,52,96,.1);
+  }
+  .field textarea { resize: vertical; min-height: 90px; }
+
+  /* ── CHECK GROUPS ── */
+  .check-group-label {
+    font-size: .78rem;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: .55rem;
+    display: block;
+  }
+  .check-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .55rem .4rem;
+    margin-bottom: 1.1rem;
+  }
+  .check-item {
+    display: flex;
+    align-items: center;
+    gap: .38rem;
+    cursor: pointer;
+  }
+  .check-item input[type="checkbox"],
+  .check-item input[type="radio"] {
+    width: 15px; height: 15px;
+    accent-color: var(--navy);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .check-item span {
+    font-size: .82rem;
+    color: var(--text);
+    line-height: 1.3;
+    user-select: none;
+  }
+
+  /* ── CONDITIONAL EXTRA ── */
+  .extra-field {
+    display: none;
+    margin-top: .6rem;
+    padding: .7rem .9rem;
+    background: var(--accent-bg);
+    border-left: 3px solid var(--navy-mid);
+    border-radius: 0 4px 4px 0;
+  }
+  .extra-field.visible { display: block; }
+  .extra-field input[type="text"],
+  .extra-field input[type="datetime-local"] {
+    border: 1px solid #b8c4d8;
+    background: white;
+    padding: .5rem .65rem;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: .85rem;
+    color: var(--text);
+    border-radius: 3px;
+    width: 100%;
+    margin-top: .25rem;
+  }
+  .extra-field label {
+    font-size: .72rem;
+    font-weight: 600;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    color: var(--navy-mid);
+    display: block;
+    margin-bottom: .25rem;
+  }
+
+  /* ── NOTIFICATION ROW ── */
+  .notif-block { margin-bottom: 1rem; }
+  .notif-row {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    flex-wrap: wrap;
+    margin-bottom: .3rem;
+  }
+  .notif-row .notif-label {
+    font-size: .82rem;
+    font-weight: 600;
+    color: var(--navy);
+    min-width: 240px;
+  }
+
+  /* ── DIVIDER ── */
+  .part-divider {
+    border: none;
+    border-top: 1px dashed var(--border);
+    margin: .6rem 0 1.2rem;
+  }
+
+  /* ── SIGNATURE SECTION ── */
+  .sig-intro {
+    background: var(--navy);
+    color: white;
+    padding: .85rem 1.3rem;
+    font-size: .8rem;
+    line-height: 1.6;
+    margin-bottom: 1.3rem;
+    border-radius: 3px;
+  }
+  .sig-block { margin-bottom: 1.6rem; }
+  .sig-block-title {
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--navy-mid);
+    margin-bottom: .5rem;
+  }
+  .sig-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+  /* ── SIG MODE TABS ── */
+  .sig-mode-tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: .5rem;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+    width: fit-content;
+  }
+  .sig-mode-tab {
+    padding: .3rem .85rem;
+    font-size: .7rem;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    background: #f5f2ea;
+    color: var(--muted);
+    border: none;
+    border-right: 1px solid var(--border);
+    font-family: 'Source Sans 3', sans-serif;
+    transition: background .15s, color .15s;
+  }
+  .sig-mode-tab:last-child { border-right: none; }
+  .sig-mode-tab.active {
+    background: var(--navy);
+    color: white;
+  }
+
+  .sig-canvas-wrap {
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    background: #fafaf7;
+    position: relative;
+    overflow: hidden;
+  }
+  .sig-canvas-wrap canvas {
+    display: block;
+    width: 100%;
+    height: 120px;
+    cursor: crosshair;
+    touch-action: none;
+  }
+  .sig-canvas-wrap .sig-clear {
+    position: absolute;
+    top: 4px; right: 6px;
+    font-size: .68rem;
+    color: var(--red);
+    cursor: pointer;
+    font-weight: 600;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    background: rgba(255,255,255,.85);
+    padding: 2px 6px;
+    border-radius: 2px;
+    border: 1px solid #e0c0c0;
+  }
+  .sig-canvas-wrap .sig-placeholder {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    font-size: .75rem;
+    color: #aaa9a2;
+    font-style: italic;
+  }
+  .sig-upload-note {
+    font-size: .7rem;
+    color: var(--muted);
+    margin-top: .3rem;
+    font-style: italic;
+  }
+
+  /* ── IMAGE UPLOAD SIG ── */
+  .sig-upload-wrap {
+    display: none;
+    border: 1.5px dashed var(--border);
+    border-radius: 3px;
+    background: #fafaf7;
+    min-height: 120px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+    padding: .8rem;
+    position: relative;
+    cursor: pointer;
+  }
+  .sig-upload-wrap.active { display: flex; }
+  .sig-upload-wrap input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+  }
+  .sig-upload-wrap .upload-icon { font-size: 1.6rem; opacity: .4; }
+  .sig-upload-wrap .upload-label {
+    font-size: .75rem;
+    color: var(--muted);
+    text-align: center;
+    line-height: 1.4;
+    pointer-events: none;
+  }
+  .sig-upload-preview {
+    display: none;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    background: white;
+    position: relative;
+    overflow: hidden;
+    min-height: 120px;
+    align-items: center;
+    justify-content: center;
+  }
+  .sig-upload-preview.active { display: flex; }
+  .sig-upload-preview img {
+    max-width: 100%;
+    max-height: 120px;
+    object-fit: contain;
+    display: block;
+  }
+  .sig-upload-preview .sig-clear {
+    position: absolute;
+    top: 4px; right: 6px;
+    font-size: .68rem;
+    color: var(--red);
+    cursor: pointer;
+    font-weight: 600;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    background: rgba(255,255,255,.85);
+    padding: 2px 6px;
+    border-radius: 2px;
+    border: 1px solid #e0c0c0;
+  }
+
+  /* ── SUBMIT ── */
+  .submit-row {
+    padding: 1.5rem 2.2rem 2.2rem;
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    border-top: 2px solid var(--border);
+  }
+  .btn-reset {
+    padding: .7rem 1.6rem;
+    border: 2px solid var(--border);
+    background: transparent;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: .85rem;
+    font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+    border-radius: 3px;
+    letter-spacing: .04em;
+    transition: all .2s;
+  }
+  .btn-reset:hover { border-color: var(--navy); color: var(--navy); }
+  .btn-submit {
+    padding: .7rem 2.2rem;
+    background: var(--navy);
+    border: none;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: .85rem;
+    font-weight: 600;
+    color: white;
+    cursor: pointer;
+    border-radius: 3px;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    transition: background .2s, transform .1s;
+  }
+  .btn-submit:hover { background: var(--navy-mid); }
+  .btn-submit:active { transform: scale(.98); }
+  .btn-submit:disabled { background: #aaa; cursor: not-allowed; }
+
+  /* ── TOAST ── */
+  #toast {
+    position: fixed; bottom: 2rem; right: 2rem;
+    padding: .9rem 1.5rem;
+    border-radius: 6px;
+    font-size: .85rem;
+    font-weight: 600;
+    color: white;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .3s;
+    z-index: 9999;
+  }
+  #toast.show { opacity: 1; }
+  #toast.success { background: #1f6b3e; }
+  #toast.error { background: var(--red); }
+
+  .footer-note {
+    text-align: center;
+    font-size: .68rem;
+    color: var(--muted);
+    padding: 1rem 2rem;
+    border-top: 1px solid var(--border);
+  }
+
+  /* ── RECEIPT MODAL ── */
+  .receipt-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(10,16,36,.82);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+  }
+  .receipt-overlay.visible { display: flex; }
+
+  .receipt-shell {
+    max-width: 460px;
+    width: 100%;
+    animation: slideUp .28s cubic-bezier(.22,.68,0,1.2);
+  }
+  @keyframes slideUp {
+    from { transform: translateY(28px) scale(.97); opacity: 0; }
+    to   { transform: translateY(0) scale(1); opacity: 1; }
+  }
+
+  /* ── CARD (the PNG) ── */
+  .receipt-card {
+    background: #fffef9;
+    border: 1px solid #c8bfa8;
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: 0 12px 60px rgba(0,0,0,.35);
+  }
+  .receipt-stripe {
+    height: 5px;
+    background: linear-gradient(90deg,#1a2744 0%,#243460 55%,#b8922a 100%);
+  }
+  .receipt-brand {
+    background: var(--navy);
+    padding: .85rem 1.4rem .7rem;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 2px solid var(--gold);
+  }
+  .receipt-brand-name {
+    font-family: 'EB Garamond', serif;
+    font-size: 1.1rem; font-weight: 700; color: white;
+  }
+  .receipt-brand-name span { color: var(--gold-light); }
+  .receipt-brand-sub {
+    font-size: .58rem; color: #8fa0be; margin-top: .08rem;
+    letter-spacing: .1em; text-transform: uppercase;
+  }
+  .receipt-stamp {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: #1f6b3e; border: 2px solid rgba(255,255,255,.18);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem; flex-shrink: 0;
+  }
+  .receipt-success-bar {
+    background: linear-gradient(135deg,#1a4d2e,#1f6b3e);
+    padding: .9rem 1.4rem;
+    display: flex; align-items: center; gap: .8rem;
+  }
+  .receipt-success-icon {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: rgba(255,255,255,.14);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem; flex-shrink: 0;
+  }
+  .receipt-success-bar h2 {
+    font-family: 'EB Garamond', serif;
+    font-size: 1.25rem; font-weight: 700; color: white; line-height: 1.1;
+  }
+  .receipt-success-bar p { font-size: .7rem; color: rgba(255,255,255,.72); margin-top: .18rem; }
+
+  .receipt-dir-badge {
+    margin: 1rem 1.2rem .5rem;
+    background: var(--accent-bg);
+    border: 1.5px solid #b0c0e0;
+    border-radius: 5px;
+    padding: .75rem 1rem;
+    display: flex; align-items: center; gap: .8rem;
+  }
+  .receipt-dir-badge .dir-icon-wrap {
+    width: 36px; height: 36px; background: var(--navy);
+    border-radius: 4px; display: flex; align-items: center;
+    justify-content: center; font-size: 1rem; flex-shrink: 0;
+  }
+  .receipt-dir-badge .dir-label {
+    font-size: .6rem; font-weight: 700; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: .12rem;
+  }
+  .receipt-dir-badge .dir-value {
+    font-family: 'EB Garamond', serif;
+    font-size: 1.3rem; font-weight: 700; color: var(--navy);
+    letter-spacing: .02em; line-height: 1;
+  }
+  .receipt-dir-badge .dir-hint {
+    font-size: .63rem; color: var(--muted); margin-top: .18rem; line-height: 1.35;
+  }
+
+  .receipt-rows { padding: .25rem 1.2rem .7rem; }
+  .receipt-row {
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 1rem; padding: .44rem 0;
+    border-bottom: 1px solid #ede9df; font-size: .82rem;
+  }
+  .receipt-row:last-child { border-bottom: none; }
+  .receipt-row .rl {
+    color: var(--muted); font-weight: 600; font-size: .66rem;
+    letter-spacing: .07em; text-transform: uppercase; flex-shrink: 0;
+  }
+  .receipt-row .rv { color: var(--text); font-weight: 600; text-align: right; }
+  .receipt-row .rv.pending { color: #a06000; }
+
+  .receipt-sev {
+    display: inline-block; font-size: .68rem; font-weight: 700;
+    letter-spacing: .05em; text-transform: uppercase;
+    padding: .13rem .48rem; border-radius: 20px;
+  }
+  .receipt-sev-Low      { background:#e8f5e9; color:#1f6b3e; }
+  .receipt-sev-Medium   { background:#fff8e1; color:#a06000; }
+  .receipt-sev-High     { background:#fbe9e7; color:#bf360c; }
+  .receipt-sev-Critical { background:#fce4ec; color:#880e4f; }
+  .receipt-sev-unknown  { background:#eee;    color:#666; }
+
+  .receipt-card-footer {
+    background: #f5f2ea; border-top: 1px dashed #c8bfa8;
+    padding: .5rem 1.2rem; font-size: .6rem; color: var(--muted); line-height: 1.5;
+  }
+
+  /* Buttons outside the card */
+  .receipt-actions {
+    display: flex; gap: .6rem; margin-top: .8rem; flex-wrap: wrap;
+  }
+  .btn-receipt-track {
+    flex: 1; padding: .6rem .9rem; background: var(--navy); border: none;
+    font-family: 'Source Sans 3', sans-serif; font-size: .78rem; font-weight: 700;
+    color: white; cursor: pointer; border-radius: 4px; letter-spacing: .05em;
+    text-transform: uppercase; transition: background .2s;
+    text-align: center; text-decoration: none;
+    display: flex; align-items: center; justify-content: center; gap: .4rem;
+  }
+  .btn-receipt-track:hover { background: var(--navy-mid); }
+  .btn-receipt-dl {
+    flex: 1; padding: .6rem .9rem; background: #b8922a; border: none;
+    font-family: 'Source Sans 3', sans-serif; font-size: .78rem; font-weight: 700;
+    color: white; cursor: pointer; border-radius: 4px; letter-spacing: .05em;
+    text-transform: uppercase; transition: background .2s;
+    display: flex; align-items: center; justify-content: center; gap: .35rem;
+  }
+  .btn-receipt-dl:hover { background: #9a7820; }
+  .btn-receipt-dl:disabled { background: #bbb; cursor: not-allowed; }
+  .btn-receipt-close {
+    flex: 1; padding: .6rem .9rem; background: transparent;
+    border: 1.5px solid rgba(255,255,255,.28);
+    font-family: 'Source Sans 3', sans-serif; font-size: .78rem; font-weight: 700;
+    color: rgba(255,255,255,.78); cursor: pointer; border-radius: 4px;
+    letter-spacing: .05em; text-transform: uppercase; transition: all .2s;
+  }
+  .btn-receipt-close:hover { border-color: white; color: white; }
+
+  @media (max-width: 600px) {
+    .row-2, .row-3 { grid-template-columns: 1fr; }
+    .sig-fields { grid-template-columns: 1fr; }
+    .form-header { padding: 1.5rem; }
+    .part { padding: 0 1.2rem 1.4rem; }
+    .instruction-box { margin: 1rem 1.2rem; }
+    .submit-row { padding: 1rem 1.2rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <!-- HEADER -->
+  <div class="form-header">
+    <p class="eyebrow">ATHStudios &nbsp;·&nbsp; Official Form</p>
+    <h1>Data Incident / <span>Data Loss</span> Report</h1>
+    <p class="sub">
+      <strong>QR Attendance System</strong><br>
+      Prepared by ATHStudios &nbsp;|&nbsp; For Admin &amp; Teacher Use &nbsp;|&nbsp; Version 20 &nbsp;|&nbsp; March 2026
+    </p>
+  </div>
+
+  <!-- INSTRUCTIONS -->
+  <div class="instruction-box">
+    <strong>INSTRUCTIONS:</strong> This form must be completed immediately upon discovery of any data loss, data corruption, unauthorized access, or data breach involving the QR Attendance System Software. The completed form must be submitted to: (1) the School Head / Principal, and (2) ATHStudios via the official support channel. In accordance with <strong>RA 10173</strong> (Data Privacy Act), personal data breaches must be reported to the National Privacy Commission (NPC) within <strong>72 hours</strong> if the breach poses a real risk of serious harm. Contact the school's Data Protection Officer immediately.
+  </div>
+
+  <form id="incidentForm" novalidate>
+
+    <!-- PART A -->
+    <div class="part">
+      <div class="part-header">
+        <span class="part-label">Part A</span>
+        <span class="part-title">Report Identification</span>
+      </div>
+      <div class="row-2">
+        <div class="field">
+          <label>Report Reference No. (assign sequential)</label>
+          <input type="text" id="refNo" placeholder="e.g. DIR-2026-001" required />
+        </div>
+        <div class="field">
+          <label>Date &amp; Time of Report</label>
+          <input type="datetime-local" id="reportDateTime" required />
+        </div>
+      </div>
+      <div class="row-2">
+        <div class="field">
+          <label>Reported By (Name &amp; Position)</label>
+          <input type="text" id="reportedBy" placeholder="Full name and position" required />
+        </div>
+        <div class="field">
+          <label>Date &amp; Time Incident Discovered</label>
+          <input type="datetime-local" id="discoveredDateTime" required />
+        </div>
+      </div>
+      <div class="field" style="margin-bottom:1rem">
+        <label>Organization / School Name</label>
+        <input type="text" id="organization" placeholder="e.g. Mapagmahal National High School" />
+      </div>
+    </div>
+
+    <!-- PART B -->
+    <div class="part">
+      <div class="part-header">
+        <span class="part-label">Part B</span>
+        <span class="part-title">Incident Classification</span>
+      </div>
+
+      <span class="check-group-label">Type of Incident: (Check all that apply)</span>
+      <div class="check-group">
+        <label class="check-item"><input type="checkbox" name="incidentType" value="Data Loss"/><span>Data Loss</span></label>
+        <label class="check-item"><input type="checkbox" name="incidentType" value="Data Corruption"/><span>Data Corruption</span></label>
+        <label class="check-item"><input type="checkbox" name="incidentType" value="Unauthorized Access"/><span>Unauthorized Access</span></label>
+        <label class="check-item"><input type="checkbox" name="incidentType" value="Data Breach"/><span>Data Breach (personal data exposed)</span></label>
+        <label class="check-item"><input type="checkbox" name="incidentType" value="System Failure"/><span>System / Software Failure</span></label>
+        <label class="check-item"><input type="checkbox" id="incidentTypeOther" name="incidentType" value="Other"/><span>Other</span></label>
+      </div>
+      <div class="extra-field" id="incidentTypeOtherField">
+        <label>Please specify incident type:</label>
+        <input type="text" id="incidentTypeOtherText" placeholder="Describe other incident type…"/>
+      </div>
+
+      <hr class="part-divider"/>
+
+      <span class="check-group-label">Severity Level:</span>
+      <div class="check-group">
+        <label class="check-item"><input type="radio" name="severity" value="Low"/><span>Low</span></label>
+        <label class="check-item"><input type="radio" name="severity" value="Medium"/><span>Medium</span></label>
+        <label class="check-item"><input type="radio" name="severity" value="High"/><span>High</span></label>
+        <label class="check-item"><input type="radio" name="severity" value="Critical"/><span>Critical</span></label>
+      </div>
+
+      <hr class="part-divider"/>
+
+      <span class="check-group-label">Data Affected:</span>
+      <div class="check-group">
+        <label class="check-item"><input type="checkbox" name="dataAffected" value="Attendance records (.xlsx)"/><span>Attendance records (.xlsx)</span></label>
+        <label class="check-item"><input type="checkbox" name="dataAffected" value="Exported reports (.csv/.txt)"/><span>Exported reports (.csv/.txt)</span></label>
+        <label class="check-item"><input type="checkbox" name="dataAffected" value="SF2 forms"/><span>SF2 forms</span></label>
+        <label class="check-item"><input type="checkbox" name="dataAffected" value="Google Drive backup"/><span>Google Drive backup</span></label>
+        <label class="check-item"><input type="checkbox" name="dataAffected" value="All of the above"/><span>All of the above</span></label>
+        <label class="check-item"><input type="checkbox" id="dataAffectedOther" name="dataAffected" value="Other"/><span>Other</span></label>
+      </div>
+      <div class="extra-field" id="dataAffectedOtherField">
+        <label>Please specify data affected:</label>
+        <input type="text" id="dataAffectedOtherText" placeholder="Describe other data affected…"/>
+      </div>
+    </div>
+
+    <!-- PART C -->
+    <div class="part">
+      <div class="part-header">
+        <span class="part-label">Part C</span>
+        <span class="part-title">Description of Incident</span>
+      </div>
+      <div class="field" style="margin-bottom:1rem">
+        <label>Provide a detailed description of what happened, including the sequence of events leading to the incident:</label>
+        <textarea id="incidentDescription" rows="5" placeholder="Describe the incident in full detail…" required></textarea>
+      </div>
+      <div class="field">
+        <label>Estimated number of student records affected:</label>
+        <input type="number" id="recordsAffected" min="0" placeholder="e.g. 250"/>
+      </div>
+    </div>
+
+    <!-- PART D -->
+    <div class="part">
+      <div class="part-header">
+        <span class="part-label">Part D</span>
+        <span class="part-title">Immediate Actions Taken</span>
+      </div>
+      <div class="field" style="margin-bottom:1.2rem">
+        <label>Describe what steps were taken immediately after discovering the incident:</label>
+        <textarea id="immediateActions" rows="4" placeholder="List actions taken immediately…" required></textarea>
+      </div>
+
+      <!-- ATHStudios notified -->
+      <div class="notif-block">
+        <span class="check-group-label">Was ATHStudios notified?</span>
+        <div class="notif-row">
+          <label class="check-item"><input type="radio" name="athNotified" value="Yes" id="athYes"/><span>Yes</span></label>
+          <label class="check-item"><input type="radio" name="athNotified" value="No" id="athNo"/><span>No</span></label>
+        </div>
+        <div class="extra-field" id="athYesField">
+          <label>Date / Time notified:</label>
+          <input type="datetime-local" id="athDateTime"/>
+        </div>
+        <div class="extra-field" id="athNoField">
+          <label>Reason not notified:</label>
+          <input type="text" id="athReason" placeholder="State reason…"/>
+        </div>
+      </div>
+
+      <!-- DPO notified -->
+      <div class="notif-block">
+        <span class="check-group-label">Was the school DPO / Principal notified?</span>
+        <div class="notif-row">
+          <label class="check-item"><input type="radio" name="dpoNotified" value="Yes" id="dpoYes"/><span>Yes</span></label>
+          <label class="check-item"><input type="radio" name="dpoNotified" value="No" id="dpoNo"/><span>No</span></label>
+        </div>
+        <div class="extra-field" id="dpoYesField">
+          <label>Date / Time notified:</label>
+          <input type="datetime-local" id="dpoDateTime"/>
+        </div>
+        <div class="extra-field" id="dpoNoField">
+          <label>Reason not notified:</label>
+          <input type="text" id="dpoReason" placeholder="State reason…"/>
+        </div>
+      </div>
+
+      <!-- NPC -->
+      <div class="notif-block">
+        <span class="check-group-label">Was NPC notification required?</span>
+        <div class="check-group">
+          <label class="check-item"><input type="radio" name="npcRequired" value="Yes – filed within 72 hrs"/><span>Yes — filed within 72 hrs</span></label>
+          <label class="check-item"><input type="radio" name="npcRequired" value="Yes – pending"/><span>Yes — pending</span></label>
+          <label class="check-item"><input type="radio" name="npcRequired" value="No – below harm threshold"/><span>No — below harm threshold</span></label>
+        </div>
+      </div>
+    </div>
+
+    <!-- PART E -->
+    <div class="part">
+      <div class="part-header">
+        <span class="part-label">Part E</span>
+        <span class="part-title">Root Cause Assessment</span>
+      </div>
+      <span class="check-group-label">Based on your assessment, what caused the incident? (Check all that apply)</span>
+      <div class="check-group" style="flex-direction:column">
+        <label class="check-item"><input type="checkbox" name="rootCause" value="Device hardware failure"/><span>Device hardware failure</span></label>
+        <label class="check-item"><input type="checkbox" name="rootCause" value="Improper shutdown / power interruption during Software operation"/><span>Improper shutdown / power interruption during Software operation</span></label>
+        <label class="check-item"><input type="checkbox" name="rootCause" value="Failure to perform manual data backup"/><span>Failure to perform manual data backup</span></label>
+        <label class="check-item"><input type="checkbox" name="rootCause" value="Unauthorized person accessed the device or license"/><span>Unauthorized person accessed the device or license</span></label>
+        <label class="check-item"><input type="checkbox" name="rootCause" value="Incompatible third-party software or accidental file modification"/><span>Incompatible third-party software or accidental file modification</span></label>
+        <label class="check-item"><input type="checkbox" name="rootCause" value="Loss or theft of device"/><span>Loss or theft of device</span></label>
+        <label class="check-item"><input type="checkbox" name="rootCause" value="Google Drive / Cloudinary sync failure (user-side)"/><span>Google Drive / Cloudinary sync failure (user-side)</span></label>
+        <label class="check-item"><input type="checkbox" id="rootSoftware" name="rootCause" value="Software malfunction"/><span>Software malfunction — describe below</span></label>
+        <label class="check-item"><input type="checkbox" id="rootOther" name="rootCause" value="Other"/><span>Other — describe below</span></label>
+      </div>
+      <div class="extra-field" id="rootSoftwareField">
+        <label>Describe software malfunction:</label>
+        <input type="text" id="rootSoftwareText" placeholder="Describe the software malfunction…"/>
+      </div>
+      <div class="extra-field" id="rootOtherField">
+        <label>Describe other root cause:</label>
+        <input type="text" id="rootOtherText" placeholder="Describe other root cause…"/>
+      </div>
+      <div class="field" style="margin-top:1rem">
+        <label>Additional details / description:</label>
+        <textarea id="rootDetails" rows="3" placeholder="Any additional details about the root cause…"></textarea>
+      </div>
+    </div>
+
+    <!-- PART F -->
+    <div class="part">
+      <div class="part-header">
+        <span class="part-label">Part F</span>
+        <span class="part-title">Corrective &amp; Preventive Actions</span>
+      </div>
+      <div class="field">
+        <label>What actions will be taken to prevent recurrence?</label>
+        <textarea id="correctiveActions" rows="4" placeholder="Describe preventive and corrective measures…" required></textarea>
+      </div>
+    </div>
+
+    <!-- SIGNATURES -->
+    <div class="part">
+      <div class="part-header">
+        <span class="part-label">Certification</span>
+        <span class="part-title">&amp; Signatures</span>
+      </div>
+      <div class="sig-intro">
+        We, the undersigned, certify that the information provided in this report is accurate and complete to the best of our knowledge. We understand that misrepresentation of facts in this report may constitute a violation of applicable law.
+      </div>
+
+      <!-- Reporting Teacher -->
+      <div class="sig-block">
+        <div class="sig-block-title">Reporting Teacher's Signature</div>
+        <div class="sig-fields">
+          <div>
+            <div class="sig-mode-tabs">
+              <button type="button" class="sig-mode-tab active" data-target="teacher" data-mode="draw">✏ Draw</button>
+              <button type="button" class="sig-mode-tab" data-target="teacher" data-mode="upload">📎 Upload Image</button>
+            </div>
+            <!-- Draw mode -->
+            <div id="teacherDrawWrap">
+              <div class="sig-canvas-wrap">
+                <canvas id="sigTeacher" width="400" height="120"></canvas>
+                <div class="sig-placeholder" id="phTeacher">Sign here</div>
+                <span class="sig-clear" onclick="clearSig('sigTeacher','phTeacher')">Clear</span>
+              </div>
+              <p class="sig-upload-note">Draw your signature above — it will be uploaded automatically.</p>
+            </div>
+            <!-- Upload mode -->
+            <div id="teacherUploadWrap" style="display:none">
+              <div class="sig-upload-wrap" id="teacherDropZone">
+                <input type="file" id="teacherSigFile" accept="image/*" onchange="previewSig('teacher', this)"/>
+                <div class="upload-icon">🖊️</div>
+                <div class="upload-label">Click or drag to upload a signature image<br><span style="font-size:.66rem;opacity:.7">PNG, JPG, GIF — Max 5 MB</span></div>
+              </div>
+              <div class="sig-upload-preview" id="teacherPreview">
+                <img id="teacherPreviewImg" src="" alt="Signature preview"/>
+                <span class="sig-clear" onclick="clearUploadSig('teacher')">Clear</span>
+              </div>
+              <p class="sig-upload-note">Upload a scanned or photographed e-signature.</p>
+            </div>
+          </div>
+          <div class="field">
+            <label>Printed Name &amp; Date</label>
+            <input type="text" id="teacherName" placeholder="Full name"/>
+            <br/>
+            <input type="datetime-local" id="teacherDate" style="margin-top:.5rem"/>
+          </div>
+        </div>
+      </div>
+
+      <!-- School Head -->
+      <div class="sig-block">
+        <div class="sig-block-title">School Head / Principal's Signature</div>
+        <div class="sig-fields">
+          <div>
+            <div class="sig-mode-tabs">
+              <button type="button" class="sig-mode-tab active" data-target="principal" data-mode="draw">✏ Draw</button>
+              <button type="button" class="sig-mode-tab" data-target="principal" data-mode="upload">📎 Upload Image</button>
+            </div>
+            <!-- Draw mode -->
+            <div id="principalDrawWrap">
+              <div class="sig-canvas-wrap">
+                <canvas id="sigPrincipal" width="400" height="120"></canvas>
+                <div class="sig-placeholder" id="phPrincipal">Sign here</div>
+                <span class="sig-clear" onclick="clearSig('sigPrincipal','phPrincipal')">Clear</span>
+              </div>
+              <p class="sig-upload-note">Draw your signature above — it will be uploaded automatically.</p>
+            </div>
+            <!-- Upload mode -->
+            <div id="principalUploadWrap" style="display:none">
+              <div class="sig-upload-wrap" id="principalDropZone">
+                <input type="file" id="principalSigFile" accept="image/*" onchange="previewSig('principal', this)"/>
+                <div class="upload-icon">🖊️</div>
+                <div class="upload-label">Click or drag to upload a signature image<br><span style="font-size:.66rem;opacity:.7">PNG, JPG, GIF — Max 5 MB</span></div>
+              </div>
+              <div class="sig-upload-preview" id="principalPreview">
+                <img id="principalPreviewImg" src="" alt="Signature preview"/>
+                <span class="sig-clear" onclick="clearUploadSig('principal')">Clear</span>
+              </div>
+              <p class="sig-upload-note">Upload a scanned or photographed e-signature.</p>
+            </div>
+          </div>
+          <div class="field">
+            <label>Printed Name &amp; Date</label>
+            <input type="text" id="principalName" placeholder="Full name"/>
+            <br/>
+            <input type="datetime-local" id="principalDate" style="margin-top:.5rem"/>
+          </div>
+        </div>
+      </div>
+
+      <!-- ATH block (for receipt only) -->
+      <div style="padding:.7rem 1rem;background:#fdf8ee;border:1px dashed var(--border);border-radius:3px;font-size:.75rem;color:var(--muted);line-height:1.6;">
+        <strong style="color:var(--navy)">For ATHStudios use only:</strong> The "Received by ATHStudios" signature will be added by ATHStudios upon receipt of this report.
+      </div>
+    </div>
+
+    <!-- SUBMIT -->
+    <div class="submit-row">
+      <button type="button" class="btn-reset" onclick="resetForm()">Reset Form</button>
+      <button type="submit" class="btn-submit" id="submitBtn">Submit Report</button>
+    </div>
+  </form>
+
+  <p class="footer-note">
+    File copies: (1) Teacher, (2) School Head, (3) ATHStudios. &nbsp;·&nbsp; Retain for a minimum of 3 years in accordance with DepEd records retention policy.
+  </p>
+</div>
+
+<!-- RECEIPT MODAL -->
+<div class="receipt-overlay" id="receiptOverlay">
+  <div class="receipt-shell">
+
+    <!-- ── CARD — this is what gets downloaded as PNG ── -->
+    <div class="receipt-card" id="receiptCard">
+      <div class="receipt-stripe"></div>
+
+      <div class="receipt-brand">
+        <div>
+          <div class="receipt-brand-name">ATH<span>Studios</span></div>
+          <div class="receipt-brand-sub">QR Attendance System</div>
+        </div>
+        <div class="receipt-stamp">✔</div>
+      </div>
+
+      <div class="receipt-success-bar">
+        <div class="receipt-success-icon">📋</div>
+        <div>
+          <h2>Report Submitted</h2>
+          <p>Your incident report has been received successfully.</p>
+        </div>
+      </div>
+
+      <div class="receipt-dir-badge">
+        <div class="dir-icon-wrap">🗂️</div>
+        <div>
+          <div class="dir-label">DIR Reference No.</div>
+          <div class="dir-value" id="receiptDirNo">—</div>
+          <div class="dir-hint">Save this number to track your report or submit corrections.</div>
+        </div>
+      </div>
+
+      <div class="receipt-rows">
+        <div class="receipt-row">
+          <span class="rl">Submitted By</span>
+          <span class="rv" id="receiptBy">—</span>
+        </div>
+        <div class="receipt-row">
+          <span class="rl">Organization</span>
+          <span class="rv" id="receiptOrg">—</span>
+        </div>
+        <div class="receipt-row">
+          <span class="rl">Date &amp; Time</span>
+          <span class="rv" id="receiptTime">—</span>
+        </div>
+        <div class="receipt-row">
+          <span class="rl">Severity</span>
+          <span class="rv" id="receiptSeverity">—</span>
+        </div>
+        <div class="receipt-row">
+          <span class="rl">ATH Acknowledgment</span>
+          <span class="rv pending">⏳ Pending</span>
+        </div>
+      </div>
+
+      <div class="receipt-card-footer">
+        ATHStudios Official Incident Report &nbsp;·&nbsp; QR Attendance System &nbsp;·&nbsp; Data Privacy Act (RA 10173) Compliant<br>
+        Retain this receipt for your records. Report status can be tracked at <strong>tracker.html</strong>.
+      </div>
+    </div>
+    <!-- end #receiptCard -->
+
+    <!-- Action buttons — not part of the PNG -->
+    <div class="receipt-actions">
+      <a id="receiptTrackBtn" href="tracker.html" class="btn-receipt-track" target="_blank">🔍 Track Report</a>
+      <button class="btn-receipt-dl" id="receiptDlBtn" onclick="downloadReceipt()">⬇ Save as PNG</button>
+      <button class="btn-receipt-close" onclick="closeReceipt()">✕ Close</button>
+    </div>
+
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<!-- Firebase -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCOIacPT7b083_Xfyv8cFRZ9YiteVTiuyU",
+    authDomain: "forms-12c42.firebaseapp.com",
+    projectId: "forms-12c42",
+    storageBucket: "forms-12c42.firebasestorage.app",
+    messagingSenderId: "481340176152",
+    appId: "1:481340176152:web:aff50b657a65c4e02dd06d",
+    measurementId: "G-5MVVQ7CXBN",
+    databaseURL: "https://forms-12c42-default-rtdb.firebaseio.com"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db  = getDatabase(app);
+
+  // ── Cloudinary config ──
+  const CLOUDINARY_CLOUD_NAME = "damr6r9op";
+  const CLOUDINARY_UPLOAD_PRESET = "org-resources";
+
+  // ── Sanitize DIR No. for Firebase key ──
+  function sanitizeKey(str) {
+    return str.trim().replace(/[.$#\[\]/]/g, '-').replace(/\s+/g, '_');
+  }
+
+  // ── Signature canvases ──
+  const canvases = ['sigTeacher','sigPrincipal'];
+  const drawStates = {};
+  canvases.forEach(id => {
+    const canvas = document.getElementById(id);
+    const ctx = canvas.getContext('2d');
+    canvas.width = canvas.offsetWidth || 400;
+    let drawing = false, lastX = 0, lastY = 0;
+    drawStates[id] = { ctx, hasDrawn: false };
+
+    const getPos = e => {
+      const rect = canvas.getBoundingClientRect();
+      const src = e.touches ? e.touches[0] : e;
+      return [(src.clientX - rect.left) * (canvas.width/rect.width),
+              (src.clientY - rect.top)  * (canvas.height/rect.height)];
+    };
+    const start = e => { e.preventDefault(); drawing = true; [lastX, lastY] = getPos(e); };
+    const draw  = e => {
+      if (!drawing) return; e.preventDefault();
+      const [x, y] = getPos(e);
+      ctx.strokeStyle = '#1a2744'; ctx.lineWidth = 2; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(lastX, lastY); ctx.lineTo(x, y); ctx.stroke();
+      [lastX, lastY] = [x, y];
+      drawStates[id].hasDrawn = true;
+      document.getElementById(id.replace('sig','ph')).style.display = 'none';
+    };
+    const stop = () => drawing = false;
+    canvas.addEventListener('mousedown', start); canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('mouseup',   stop);  canvas.addEventListener('mouseleave', stop);
+    canvas.addEventListener('touchstart', start); canvas.addEventListener('touchmove', draw);
+    canvas.addEventListener('touchend', stop);
+  });
+
+  window.clearSig = (id, phId) => {
+    const canvas = document.getElementById(id);
+    canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+    drawStates[id].hasDrawn = false;
+    document.getElementById(phId).style.display = 'flex';
+  };
+
+  // Track sig mode and uploaded files
+  window.sigMode = { teacher: 'draw', principal: 'draw' };
+  window.sigFiles = { teacher: null, principal: null };
+
+  window.previewSig = (who, input) => {
+    const file = input.files[0];
+    if (!file) return;
+    window.sigFiles[who] = file;
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = document.getElementById(who + 'PreviewImg');
+      img.src = e.target.result;
+      document.getElementById(who + 'DropZone').classList.remove('active');
+      document.getElementById(who + 'DropZone').style.display = 'none';
+      const prev = document.getElementById(who + 'Preview');
+      prev.classList.add('active');
+      prev.style.display = 'flex';
+    };
+    reader.readAsDataURL(file);
+  };
+
+  window.clearUploadSig = (who) => {
+    window.sigFiles[who] = null;
+    document.getElementById(who + 'SigFile').value = '';
+    document.getElementById(who + 'PreviewImg').src = '';
+    const prev = document.getElementById(who + 'Preview');
+    prev.classList.remove('active');
+    prev.style.display = 'none';
+    const drop = document.getElementById(who + 'DropZone');
+    drop.style.display = 'flex';
+    drop.classList.add('active');
+  };
+
+  // ── Upload signature (canvas or file) to Cloudinary ──
+  async function uploadSignature(who, label) {
+    const mode = window.sigMode[who];
+    let blob;
+    if (mode === 'draw') {
+      const canvasId = 'sig' + who.charAt(0).toUpperCase() + who.slice(1);
+      if (!drawStates[canvasId]?.hasDrawn) return null;
+      blob = await new Promise(res => document.getElementById(canvasId).toBlob(res, 'image/png'));
+    } else {
+      const file = window.sigFiles[who];
+      if (!file) return null;
+      blob = file;
+    }
+    const fd = new FormData();
+    fd.append('file', blob, `${label}_${Date.now()}.png`);
+    fd.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+    fd.append('folder', 'incident_reports/signatures');
+    const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
+      method: 'POST', body: fd
+    });
+    const json = await res.json();
+    return json.secure_url || null;
+  }
+
+  // ── Helpers ──
+  function getChecked(name) {
+    return [...document.querySelectorAll(`input[name="${name}"]:checked`)].map(c => c.value);
+  }
+  function getRadio(name) {
+    const el = document.querySelector(`input[name="${name}"]:checked`);
+    return el ? el.value : null;
+  }
+  function showToast(msg, type='success') {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.className = `show ${type}`;
+    setTimeout(() => t.className = '', 3000);
+  }
+
+  // ── Show receipt ──
+  function showReceipt(dirNo, reportedBy, severity, organization) {
+    document.getElementById('receiptDirNo').textContent = dirNo;
+    document.getElementById('receiptBy').textContent = reportedBy || '—';
+    document.getElementById('receiptOrg').textContent = organization || '—';
+    document.getElementById('receiptTime').textContent = new Date().toLocaleString('en-PH', {
+      year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+    });
+    // Severity with colour pill
+    const sevEl = document.getElementById('receiptSeverity');
+    const sevMap = {Low:'receipt-sev-Low',Medium:'receipt-sev-Medium',High:'receipt-sev-High',Critical:'receipt-sev-Critical'};
+    const sevClass = sevMap[severity] || 'receipt-sev-unknown';
+    sevEl.innerHTML = severity
+      ? `<span class="receipt-sev ${sevClass}">${severity}</span>`
+      : '<span style="color:#aaa;font-style:italic">Not specified</span>';
+    // Tracker link
+    const trackUrl = `tracker.html?dir=${encodeURIComponent(dirNo)}`;
+    document.getElementById('receiptTrackBtn').href = trackUrl;
+    document.getElementById('receiptOverlay').classList.add('visible');
+  }
+
+  window.closeReceipt = () => {
+    document.getElementById('receiptOverlay').classList.remove('visible');
+  };
+
+  // ── Download receipt as PNG via html2canvas ──
+  window.downloadReceipt = async function() {
+    const btn = document.getElementById('receiptDlBtn');
+    btn.disabled = true; btn.textContent = 'Generating…';
+    try {
+      const card = document.getElementById('receiptCard');
+      const canvas = await html2canvas(card, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#fffef9',
+        logging: false
+      });
+      const link = document.createElement('a');
+      const dirNo = document.getElementById('receiptDirNo').textContent.trim() || 'receipt';
+      link.download = `ATHStudios_Receipt_${dirNo.replace(/[^a-zA-Z0-9-]/g,'_')}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    } catch (err) {
+      console.error(err);
+      alert('Could not generate PNG. Please take a screenshot instead.');
+    }
+    btn.disabled = false; btn.textContent = '⬇ Save as PNG';
+  };
+
+  // ── Form submit ──
+  document.getElementById('incidentForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const btn = document.getElementById('submitBtn');
+    const rawDirNo = document.getElementById('refNo').value.trim();
+    if (!rawDirNo) { showToast('Please enter a Report Reference No. (DIR No.)', 'error'); return; }
+
+    const dirKey = sanitizeKey(rawDirNo);
+    btn.disabled = true; btn.textContent = 'Checking DIR No.…';
+
+    try {
+      // Check if DIR No. already exists
+      const existing = await get(ref(db, `incidentReports/${dirKey}`));
+      if (existing.exists()) {
+        showToast(`DIR No. "${rawDirNo}" already exists. Please use a unique reference number.`, 'error');
+        btn.disabled = false; btn.textContent = 'Submit Report';
+        return;
+      }
+
+      btn.textContent = 'Uploading signatures…';
+      const [sigTeacherUrl, sigPrincipalUrl] = await Promise.all([
+        uploadSignature('teacher', 'teacher'),
+        uploadSignature('principal', 'principal')
+      ]);
+
+      const incidentTypes = getChecked('incidentType');
+      if (incidentTypes.includes('Other')) {
+        const txt = document.getElementById('incidentTypeOtherText').value.trim();
+        if (txt) incidentTypes[incidentTypes.indexOf('Other')] = `Other: ${txt}`;
+      }
+      const dataAffected = getChecked('dataAffected');
+      if (dataAffected.includes('Other')) {
+        const txt = document.getElementById('dataAffectedOtherText').value.trim();
+        if (txt) dataAffected[dataAffected.indexOf('Other')] = `Other: ${txt}`;
+      }
+      const rootCauses = getChecked('rootCause');
+      if (rootCauses.includes('Software malfunction')) {
+        const txt = document.getElementById('rootSoftwareText').value.trim();
+        if (txt) rootCauses[rootCauses.indexOf('Software malfunction')] = `Software malfunction: ${txt}`;
+      }
+      if (rootCauses.includes('Other')) {
+        const txt = document.getElementById('rootOtherText').value.trim();
+        if (txt) rootCauses[rootCauses.indexOf('Other')] = `Other: ${txt}`;
+      }
+
+      const athNotified = getRadio('athNotified');
+      const dpoNotified = getRadio('dpoNotified');
+      const severity = getRadio('severity');
+
+      const payload = {
+        submittedAt: new Date().toISOString(),
+        dirNo: rawDirNo,
+        status: 'pending',
+        corrections: [],
+        partA: {
+          refNo:            rawDirNo,
+          reportDateTime:   document.getElementById('reportDateTime').value,
+          reportedBy:       document.getElementById('reportedBy').value.trim(),
+          discoveredDateTime: document.getElementById('discoveredDateTime').value,
+          organization:     document.getElementById('organization').value.trim()
+        },
+        partB: {
+          incidentTypes,
+          severity,
+          dataAffected
+        },
+        partC: {
+          description:     document.getElementById('incidentDescription').value.trim(),
+          recordsAffected: document.getElementById('recordsAffected').value
+        },
+        partD: {
+          immediateActions: document.getElementById('immediateActions').value.trim(),
+          athNotified,
+          athDateTime:  athNotified === 'Yes' ? document.getElementById('athDateTime').value : null,
+          athReason:    athNotified === 'No'  ? document.getElementById('athReason').value.trim() : null,
+          dpoNotified,
+          dpoDateTime:  dpoNotified === 'Yes' ? document.getElementById('dpoDateTime').value : null,
+          dpoReason:    dpoNotified === 'No'  ? document.getElementById('dpoReason').value.trim() : null,
+          npcRequired:  getRadio('npcRequired')
+        },
+        partE: {
+          rootCauses,
+          additionalDetails: document.getElementById('rootDetails').value.trim()
+        },
+        partF: {
+          correctiveActions: document.getElementById('correctiveActions').value.trim()
+        },
+        signatures: {
+          teacher: {
+            signatureUrl: sigTeacherUrl,
+            printedName:  document.getElementById('teacherName').value.trim(),
+            date:         document.getElementById('teacherDate').value
+          },
+          principal: {
+            signatureUrl: sigPrincipalUrl,
+            printedName:  document.getElementById('principalName').value.trim(),
+            date:         document.getElementById('principalDate').value
+          },
+          ath: { signatureUrl: null, dateReceived: null }
+        }
+      };
+
+      btn.textContent = 'Submitting…';
+      // Use set() with DIR No. as key
+      await set(ref(db, `incidentReports/${dirKey}`), payload);
+
+      showReceipt(rawDirNo, payload.partA.reportedBy, severity, payload.partA.organization);
+      btn.textContent = '✓ Submitted';
+      setTimeout(() => { btn.disabled = false; btn.textContent = 'Submit Report'; }, 3000);
+    } catch (err) {
+      console.error(err);
+      showToast('Error submitting report. Please try again.', 'error');
+      btn.disabled = false; btn.textContent = 'Submit Report';
+    }
+  });
+
+  window.resetForm = () => {
+    document.getElementById('incidentForm').reset();
+    canvases.forEach(id => window.clearSig(id, id.replace('sig','ph')));
+    document.querySelectorAll('.extra-field').forEach(el => el.classList.remove('visible'));
+    window.sigFiles = { teacher: null, principal: null };
+  };
+</script>
+
+<script>
+  // ── Sig mode tab switching ──
+  document.querySelectorAll('.sig-mode-tab').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const target = this.dataset.target;
+      const mode   = this.dataset.mode;
+      // Update active tab
+      document.querySelectorAll(`.sig-mode-tab[data-target="${target}"]`).forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      window.sigMode = window.sigMode || {};
+      window.sigMode[target] = mode;
+      // Show/hide panels
+      document.getElementById(target + 'DrawWrap').style.display   = mode === 'draw'   ? 'block' : 'none';
+      document.getElementById(target + 'UploadWrap').style.display = mode === 'upload' ? 'block' : 'none';
+      // Init the upload dropzone display
+      if (mode === 'upload') {
+        const drop = document.getElementById(target + 'DropZone');
+        const prev = document.getElementById(target + 'Preview');
+        if (window.sigFiles && window.sigFiles[target]) {
+          drop.style.display = 'none';
+          prev.style.display = 'flex';
+        } else {
+          drop.style.display = 'flex';
+          drop.classList.add('active');
+          prev.style.display = 'none';
+        }
+      }
+    });
+  });
+
+  // ── Conditional show/hide ──
+  function toggle(checkId, fieldId) {
+    document.getElementById(checkId).addEventListener('change', function() {
+      document.getElementById(fieldId).classList.toggle('visible', this.checked);
+    });
+  }
+  toggle('incidentTypeOther', 'incidentTypeOtherField');
+  toggle('dataAffectedOther', 'dataAffectedOtherField');
+  toggle('rootSoftware',      'rootSoftwareField');
+  toggle('rootOther',         'rootOtherField');
+
+  // Radio-based conditionals
+  function radioToggle(yesId, noId, yesFieldId, noFieldId) {
+    document.getElementById(yesId).addEventListener('change', function() {
+      document.getElementById(yesFieldId).classList.toggle('visible', this.checked);
+      document.getElementById(noFieldId).classList.remove('visible');
+    });
+    document.getElementById(noId).addEventListener('change', function() {
+      document.getElementById(noFieldId).classList.toggle('visible', this.checked);
+      document.getElementById(yesFieldId).classList.remove('visible');
+    });
+  }
+  radioToggle('athYes','athNo','athYesField','athNoField');
+  radioToggle('dpoYes','dpoNo','dpoYesField','dpoNoField');
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</body>
+</html>
