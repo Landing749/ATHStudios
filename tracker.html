@@ -339,18 +339,20 @@
     background: rgba(255,255,255,.85); padding: 2px 5px; border-radius: 2px; border: 1px solid #e0c0c0;
   }
   .cf-sig-upload-wrap {
-    display: none; border: 1.5px dashed var(--border); border-radius: 3px; background: #fafaf7;
-    min-height: 100px; flex-direction: column; align-items: center; justify-content: center;
-    gap: .4rem; padding: .7rem; position: relative; cursor: pointer;
+    display: none; border: 2px dashed #b0c0d8; border-radius: 4px; background: #f5f8ff;
+    min-height: 108px; flex-direction: column; align-items: center; justify-content: center;
+    gap: .5rem; padding: .9rem; position: relative; cursor: pointer;
+    transition: border-color .2s, background .2s;
   }
+  .cf-sig-upload-wrap:hover { border-color: var(--navy-mid); background: #eef1f8; }
   .cf-sig-upload-wrap.active { display: flex; }
   .cf-sig-upload-wrap input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
-  .cf-sig-upload-wrap .icon { font-size: 1.4rem; opacity: .4; }
-  .cf-sig-upload-wrap .lbl { font-size: .72rem; color: var(--muted); text-align: center; line-height: 1.4; pointer-events: none; }
-  .cf-sig-preview { display: none; border: 1px solid var(--border); border-radius: 3px; background: white; position: relative; overflow: hidden; min-height: 100px; align-items: center; justify-content: center; }
+  .cf-sig-upload-wrap .icon { font-size: 1.7rem; opacity: .55; }
+  .cf-sig-upload-wrap .lbl { font-size: .73rem; color: var(--navy-mid); text-align: center; line-height: 1.45; pointer-events: none; }
+  .cf-sig-preview { display: none; border: 1.5px solid #b0c0d8; border-radius: 4px; background: white; position: relative; overflow: hidden; min-height: 108px; align-items: center; justify-content: center; }
   .cf-sig-preview.active { display: flex; }
-  .cf-sig-preview img { max-width: 100%; max-height: 100px; object-fit: contain; }
-  .cf-sig-preview .cf-sig-clear { position: absolute; top: 3px; right: 5px; }
+  .cf-sig-preview img { max-width: 100%; max-height: 108px; object-fit: contain; }
+  .cf-sig-preview .cf-sig-clear { position: absolute; top: 4px; right: 6px; background: rgba(139,28,28,.9); color: white; border: none; border-radius: 2px; padding: 2px 7px; font-size: .65rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; cursor: pointer; }
   .sig-note { font-size: .69rem; color: var(--muted); font-style: italic; margin-top: .25rem; }
 
   .correction-note-wrap { margin-bottom: 1rem; }
@@ -604,62 +606,76 @@
       </div>
 
       <div class="correction-section-title">Update Signatures (Optional)</div>
-      <p style="font-size:.76rem;color:var(--muted);margin-bottom:1rem;line-height:1.5;">Only provide new signatures if the original was incorrect or missing. Draw or upload an image of the e-signature.</p>
+      <p style="font-size:.76rem;color:var(--muted);margin-bottom:1rem;line-height:1.5;">Only fill these in if the original signature was missing or incorrect. You can <strong>draw</strong> or <strong>upload an image</strong> of the e-signature.</p>
 
       <!-- Teacher sig correction -->
       <div class="cf-sig-block">
         <div class="cf-sig-block-title">Reporting Teacher's Signature</div>
         <div class="cf-sig-mode-tabs">
-          <button type="button" class="cf-sig-tab active" data-target="cf_teacher" data-mode="draw">✏ Draw</button>
-          <button type="button" class="cf-sig-tab" data-target="cf_teacher" data-mode="upload">📎 Upload</button>
+          <button type="button" class="cf-sig-tab active" data-target="cf_teacher" data-mode="draw">✏️ Draw</button>
+          <button type="button" class="cf-sig-tab" data-target="cf_teacher" data-mode="upload">📎 Upload Image</button>
         </div>
+
+        <!-- Draw mode -->
         <div id="cf_teacherDrawWrap">
           <div class="cf-sig-canvas-wrap">
             <canvas id="cf_sigTeacher" width="400" height="100"></canvas>
-            <div class="cf-sig-placeholder" id="cf_phTeacher">Sign here to update (optional)</div>
+            <div class="cf-sig-placeholder" id="cf_phTeacher">Draw signature here (optional)</div>
             <span class="cf-sig-clear" onclick="cfClearSig('cf_sigTeacher','cf_phTeacher')">Clear</span>
           </div>
+          <p class="sig-note">Draw using mouse or touch.</p>
         </div>
+
+        <!-- Upload mode -->
         <div id="cf_teacherUploadWrap" style="display:none">
-          <div class="cf-sig-upload-wrap" id="cf_teacherDropZone">
+          <div class="cf-sig-upload-wrap active" id="cf_teacherDropZone">
             <input type="file" id="cf_teacherSigFile" accept="image/*" onchange="cfPreviewSig('cf_teacher', this)"/>
-            <div class="icon">🖊️</div>
-            <div class="lbl">Click or drag to upload signature<br><span style="font-size:.64rem;opacity:.7">PNG, JPG — optional update</span></div>
+            <div class="icon">🖼️</div>
+            <div class="lbl"><strong>Click or drag</strong> to upload a signature image<br><span style="font-size:.64rem;opacity:.7">PNG, JPG, GIF — max 5 MB</span></div>
           </div>
           <div class="cf-sig-preview" id="cf_teacherPreview">
-            <img id="cf_teacherPreviewImg" src="" alt=""/>
-            <span class="cf-sig-clear" onclick="cfClearUploadSig('cf_teacher')">Clear</span>
+            <img id="cf_teacherPreviewImg" src="" alt="Signature preview"/>
+            <span class="cf-sig-clear" onclick="cfClearUploadSig('cf_teacher')">✕ Remove</span>
           </div>
+          <p class="sig-note">Upload a photo or scan of the signed e-signature.</p>
         </div>
-        <p class="sig-note">Leave empty to keep the existing signature.</p>
+
+        <p class="sig-note" style="color:#b8922a;">Leave both draw and upload empty to keep the existing signature on file.</p>
       </div>
 
       <!-- Principal sig correction -->
       <div class="cf-sig-block">
         <div class="cf-sig-block-title">School Head / Principal's Signature</div>
         <div class="cf-sig-mode-tabs">
-          <button type="button" class="cf-sig-tab active" data-target="cf_principal" data-mode="draw">✏ Draw</button>
-          <button type="button" class="cf-sig-tab" data-target="cf_principal" data-mode="upload">📎 Upload</button>
+          <button type="button" class="cf-sig-tab active" data-target="cf_principal" data-mode="draw">✏️ Draw</button>
+          <button type="button" class="cf-sig-tab" data-target="cf_principal" data-mode="upload">📎 Upload Image</button>
         </div>
+
+        <!-- Draw mode -->
         <div id="cf_principalDrawWrap">
           <div class="cf-sig-canvas-wrap">
             <canvas id="cf_sigPrincipal" width="400" height="100"></canvas>
-            <div class="cf-sig-placeholder" id="cf_phPrincipal">Sign here to update (optional)</div>
+            <div class="cf-sig-placeholder" id="cf_phPrincipal">Draw signature here (optional)</div>
             <span class="cf-sig-clear" onclick="cfClearSig('cf_sigPrincipal','cf_phPrincipal')">Clear</span>
           </div>
+          <p class="sig-note">Draw using mouse or touch.</p>
         </div>
+
+        <!-- Upload mode -->
         <div id="cf_principalUploadWrap" style="display:none">
-          <div class="cf-sig-upload-wrap" id="cf_principalDropZone">
+          <div class="cf-sig-upload-wrap active" id="cf_principalDropZone">
             <input type="file" id="cf_principalSigFile" accept="image/*" onchange="cfPreviewSig('cf_principal', this)"/>
-            <div class="icon">🖊️</div>
-            <div class="lbl">Click or drag to upload signature<br><span style="font-size:.64rem;opacity:.7">PNG, JPG — optional update</span></div>
+            <div class="icon">🖼️</div>
+            <div class="lbl"><strong>Click or drag</strong> to upload a signature image<br><span style="font-size:.64rem;opacity:.7">PNG, JPG, GIF — max 5 MB</span></div>
           </div>
           <div class="cf-sig-preview" id="cf_principalPreview">
-            <img id="cf_principalPreviewImg" src="" alt=""/>
-            <span class="cf-sig-clear" onclick="cfClearUploadSig('cf_principal')">Clear</span>
+            <img id="cf_principalPreviewImg" src="" alt="Signature preview"/>
+            <span class="cf-sig-clear" onclick="cfClearUploadSig('cf_principal')">✕ Remove</span>
           </div>
+          <p class="sig-note">Upload a photo or scan of the signed e-signature.</p>
         </div>
-        <p class="sig-note">Leave empty to keep the existing signature.</p>
+
+        <p class="sig-note" style="color:#b8922a;">Leave both draw and upload empty to keep the existing signature on file.</p>
       </div>
 
       <div class="correction-section-title">Correction Note</div>
