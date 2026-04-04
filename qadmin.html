@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Queue Admin — ATHStudios</title>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;700&family=Source+Sans+3:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+  :root{--navy:#1a2744;--navy-mid:#243460;--gold:#b8922a;--gold-light:#d4aa4a;--bg:#eef0f5;--paper:#fffef9;--border:#c8bfa8;--text:#1e1e1e;--muted:#5a5448;--green:#1f6b3e;--red:#8b1c1c;}
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);font-family:'Source Sans 3',sans-serif;color:var(--text);min-height:100vh;}
+  body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(26,39,68,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(26,39,68,.04) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
+
+  .topbar{background:var(--navy);border-bottom:3px solid var(--gold);padding:.9rem 2rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+  .topbar-left .eyebrow{font-size:.58rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--gold-light);margin-bottom:.1rem;}
+  .topbar-left h1{font-family:'EB Garamond',serif;font-size:1.3rem;font-weight:700;color:white;}
+  .topbar-left h1 span{color:var(--gold-light);}
+
+  /* TYPE TABS */
+  .type-tabs{display:flex;gap:0;border-bottom:2px solid var(--border);background:var(--paper);padding:0 1.5rem;position:sticky;top:62px;z-index:99;overflow-x:auto;}
+  .type-tab{
+    padding:.65rem 1.2rem;font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+    cursor:pointer;border:none;background:transparent;color:var(--muted);font-family:'Source Sans 3',sans-serif;
+    border-bottom:3px solid transparent;margin-bottom:-2px;white-space:nowrap;transition:all .15s;
+  }
+  .type-tab:hover{color:var(--navy);}
+  .type-tab.active{color:var(--navy);border-bottom-color:var(--gold);}
+  .type-tab .tab-badge{display:inline-block;background:#eee;color:var(--muted);font-size:.58rem;font-weight:700;padding:.1rem .35rem;border-radius:10px;margin-left:.35rem;}
+  .type-tab.active .tab-badge{background:var(--gold);color:white;}
+
+  .add-type-btn{padding:.65rem 1rem;font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;border:none;background:transparent;color:var(--gold);font-family:'Source Sans 3',sans-serif;white-space:nowrap;display:flex;align-items:center;gap:.3rem;}
+
+  .wrap{max-width:960px;margin:0 auto;padding:1.5rem;position:relative;z-index:1;}
+
+  /* STATS */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.5rem;}
+  .stat-card{background:var(--paper);border:1px solid var(--border);box-shadow:0 2px 12px rgba(26,39,68,.08);padding:1.1rem 1.3rem;}
+  .stat-card .sc-label{font-size:.58rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:.35rem;}
+  .stat-card .sc-val{font-family:'EB Garamond',serif;font-size:2.3rem;font-weight:700;color:var(--navy);line-height:1;}
+  .stat-card.highlight{background:var(--navy);border-color:var(--gold);}
+  .stat-card.highlight .sc-label{color:var(--gold-light);}
+  .stat-card.highlight .sc-val{color:white;}
+
+  /* CONTROLS */
+  .controls-card{background:var(--paper);border:1px solid var(--border);box-shadow:0 4px 24px rgba(26,39,68,.1);margin-bottom:1.5rem;overflow:hidden;}
+  .cc-header{background:var(--navy-mid);padding:.8rem 1.4rem;display:flex;align-items:center;justify-content:space-between;}
+  .cc-header-title{font-family:'EB Garamond',serif;font-size:.95rem;font-weight:700;color:white;}
+  .cc-body{padding:1.3rem 1.4rem;display:flex;gap:1rem;align-items:center;flex-wrap:wrap;}
+
+  .status-pill{font-size:.65rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:.25rem .7rem;border-radius:20px;cursor:pointer;border:none;font-family:'Source Sans 3',sans-serif;transition:all .2s;}
+  .status-pill.open{background:#c8e6c9;color:#1b5e20;}
+  .status-pill.closed{background:#ffcdd2;color:#b71c1c;}
+
+  .btn{padding:.62rem 1.5rem;border:none;font-family:'Source Sans 3',sans-serif;font-size:.78rem;font-weight:700;cursor:pointer;border-radius:3px;letter-spacing:.06em;text-transform:uppercase;transition:all .2s;}
+  .btn-primary{background:var(--navy);color:white;}
+  .btn-primary:hover{background:var(--navy-mid);}
+  .btn-primary:disabled{background:#aaa;cursor:not-allowed;}
+  .btn-danger{background:var(--red);color:white;}
+  .btn-danger:hover{background:#6b1010;}
+  .btn-outline{background:transparent;border:1.5px solid var(--border);color:var(--navy);}
+  .btn-outline:hover{background:#f0f2f8;border-color:var(--navy);}
+
+  .now-serving-big{text-align:center;flex:1;min-width:160px;padding:.75rem 1rem;background:#f0f4ff;border:1px solid #b0bce8;border-radius:4px;}
+  .nsb-label{font-size:.56rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:.25rem;}
+  .nsb-num{font-family:'EB Garamond',serif;font-size:2.8rem;font-weight:700;color:var(--navy);line-height:1;}
+
+  /* QUEUE LIST */
+  .queue-section{background:var(--paper);border:1px solid var(--border);box-shadow:0 4px 24px rgba(26,39,68,.1);}
+  .qs-header{background:var(--navy);padding:.75rem 1.4rem;display:flex;align-items:center;justify-content:space-between;}
+  .qs-title{font-family:'EB Garamond',serif;font-size:.95rem;color:white;font-weight:700;}
+  .qs-live{font-size:.62rem;color:var(--gold-light);letter-spacing:.1em;text-transform:uppercase;display:flex;align-items:center;gap:.4rem;}
+  .live-dot{width:6px;height:6px;border-radius:50%;background:#4caf50;animation:blink 2s ease-in-out infinite;}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+  .queue-list{overflow-y:auto;max-height:500px;}
+  .q-item{display:flex;align-items:center;gap:1rem;padding:.75rem 1.4rem;border-bottom:1px solid #ebe6da;transition:background .15s;}
+  .q-item:hover{background:#f5f2ea;}
+  .q-item.serving{background:#e8f5e9;border-left:4px solid #4caf50;}
+  .q-item.served{opacity:.45;}
+  .q-num{font-family:'EB Garamond',serif;font-size:1.55rem;font-weight:700;color:var(--navy);min-width:48px;text-align:center;line-height:1;}
+  .q-info{flex:1;}
+  .q-status{display:inline-block;font-size:.58rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:.1rem .38rem;border-radius:3px;margin-bottom:.18rem;}
+  .q-status.waiting{background:#fff8e1;color:#a06000;}
+  .q-status.serving{background:#e8f5e9;color:#1b5e20;}
+  .q-status.served{background:#eee;color:#666;}
+  .q-time{font-size:.68rem;color:var(--muted);}
+  .q-actions{display:flex;gap:.4rem;}
+  .q-btn{padding:.25rem .62rem;font-size:.62rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;border-radius:3px;border:1px solid;font-family:'Source Sans 3',sans-serif;transition:all .15s;}
+  .q-btn-call{border-color:#4caf50;color:#1b5e20;background:transparent;}
+  .q-btn-call:hover{background:#e8f5e9;}
+  .q-btn-done{border-color:var(--border);color:var(--muted);background:transparent;}
+  .q-btn-done:hover{background:#f5f2ea;}
+  .q-btn-del{border-color:#e57373;color:var(--red);background:transparent;}
+  .q-btn-del:hover{background:#ffebee;}
+
+  .empty-q{padding:2.5rem;text-align:center;color:var(--muted);font-size:.82rem;font-style:italic;}
+
+  #toast{position:fixed;bottom:2rem;right:2rem;padding:.72rem 1.2rem;border-radius:4px;font-size:.78rem;font-weight:600;color:white;opacity:0;pointer-events:none;transition:opacity .3s;z-index:9999;}
+  #toast.show{opacity:1;}
+  #toast.success{background:var(--green);}
+  #toast.error{background:var(--red);}
+  #toast.info{background:var(--navy);}
+
+  .modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:center;justify-content:center;}
+  .modal-backdrop.show{display:flex;}
+  .modal{background:var(--paper);border:1px solid var(--border);box-shadow:0 20px 60px rgba(0,0,0,.3);padding:2rem;max-width:360px;width:90%;text-align:center;}
+  .modal h3{font-family:'EB Garamond',serif;font-size:1.25rem;color:var(--navy);margin-bottom:.5rem;}
+  .modal p{font-size:.8rem;color:var(--muted);margin-bottom:1.3rem;line-height:1.6;}
+  .modal-btns{display:flex;gap:.7rem;justify-content:center;}
+
+  /* ADD TYPE MODAL */
+  .modal input{width:100%;border:1px solid var(--border);padding:.55rem .8rem;font-family:'Source Sans 3',sans-serif;font-size:.88rem;border-radius:3px;margin-bottom:1rem;}
+  .modal input:focus{outline:none;border-color:var(--navy-mid);box-shadow:0 0 0 3px rgba(36,52,96,.1);}
+
+  @media(max-width:640px){
+    .stats{grid-template-columns:1fr 1fr;}
+    .cc-body{flex-direction:column;align-items:stretch;}
+    .now-serving-big{text-align:center;}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <p class="eyebrow">ATHStudios · Admin</p>
+    <h1>Queue <span>Control</span></h1>
+  </div>
+</div>
+
+<!-- TYPE TABS -->
+<div class="type-tabs" id="typeTabs">
+  <button class="add-type-btn" id="addTypeBtn">＋ Add Type</button>
+</div>
+
+<div class="wrap">
+  <div class="stats">
+    <div class="stat-card highlight">
+      <div class="sc-label">Now Serving</div>
+      <div class="sc-val" id="statServing">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="sc-label">Waiting</div>
+      <div class="sc-val" id="statWaiting">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="sc-label">Served</div>
+      <div class="sc-val" id="statServed">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="sc-label">Total Issued</div>
+      <div class="sc-val" id="statTotal">0</div>
+    </div>
+  </div>
+
+  <div class="controls-card">
+    <div class="cc-header">
+      <span class="cc-header-title">Controls — <span id="activeTypeLabel">—</span></span>
+      <button class="status-pill closed" id="statusToggle">● Closed</button>
+    </div>
+    <div class="cc-body">
+      <button class="btn btn-primary" id="callNextBtn">▶ Call Next</button>
+      <button class="btn btn-outline" id="resetBtn">↺ Reset This Queue</button>
+      <div class="now-serving-big">
+        <div class="nsb-label">Currently Serving</div>
+        <div class="nsb-num" id="nowServingBig">—</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="queue-section">
+    <div class="qs-header">
+      <span class="qs-title">Queue Entries</span>
+      <span class="qs-live"><span class="live-dot"></span>Live</span>
+    </div>
+    <div class="queue-list" id="queueList">
+      <div class="empty-q">Select a queue type above.</div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<div class="modal-backdrop" id="resetModal">
+  <div class="modal">
+    <h3>Reset Queue?</h3>
+    <p>This clears all entries and resets the counter for this type. Cannot be undone.</p>
+    <div class="modal-btns">
+      <button class="btn btn-outline" id="resetCancelBtn">Cancel</button>
+      <button class="btn btn-danger" id="resetConfirmBtn">Reset</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="addTypeModal">
+  <div class="modal">
+    <h3>Add Queue Type</h3>
+    <p>Enter a name for the new queue type (e.g. cashier, consultation, registrar).</p>
+    <input type="text" id="newTypeName" placeholder="e.g. cashier" maxlength="30"/>
+    <div class="modal-btns">
+      <button class="btn btn-outline" id="addTypeCancelBtn">Cancel</button>
+      <button class="btn btn-primary" id="addTypeConfirmBtn">Add</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getDatabase, ref, onValue, update, set, remove, get }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+  const app = initializeApp({
+    apiKey:"AIzaSyCOIacPT7b083_Xfyv8cFRZ9YiteVTiuyU",
+    authDomain:"forms-12c42.firebaseapp.com",
+    projectId:"forms-12c42",
+    storageBucket:"forms-12c42.firebasestorage.app",
+    messagingSenderId:"481340176152",
+    appId:"1:481340176152:web:aff50b657a65c4e02dd06d",
+    databaseURL:"https://forms-12c42-default-rtdb.firebaseio.com"
+  });
+  const db = getDatabase(app);
+
+  // ── State ──
+  let activeType   = null;
+  let allEntries   = {};
+  let nowServing   = 0;
+  let queueStatus  = 'closed';
+  let typeUnsubs   = [];
+  const TYPES_KEY  = 'ath_admin_types';
+
+  // ── Saved types ──
+  let savedTypes = [];
+  try { savedTypes = JSON.parse(localStorage.getItem(TYPES_KEY)) || []; } catch {}
+  if (!savedTypes.length) { savedTypes = ['general']; saveTypes(); }
+
+  function saveTypes() { localStorage.setItem(TYPES_KEY, JSON.stringify(savedTypes)); }
+
+  function toast(msg, type='info') {
+    const t=document.getElementById('toast');
+    t.textContent=msg; t.className=`show ${type}`;
+    setTimeout(()=>t.className='',3000);
+  }
+  const pad = n => String(n).padStart(3,'0');
+  const fmtTime = iso => iso ? new Date(iso).toLocaleTimeString('en-PH',{hour:'2-digit',minute:'2-digit'}) : '—';
+
+  function playBeep() {
+    try {
+      const ctx=new(window.AudioContext||window.webkitAudioContext)();
+      [[440,0,.12],[440,.16,.12],[660,.34,.22]].forEach(([f,s,d])=>{
+        const o=ctx.createOscillator(),g=ctx.createGain();
+        o.connect(g);g.connect(ctx.destination);
+        o.type='sine';o.frequency.value=f;
+        g.gain.setValueAtTime(0,ctx.currentTime+s);
+        g.gain.linearRampToValueAtTime(.4,ctx.currentTime+s+.02);
+        g.gain.linearRampToValueAtTime(0,ctx.currentTime+s+d);
+        o.start(ctx.currentTime+s);o.stop(ctx.currentTime+s+d+.05);
+      });
+    } catch(e){}
+  }
+
+  // ── Render tabs ──
+  function renderTabs() {
+    const container = document.getElementById('typeTabs');
+    // Clear existing tabs (keep add button)
+    container.querySelectorAll('.type-tab').forEach(el => el.remove());
+    const addBtn = document.getElementById('addTypeBtn');
+
+    savedTypes.forEach(type => {
+      const btn = document.createElement('button');
+      btn.className = 'type-tab' + (type === activeType ? ' active' : '');
+      btn.dataset.type = type;
+      btn.innerHTML = `${type} <span class="tab-badge" id="badge-${type}">—</span>`;
+      btn.addEventListener('click', () => switchType(type));
+      container.insertBefore(btn, addBtn);
+    });
+
+    // Live badge counts from Firebase
+    savedTypes.forEach(type => {
+      onValue(ref(db, `queue/types/${type}/entries`), snap => {
+        const entries = snap.val() || {};
+        const waiting = Object.values(entries).filter(e => e.status==='waiting').length;
+        const el = document.getElementById(`badge-${type}`);
+        if (el) el.textContent = waiting || '0';
+      });
+    });
+  }
+
+  // ── Switch active type ──
+  function switchType(type) {
+    // Unsubscribe old listeners
+    typeUnsubs.forEach(u => u());
+    typeUnsubs = [];
+
+    activeType = type;
+    allEntries = {}; nowServing = 0;
+    document.getElementById('activeTypeLabel').textContent = type;
+    document.getElementById('queueList').innerHTML = '<div class="empty-q">Loading…</div>';
+    renderTabs();
+
+    const base = `queue/types/${type}`;
+
+    const u1 = onValue(ref(db, `${base}/nowServing`), snap => {
+      const s = snap.val() || 0;
+      nowServing = s;
+      const d = s ? pad(s) : '—';
+      document.getElementById('statServing').textContent = d;
+      document.getElementById('nowServingBig').textContent = d;
+      renderList();
+    });
+
+    const u2 = onValue(ref(db, `${base}/entries`), snap => {
+      allEntries = snap.val() || {};
+      renderList();
+    });
+
+    const u3 = onValue(ref(db, `${base}/status`), snap => {
+      queueStatus = snap.val() || 'closed';
+      const btn = document.getElementById('statusToggle');
+      btn.textContent = queueStatus==='open' ? '● Open' : '● Closed';
+      btn.className = 'status-pill ' + (queueStatus==='open' ? 'open' : 'closed');
+    });
+
+    typeUnsubs = [u1, u2, u3];
+  }
+
+  function renderList() {
+    const list = document.getElementById('queueList');
+    const entries = Object.entries(allEntries);
+
+    if (!entries.length) { list.innerHTML='<div class="empty-q">No entries yet.</div>'; updateStats(0,0,0); return; }
+
+    entries.sort((a,b) => a[1].number - b[1].number);
+
+    const waiting = entries.filter(([,e])=>e.status==='waiting').length;
+    const served  = entries.filter(([,e])=>e.status==='served').length;
+    updateStats(waiting, served, entries.length);
+
+    list.innerHTML = entries.map(([id,e]) => {
+      const isServing = e.number === nowServing;
+      const cls = isServing ? 'serving' : e.status==='served' ? 'served' : '';
+      const statusLabel = isServing ? 'serving' : (e.status||'waiting');
+      const statusText  = isServing ? 'Serving Now' : statusLabel;
+      return `<div class="q-item ${cls}">
+        <div class="q-num">${pad(e.number)}</div>
+        <div class="q-info">
+          <span class="q-status ${statusLabel}">${statusText}</span>
+          <div class="q-time">Joined: ${fmtTime(e.joinedAt)}</div>
+        </div>
+        <div class="q-actions">
+          ${e.status!=='served'?`<button class="q-btn q-btn-call" data-call="${id}" data-num="${e.number}">Call</button>`:''}
+          ${e.status!=='served'?`<button class="q-btn q-btn-done" data-done="${id}" data-num="${e.number}">Done</button>`:''}
+          <button class="q-btn q-btn-del" data-del="${id}">✕</button>
+        </div>
+      </div>`;
+    }).join('');
+
+    // Attach click handlers
+    list.querySelectorAll('[data-call]').forEach(btn => {
+      btn.addEventListener('click', () => callSpecific(btn.dataset.call, parseInt(btn.dataset.num)));
+    });
+    list.querySelectorAll('[data-done]').forEach(btn => {
+      btn.addEventListener('click', () => markServed(btn.dataset.done, parseInt(btn.dataset.num)));
+    });
+    list.querySelectorAll('[data-del]').forEach(btn => {
+      btn.addEventListener('click', () => deleteEntry(btn.dataset.del));
+    });
+  }
+
+  function updateStats(waiting, served, total) {
+    document.getElementById('statWaiting').textContent = waiting;
+    document.getElementById('statServed').textContent  = served;
+    document.getElementById('statTotal').textContent   = total;
+  }
+
+  // ── Controls ──
+  document.getElementById('callNextBtn').addEventListener('click', async () => {
+    if (!activeType) { toast('Select a queue type first.','error'); return; }
+    const waiting = Object.entries(allEntries)
+      .filter(([,e])=>e.status==='waiting')
+      .map(([,e])=>e.number).sort((a,b)=>a-b);
+
+    if (!waiting.length) { toast('No one waiting.','info'); return; }
+
+    const next = waiting[0];
+    await markPrevServed();
+    await set(ref(db,`queue/types/${activeType}/nowServing`), next);
+    playBeep();
+    toast(`Now serving #${pad(next)}`,'success');
+  });
+
+  async function callSpecific(id, number) {
+    await markPrevServed();
+    await set(ref(db,`queue/types/${activeType}/nowServing`), number);
+    playBeep();
+    toast(`Now serving #${pad(number)}`,'success');
+  }
+
+  async function markPrevServed() {
+    if (nowServing) {
+      const prev = Object.entries(allEntries).find(([,e])=>e.number===nowServing);
+      if (prev) await update(ref(db,`queue/types/${activeType}/entries/${prev[0]}`),{status:'served'});
+    }
+  }
+
+  async function markServed(id, number) {
+    await update(ref(db,`queue/types/${activeType}/entries/${id}`),{status:'served'});
+    if (number === nowServing) await set(ref(db,`queue/types/${activeType}/nowServing`),0);
+    toast('Marked as served.','success');
+  }
+
+  async function deleteEntry(id) {
+    await remove(ref(db,`queue/types/${activeType}/entries/${id}`));
+    toast('Entry removed.','info');
+  }
+
+  document.getElementById('statusToggle').addEventListener('click', async () => {
+    if (!activeType) return;
+    const next = queueStatus==='open' ? 'closed' : 'open';
+    await set(ref(db,`queue/types/${activeType}/status`), next);
+    toast(`Queue is now ${next}.`, next==='open'?'success':'info');
+  });
+
+  // ── Reset ──
+  document.getElementById('resetBtn').addEventListener('click', () => {
+    if (!activeType) return;
+    document.getElementById('resetModal').classList.add('show');
+  });
+  document.getElementById('resetCancelBtn').addEventListener('click', () => document.getElementById('resetModal').classList.remove('show'));
+  document.getElementById('resetConfirmBtn').addEventListener('click', async () => {
+    await set(ref(db,`queue/types/${activeType}`),{status:'closed',counter:0,nowServing:0,entries:null});
+    document.getElementById('resetModal').classList.remove('show');
+    toast('Queue reset.','info');
+  });
+
+  // ── Add type ──
+  document.getElementById('addTypeBtn').addEventListener('click', () => {
+    document.getElementById('newTypeName').value='';
+    document.getElementById('addTypeModal').classList.add('show');
+    setTimeout(()=>document.getElementById('newTypeName').focus(),100);
+  });
+  document.getElementById('addTypeCancelBtn').addEventListener('click', () => document.getElementById('addTypeModal').classList.remove('show'));
+  document.getElementById('addTypeConfirmBtn').addEventListener('click', () => {
+    const val = document.getElementById('newTypeName').value.trim().toLowerCase().replace(/[^a-z0-9_-]/g,'-').replace(/-+/g,'-');
+    if (!val) { toast('Enter a valid name.','error'); return; }
+    if (savedTypes.includes(val)) { toast('Type already exists.','error'); return; }
+    savedTypes.push(val);
+    saveTypes();
+    renderTabs();
+    document.getElementById('addTypeModal').classList.remove('show');
+    switchType(val);
+    toast(`Type "${val}" added.`,'success');
+  });
+  document.getElementById('newTypeName').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('addTypeConfirmBtn').click(); });
+
+  // ── Init ──
+  renderTabs();
+  if (savedTypes.length) switchType(savedTypes[0]);
+</script>
+</body>
+</html>
