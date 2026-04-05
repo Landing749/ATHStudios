@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ATSYS Mailer — ATH Studios</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<!-- Google Identity Services -->
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --navy:   #05192D;
+  --navy2:  #0A2540;
+  --teal:   #0891B2;
+  --teal2:  #06B6D4;
+  --mint:   #10B981;
+  --mint2:  #34D399;
+  --red:    #EF4444;
+  --amber:  #F59E0B;
+  --bg:     #EEF2F7;
+  --card:   #FFFFFF;
+  --text:   #0F172A;
+  --muted:  #64748B;
+  --border: #E2E8F0;
+  --light:  #F8FAFC;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── SETUP SCREEN ─── */
+#setup-screen {
+  min-height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--navy);
+  position: relative; overflow: hidden;
+}
+.setup-grid {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(8,145,178,0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(8,145,178,0.07) 1px, transparent 1px);
+  background-size: 36px 36px;
+}
+.setup-glow {
+  position: absolute;
+  top: -100px; right: -100px;
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(8,145,178,0.18) 0%, transparent 70%);
+}
+.setup-glow2 {
+  position: absolute;
+  bottom: -80px; left: 60px;
+  width: 300px; height: 300px;
+  background: radial-gradient(circle, rgba(16,185,129,0.1) 0%, transparent 70%);
+}
+.setup-card {
+  position: relative;
+  background: white;
+  border-radius: 20px;
+  padding: 44px 48px;
+  width: 100%; max-width: 460px;
+  margin: 20px;
+  box-shadow: 0 24px 80px rgba(5,25,45,0.35);
+  animation: slideUp 0.5s cubic-bezier(0.175,0.885,0.32,1.275);
+}
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.setup-logo {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 32px;
+}
+.setup-logo-box {
+  width: 44px; height: 44px;
+  background: linear-gradient(135deg, var(--teal), var(--teal2));
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Instrument Serif', serif;
+  font-size: 22px; color: white;
+  box-shadow: 0 6px 16px rgba(8,145,178,0.35);
+}
+.setup-logo-text .name { font-size: 17px; font-weight: 800; color: var(--navy); }
+.setup-logo-text .sub  { font-size: 11px; color: var(--muted); margin-top: 1px; }
+
+.setup-title {
+  font-family: 'Instrument Serif', serif;
+  font-size: 28px; font-weight: 400;
+  color: var(--navy); line-height: 1.25; margin-bottom: 8px;
+}
+.setup-title em { font-style: italic; color: var(--teal); }
+.setup-desc { font-size: 13px; color: var(--muted); line-height: 1.7; margin-bottom: 28px; }
+
+.input-group { margin-bottom: 16px; }
+.input-label {
+  font-size: 11px; font-weight: 700; color: var(--muted);
+  letter-spacing: 0.07em; text-transform: uppercase; margin-bottom: 7px; display: block;
+}
+.input-field {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  font-size: 13px; font-family: 'Plus Jakarta Sans', sans-serif;
+  color: var(--text); background: var(--light);
+  outline: none; transition: border-color 0.15s, box-shadow 0.15s;
+}
+.input-field:focus { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(8,145,178,0.12); background: white; }
+.input-field::placeholder { color: #CBD5E1; }
+.input-hint { font-size: 11px; color: var(--muted); margin-top: 5px; line-height: 1.5; }
+.input-hint a { color: var(--teal); text-decoration: none; font-weight: 600; }
+
+.setup-btn {
+  width: 100%;
+  padding: 13px;
+  background: linear-gradient(135deg, var(--teal), var(--teal2));
+  color: white; border: none; border-radius: 10px;
+  font-size: 14px; font-weight: 700;
+  cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif;
+  box-shadow: 0 4px 14px rgba(8,145,178,0.3);
+  transition: all 0.15s; margin-top: 8px;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.setup-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(8,145,178,0.4); }
+
+.setup-note {
+  background: rgba(8,145,178,0.06);
+  border: 1px solid rgba(8,145,178,0.15);
+  border-radius: 10px; padding: 12px 14px;
+  font-size: 12px; color: var(--muted);
+  line-height: 1.6; margin-top: 16px;
+}
+.setup-note strong { color: var(--teal); }
+
+/* ─── AUTH SCREEN ─── */
+#auth-screen {
+  min-height: 100vh;
+  display: none; align-items: center; justify-content: center;
+  background: var(--navy); position: relative; overflow: hidden;
+}
+.auth-card {
+  position: relative; background: white; border-radius: 20px;
+  padding: 48px; width: 100%; max-width: 400px; margin: 20px;
+  box-shadow: 0 24px 80px rgba(5,25,45,0.35);
+  text-align: center;
+  animation: slideUp 0.4s ease;
+}
+.auth-icon { font-size: 48px; margin-bottom: 20px; }
+.auth-title {
+  font-family: 'Instrument Serif', serif;
+  font-size: 26px; color: var(--navy); margin-bottom: 8px;
+}
+.auth-desc { font-size: 13px; color: var(--muted); margin-bottom: 28px; line-height: 1.7; }
+
+.google-btn {
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  width: 100%; padding: 13px 20px;
+  background: white; border: 1.5px solid var(--border);
+  border-radius: 10px; cursor: pointer;
+  font-size: 14px; font-weight: 600; color: var(--text);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  transition: all 0.15s; box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.google-btn:hover { border-color: #4285F4; box-shadow: 0 4px 16px rgba(66,133,244,0.2); }
+.google-icon { width: 20px; height: 20px; }
+
+/* ─── APP ─── */
+#app { display: none; flex-direction: column; min-height: 100vh; }
+
+/* TOPBAR */
+.topbar {
+  background: var(--navy); height: 54px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 28px;
+  border-bottom: 2px solid var(--teal);
+  position: sticky; top: 0; z-index: 100;
+}
+.topbar-left { display: flex; align-items: center; gap: 12px; }
+.tb-logo {
+  width: 32px; height: 32px;
+  background: linear-gradient(135deg, var(--teal), var(--teal2));
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Instrument Serif', serif; font-size: 16px; color: white;
+}
+.tb-name { font-size: 14px; font-weight: 800; color: white; }
+.tb-sep { width: 1px; height: 16px; background: rgba(255,255,255,0.15); }
+.tb-sub { font-size: 11px; color: rgba(255,255,255,0.4); }
+.topbar-right { display: flex; align-items: center; gap: 14px; }
+.user-pill {
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 20px; padding: 5px 12px 5px 5px;
+}
+.user-avatar {
+  width: 24px; height: 24px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--teal), var(--mint));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 700; color: white;
+}
+.user-name { font-size: 12px; color: rgba(255,255,255,0.7); }
+.signout-btn {
+  background: none; border: none; color: rgba(255,255,255,0.35);
+  font-size: 11px; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif;
+  transition: color 0.15s; padding: 4px 8px; border-radius: 6px;
+}
+.signout-btn:hover { color: white; background: rgba(255,255,255,0.08); }
+
+/* LAYOUT */
+.app-body { display: grid; grid-template-columns: 240px 1fr; flex: 1; }
+
+/* SIDEBAR */
+.sidebar {
+  background: white; border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; overflow-y: auto;
+  height: calc(100vh - 54px); position: sticky; top: 54px;
+}
+.sidebar-sec { padding: 18px 14px 6px; }
+.sl { font-size: 10px; font-weight: 700; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 8px; padding: 0 8px; }
+.nav-btn {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 12px; border-radius: 8px;
+  cursor: pointer; font-size: 13px; font-weight: 500;
+  color: var(--muted); border: none; background: none;
+  width: 100%; text-align: left; font-family: 'Plus Jakarta Sans', sans-serif;
+  transition: all 0.12s; margin-bottom: 2px;
+}
+.nav-btn:hover { background: var(--light); color: var(--text); }
+.nav-btn.active { background: rgba(8,145,178,0.08); color: var(--teal); font-weight: 700; }
+.nav-btn .ni { font-size: 15px; width: 20px; text-align: center; }
+.nb-badge {
+  margin-left: auto; background: var(--teal); color: white;
+  font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 10px;
+}
+.sdiv { height: 1px; background: var(--border); margin: 8px 14px; }
+
+.tpl-sec { padding: 6px 14px 14px; }
+.tpl-card {
+  padding: 10px 12px; border-radius: 8px; cursor: pointer;
+  border: 1.5px solid var(--border); margin-bottom: 7px;
+  background: var(--light); transition: all 0.12s;
+}
+.tpl-card:hover { border-color: var(--teal); background: rgba(8,145,178,0.04); }
+.tpl-card.sel { border-color: var(--teal); background: rgba(8,145,178,0.07); }
+.tpl-name { font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+.tpl-hint { font-size: 10px; color: var(--muted); }
+
+.sidebar-foot {
+  margin-top: auto; padding: 14px;
+  border-top: 1px solid var(--border);
+}
+.quota-label { font-size: 11px; color: var(--muted); margin-bottom: 6px; display: flex; justify-content: space-between; }
+.quota-bar { height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+.quota-fill { height: 100%; background: linear-gradient(90deg, var(--teal), var(--mint)); border-radius: 2px; transition: width 0.4s; }
+
+/* CONTENT */
+.content { padding: 28px 32px; overflow-y: auto; }
+
+/* PAGE HEADER */
+.ph { margin-bottom: 22px; }
+.pt { font-family: 'Instrument Serif', serif; font-size: 26px; color: var(--navy); margin-bottom: 3px; }
+.ps { font-size: 13px; color: var(--muted); }
+
+/* VIEWS */
+.view { display: none; }
+.view.active { display: block; animation: fadeIn 0.2s ease; }
+@keyframes fadeIn { from { opacity:0; transform: translateY(4px); } to { opacity:1; transform: none; } }
+
+/* COMPOSE */
+.compose-wrap {
+  background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+  overflow: hidden; box-shadow: 0 2px 16px rgba(5,25,45,0.07);
+}
+.compose-bar {
+  background: var(--light); border-bottom: 1px solid var(--border);
+  padding: 11px 18px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+.bar-label { font-size: 10px; font-weight: 700; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; margin-right: 6px; }
+.tq {
+  padding: 5px 12px; border-radius: 6px;
+  font-size: 11px; font-weight: 600;
+  border: 1.5px solid var(--border); background: white; color: var(--text);
+  cursor: pointer; transition: all 0.12s; font-family: 'Plus Jakarta Sans', sans-serif;
+}
+.tq:hover { border-color: var(--teal); color: var(--teal); }
+.tq.active { border-color: var(--teal); background: rgba(8,145,178,0.08); color: var(--teal); }
+
+.field-row {
+  display: flex; align-items: center;
+  border-bottom: 1px solid var(--border); padding: 0 20px; min-height: 46px;
+}
+.fl { font-size: 12px; font-weight: 700; color: var(--muted); width: 68px; min-width: 68px; }
+.fi {
+  flex: 1; border: none; outline: none;
+  font-size: 13px; color: var(--text); padding: 12px 0;
+  font-family: 'Plus Jakarta Sans', sans-serif; background: transparent;
+}
+.fi::placeholder { color: #CBD5E1; }
+
+/* Recipient chips */
+.recip-row {
+  display: flex; flex-wrap: wrap; align-items: center;
+  border-bottom: 1px solid var(--border); padding: 8px 20px; gap: 6px; min-height: 46px;
+}
+.chip {
+  display: flex; align-items: center; gap: 5px;
+  background: rgba(8,145,178,0.09); border: 1px solid rgba(8,145,178,0.22);
+  color: var(--teal); padding: 3px 10px; border-radius: 20px;
+  font-size: 12px; font-weight: 600;
+}
+.chip-x { background: none; border: none; color: var(--teal); cursor: pointer; font-size: 15px; line-height: 1; padding: 0; opacity: 0.6; }
+.chip-x:hover { opacity: 1; }
+#to-input {
+  border: none; outline: none; font-size: 13px;
+  font-family: 'Plus Jakarta Sans', sans-serif; min-width: 150px; flex: 1; padding: 4px 0;
+  color: var(--text); background: transparent;
+}
+#to-input::placeholder { color: #CBD5E1; }
+
+.body-wrap { padding: 20px; }
+#email-body {
+  width: 100%; min-height: 260px; border: none; outline: none; resize: vertical;
+  font-size: 13px; line-height: 1.8; color: var(--text);
+  font-family: 'Plus Jakarta Sans', sans-serif; background: transparent;
+}
+#email-body::placeholder { color: #CBD5E1; }
+
+.compose-foot {
+  border-top: 1px solid var(--border); padding: 13px 20px;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+}
+.cf-meta { font-size: 11px; color: var(--muted); }
+.cf-meta b { color: var(--teal); }
+.cf-actions { display: flex; gap: 8px; }
+.btn-clear {
+  padding: 9px 18px; border-radius: 8px; border: 1.5px solid var(--border);
+  background: white; color: var(--muted); font-size: 12px; font-weight: 600;
+  cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.12s;
+}
+.btn-clear:hover { border-color: var(--red); color: var(--red); }
+.btn-send {
+  display: flex; align-items: center; gap: 8px;
+  padding: 9px 22px; border-radius: 8px;
+  background: linear-gradient(135deg, var(--teal), var(--teal2));
+  color: white; border: none; font-size: 13px; font-weight: 700;
+  cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif;
+  box-shadow: 0 3px 10px rgba(8,145,178,0.3); transition: all 0.15s;
+}
+.btn-send:hover { transform: translateY(-1px); box-shadow: 0 5px 16px rgba(8,145,178,0.4); }
+.btn-send:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+/* SENT LOG */
+.log-empty { text-align: center; padding: 64px 20px; }
+.log-empty .le-icon { font-size: 40px; margin-bottom: 14px; }
+.log-empty .le-title { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+.log-empty .le-desc { font-size: 13px; color: var(--muted); }
+
+.log-item {
+  background: white; border: 1px solid var(--border); border-radius: 12px;
+  padding: 16px 20px; margin-bottom: 10px;
+  display: flex; align-items: flex-start; gap: 14px;
+  box-shadow: 0 1px 4px rgba(5,25,45,0.05);
+  animation: fadeIn 0.3s ease;
+}
+.log-status {
+  width: 32px; height: 32px; min-width: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; font-size: 14px;
+}
+.log-status.ok { background: rgba(16,185,129,0.12); }
+.log-status.fail { background: rgba(239,68,68,0.1); }
+.log-body { flex: 1; }
+.log-to { font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+.log-subject { font-size: 11px; color: var(--muted); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 400px; }
+.log-time { font-size: 10px; color: #94A3B8; }
+.log-badge {
+  padding: 3px 10px; border-radius: 20px; font-size: 10px; font-weight: 700;
+  align-self: center;
+}
+.log-badge.ok { background: rgba(16,185,129,0.1); color: var(--mint); }
+.log-badge.fail { background: rgba(239,68,68,0.1); color: var(--red); }
+
+/* TOAST */
+.toast {
+  position: fixed; bottom: 24px; left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  padding: 11px 20px; border-radius: 10px; font-size: 12px; font-weight: 700;
+  display: flex; align-items: center; gap: 8px;
+  box-shadow: 0 8px 24px rgba(5,25,45,0.25);
+  z-index: 999; white-space: nowrap;
+  transition: transform 0.35s cubic-bezier(0.175,0.885,0.32,1.275), opacity 0.35s;
+  opacity: 0; pointer-events: none;
+}
+.toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+.toast.success { background: var(--navy); color: white; border-left: 3px solid var(--mint); }
+.toast.error { background: #FEF2F2; color: var(--red); border-left: 3px solid var(--red); border: 1px solid #FECACA; }
+.toast.info { background: var(--navy); color: white; border-left: 3px solid var(--teal2); }
+
+/* RESPONSIVE */
+@media (max-width: 680px) {
+  .app-body { grid-template-columns: 1fr; }
+  .sidebar { display: none; }
+  .content { padding: 20px 16px; }
+  .topbar { padding: 0 16px; }
+  .tb-sep, .tb-sub { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══ STEP 1: SETUP (enter Client ID) ══ -->
+<div id="setup-screen">
+  <div class="setup-grid"></div>
+  <div class="setup-glow"></div>
+  <div class="setup-glow2"></div>
+  <div class="setup-card">
+    <div class="setup-logo">
+      <div class="setup-logo-box">A</div>
+      <div class="setup-logo-text">
+        <div class="name">ATSYS Mailer</div>
+        <div class="sub">ATH Studios IT Development</div>
+      </div>
+    </div>
+    <div class="setup-title">Connect your <em>Gmail</em> account.</div>
+    <p class="setup-desc">Enter your Google OAuth Client ID to link this mailer directly to your Gmail. Emails are sent from your own account — no third-party service involved.</p>
+
+    <div class="input-group">
+      <label class="input-label">Google OAuth Client ID</label>
+      <input class="input-field" id="client-id-input" type="text"
+        placeholder="xxxxxxxxxxxx-xxxxxxxx.apps.googleusercontent.com">
+      <div class="input-hint">
+        Get this from <a href="https://console.cloud.google.com/apis/credentials" target="_blank">Google Cloud Console</a> → APIs & Services → Credentials → Create OAuth 2.0 Client ID. Add <strong>this page's URL</strong> as an Authorized JavaScript origin.
+      </div>
+    </div>
+
+    <button class="setup-btn" onclick="saveClientId()">
+      <span>Continue</span> <span>→</span>
+    </button>
+
+    <div class="setup-note">
+      <strong>One-time setup.</strong> Your Client ID is saved in your browser. No server, no middleman — this tool talks directly to Google on your behalf using the Gmail API.
+    </div>
+  </div>
+</div>
+
+<!-- ══ STEP 2: SIGN IN WITH GOOGLE ══ -->
+<div id="auth-screen">
+  <div class="setup-grid"></div>
+  <div class="setup-glow"></div>
+  <div class="auth-card">
+    <div class="auth-icon">📬</div>
+    <div class="auth-title">Sign in to send</div>
+    <p class="auth-desc">Authorize with your Gmail account. ATSYS Mailer will only request permission to <strong>send email</strong> on your behalf — nothing else.</p>
+    <button class="google-btn" onclick="signIn()">
+      <svg class="google-icon" viewBox="0 0 24 24">
+        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+      </svg>
+      Sign in with Google
+    </button>
+    <p style="margin-top:18px; font-size:11px; color:var(--muted);">
+      <a href="#" onclick="resetSetup()" style="color:var(--teal); text-decoration:none; font-weight:600;">← Change Client ID</a>
+    </p>
+  </div>
+</div>
+
+<!-- ══ STEP 3: THE APP ══ -->
+<div id="app">
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="tb-logo">A</div>
+      <span class="tb-name">ATSYS Mailer</span>
+      <div class="tb-sep"></div>
+      <span class="tb-sub">ATH Studios</span>
+    </div>
+    <div class="topbar-right">
+      <div class="user-pill">
+        <div class="user-avatar" id="user-initial">?</div>
+        <span class="user-name" id="user-email-display">—</span>
+      </div>
+      <button class="signout-btn" onclick="signOut()">Sign out</button>
+    </div>
+  </div>
+
+  <div class="app-body">
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <div class="sidebar-sec">
+        <div class="sl">Menu</div>
+        <button class="nav-btn active" onclick="showView('compose', this)">
+          <span class="ni">✏️</span> Compose
+        </button>
+        <button class="nav-btn" onclick="showView('sent', this)">
+          <span class="ni">📤</span> Sent
+          <span class="nb-badge" id="sent-count">0</span>
+        </button>
+      </div>
+
+      <div class="sdiv"></div>
+
+      <div class="sidebar-sec">
+        <div class="sl">Templates</div>
+      </div>
+      <div class="tpl-sec">
+        <div class="tpl-card" onclick="loadTemplate(0)">
+          <div class="tpl-name">📋 General Inquiry Reply</div>
+          <div class="tpl-hint">First response to interested schools</div>
+        </div>
+        <div class="tpl-card" onclick="loadTemplate(1)">
+          <div class="tpl-name">🗓 Demo Confirmation</div>
+          <div class="tpl-hint">Schedule a product walkthrough</div>
+        </div>
+        <div class="tpl-card" onclick="loadTemplate(2)">
+          <div class="tpl-name">💰 Pricing Proposal</div>
+          <div class="tpl-hint">Licensing tiers and quotation</div>
+        </div>
+        <div class="tpl-card" onclick="loadTemplate(3)">
+          <div class="tpl-name">📬 Auto-Reply</div>
+          <div class="tpl-hint">Standard acknowledgement email</div>
+        </div>
+      </div>
+
+      <div class="sidebar-foot">
+        <div class="quota-label">
+          <span>Gmail daily quota</span>
+          <span id="quota-text">0 / 500 sent</span>
+        </div>
+        <div class="quota-bar"><div class="quota-fill" id="quota-fill" style="width:0%"></div></div>
+      </div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content">
+
+      <!-- COMPOSE VIEW -->
+      <div class="view active" id="view-compose">
+        <div class="ph">
+          <div class="pt">Compose Email</div>
+          <div class="ps">Send from your Gmail · No third-party service</div>
+        </div>
+
+        <div class="compose-wrap">
+          <!-- Quick template bar -->
+          <div class="compose-bar">
+            <span class="bar-label">Templates</span>
+            <button class="tq" onclick="loadTemplate(0)">General</button>
+            <button class="tq" onclick="loadTemplate(1)">Demo</button>
+            <button class="tq" onclick="loadTemplate(2)">Pricing</button>
+            <button class="tq" onclick="loadTemplate(3)">Auto-Reply</button>
+            <button class="tq" onclick="clearForm()" style="margin-left:auto; border-color:#fee2e2; color:#ef4444;">✕ Clear</button>
+          </div>
+
+          <!-- To field (chips) -->
+          <div class="recip-row" id="recip-row" onclick="document.getElementById('to-input').focus()">
+            <span class="fl">To</span>
+            <input id="to-input" placeholder="school@example.com — press Enter or comma to add"
+              onkeydown="handleRecipKey(event)">
+          </div>
+
+          <!-- Subject -->
+          <div class="field-row">
+            <span class="fl">Subject</span>
+            <input class="fi" id="email-subject" placeholder="Enter subject line…">
+          </div>
+
+          <!-- Body -->
+          <div class="body-wrap">
+            <textarea id="email-body" placeholder="Write your message here, or pick a template above…"></textarea>
+          </div>
+
+          <!-- Footer -->
+          <div class="compose-foot">
+            <div class="cf-meta">
+              Sending as <b id="sending-as">your Gmail</b>
+            </div>
+            <div class="cf-actions">
+              <button class="btn-clear" onclick="clearForm()">Clear</button>
+              <button class="btn-send" id="send-btn" onclick="sendEmail()">
+                <span>📤</span> <span>Send via Gmail</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SENT VIEW -->
+      <div class="view" id="view-sent">
+        <div class="ph">
+          <div class="pt">Sent Emails</div>
+          <div class="ps">Session history · Clears on page refresh</div>
+        </div>
+        <div id="sent-list">
+          <div class="log-empty">
+            <div class="le-icon">📭</div>
+            <div class="le-title">Nothing sent yet</div>
+            <div class="le-desc">Emails you send this session will appear here.</div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /app-body -->
+</div><!-- /app -->
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── STATE ──────────────────────────────────────────────────────────────────
+let accessToken = null;
+let userEmail   = null;
+let sentLog     = [];
+let recipients  = [];
+let sentCount   = 0;
+const SCOPE     = 'https://www.googleapis.com/auth/gmail.send';
+let tokenClient = null;
+
+// ── TEMPLATES ─────────────────────────────────────────────────────────────
+const TEMPLATES = [
+  {
+    label: 'General Inquiry Reply',
+    subject: 'ATSYS Attendance System — Information & Next Steps',
+    body: `Dear [Principal / Coordinator Name],
+
+Good day!
+
+Thank you for your interest in ATSYS, our QR Code Attendance System developed by ATH Studios.
+
+ATSYS is designed specifically for Philippine schools — it replaces manual roll call with a fast, accurate QR scanning process that automatically saves records to organized Excel files. It runs fully offline on any Windows PC, with no internet required during daily use.
+
+We would be glad to walk you through everything in more detail. We can arrange:
+
+  • A live product demo at your school or via video call
+  • A formal presentation for your faculty and administration
+  • A tailored pricing and licensing discussion based on your school's size
+
+Please let us know your preferred schedule or any specific questions you may have. We are happy to accommodate at your convenience.
+
+Looking forward to hearing from you.
+
+Respectfully,
+[Your Name]
+ATH Studios IT Development Department
+arhanmeir.obrero@gmail.com | athstudios.dpdns.org`
+  },
+  {
+    label: 'Demo Confirmation',
+    subject: 'ATSYS Demo Confirmation — [School Name]',
+    body: `Dear [Principal / Coordinator Name],
+
+Good day!
+
+Thank you for your interest in scheduling a demonstration of ATSYS. We are excited to show you how it can benefit your school's attendance process.
+
+We would like to confirm the following:
+
+  📅 Proposed Date:  [Date]
+  🕐 Time:           [Time]
+  📍 Venue / Mode:   [On-site at your school / Google Meet]
+
+During the session, we will cover:
+  ✓ Full walkthrough of the QR scanning process
+  ✓ Excel file output and live analytics dashboard
+  ✓ Offline capability and data privacy features
+  ✓ Pricing tiers and implementation timeline
+
+Please reply to confirm or suggest an alternative schedule. We will adjust based on what works best for your team.
+
+Thank you, and we look forward to presenting ATSYS to [School Name].
+
+Respectfully,
+[Your Name]
+ATH Studios IT Development Department
+arhanmeir.obrero@gmail.com | athstudios.dpdns.org`
+  },
+  {
+    label: 'Pricing Proposal',
+    subject: 'ATSYS Pricing & Licensing — [School Name]',
+    body: `Dear [Principal / Coordinator Name],
+
+Good day!
+
+Thank you for considering ATSYS for [School Name]. We are pleased to share our pricing information below.
+
+ATSYS LICENSING — PER TEACHER / SCHOOL YEAR:
+
+  Starter       ₱10 / teacher / year
+                QR scanning, Excel auto-export, email support
+
+  Standard      ₱25 / teacher / year
+                Everything in Starter + Analytics dashboard + phone support
+
+  Professional  ₱40 / teacher / year  ⭐ Most Popular
+                Everything in Standard + QR generation + Google Drive backups
+                + 2-month warranty + priority support
+
+  Enterprise    ₱50–99 / teacher / year (negotiated)
+                Everything in Professional + custom branding + dedicated support
+
+Based on your school's size of approximately [Teacher Count] teachers, we recommend
+the [Suggested Tier] plan — approximately ₱[Estimated Total] for the full school year.
+
+We can prepare a formal quotation or proposal document upon request.
+A product demo can also be arranged before any commitment.
+
+Respectfully,
+[Your Name]
+ATH Studios IT Development Department
+arhanmeir.obrero@gmail.com | athstudios.dpdns.org`
+  },
+  {
+    label: 'Auto-Reply / Acknowledgement',
+    subject: 'Thank you for your inquiry — ATSYS Attendance System',
+    body: `Dear [School Name / Principal's Name],
+
+Thank you for reaching out to ATH Studios regarding the ATSYS QR Code Attendance System.
+
+We have received your message and our team will get back to you within 1–2 business days with the information you need.
+
+In the meantime, here is a brief overview of what ATSYS offers:
+
+  • QR-based attendance — whole class recorded in under 1 minute
+  • Automatic Excel file generation — no manual data entry
+  • Live analytics dashboard — charts, reports, and absentee trends
+  • Fully offline operation — no internet needed during daily use
+  • Compliant with RA 10173 (Data Privacy Act of 2012)
+
+We are happy to arrange a demo, on-site presentation, or pricing discussion at your convenience.
+
+For urgent concerns, you may reach us at: arhanmeir.obrero@gmail.com
+
+We look forward to serving [School Name].
+
+Warm regards,
+ATH Studios IT Development Department
+ATSYS — QR Code Attendance System
+Simple. Secure. Reliable.`
+  }
+];
+
+// ── SETUP ──────────────────────────────────────────────────────────────────
+function saveClientId() {
+  const id = document.getElementById('client-id-input').value.trim();
+  if (!id || !id.includes('.apps.googleusercontent.com')) {
+    showToast('⚠️ Please enter a valid Google Client ID', 'error'); return;
+  }
+  localStorage.setItem('atsys_client_id', id);
+  initGIS(id);
+  document.getElementById('setup-screen').style.display = 'none';
+  document.getElementById('auth-screen').style.display  = 'flex';
+}
+
+function resetSetup() {
+  localStorage.removeItem('atsys_client_id');
+  document.getElementById('auth-screen').style.display  = 'none';
+  document.getElementById('setup-screen').style.display = 'flex';
+}
+
+// ── GOOGLE IDENTITY SERVICES ───────────────────────────────────────────────
+function initGIS(clientId) {
+  tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: clientId,
+    scope: SCOPE,
+    callback: handleTokenResponse,
+  });
+}
+
+function signIn() {
+  if (!tokenClient) {
+    showToast('Client not ready — reload the page', 'error'); return;
+  }
+  tokenClient.requestAccessToken({ prompt: 'consent' });
+}
+
+function handleTokenResponse(resp) {
+  if (resp.error) {
+    showToast('Auth failed: ' + resp.error, 'error'); return;
+  }
+  accessToken = resp.access_token;
+  fetchUserInfo();
+}
+
+async function fetchUserInfo() {
+  try {
+    const r = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+      headers: { Authorization: 'Bearer ' + accessToken }
+    });
+    const u = await r.json();
+    userEmail = u.email;
+    document.getElementById('user-email-display').textContent = u.email;
+    document.getElementById('user-initial').textContent = u.email[0].toUpperCase();
+    document.getElementById('sending-as').textContent = u.email;
+    document.getElementById('auth-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'flex';
+    showToast('✓ Connected as ' + u.email, 'success');
+  } catch(e) {
+    showToast('Could not fetch user info', 'error');
+  }
+}
+
+function signOut() {
+  google.accounts.oauth2.revoke(accessToken, () => {
+    accessToken = null; userEmail = null;
+    document.getElementById('app').style.display = 'none';
+    document.getElementById('auth-screen').style.display = 'flex';
+    showToast('Signed out', 'info');
+  });
+}
+
+// ── RECIPIENTS ─────────────────────────────────────────────────────────────
+function handleRecipKey(e) {
+  if (e.key === 'Enter' || e.key === ',') {
+    e.preventDefault();
+    const val = e.target.value.trim().replace(/,$/, '');
+    if (val && val.includes('@')) addRecipient(val);
+    e.target.value = '';
+  }
+  if (e.key === 'Backspace' && e.target.value === '' && recipients.length > 0) {
+    removeRecipient(recipients.length - 1);
+  }
+}
+
+function addRecipient(email) {
+  if (recipients.includes(email)) return;
+  recipients.push(email);
+  renderChips();
+}
+
+function removeRecipient(i) {
+  recipients.splice(i, 1);
+  renderChips();
+}
+
+function renderChips() {
+  const row = document.getElementById('recip-row');
+  const input = document.getElementById('to-input');
+  row.innerHTML = '<span class="fl">To</span>';
+  recipients.forEach((r, i) => {
+    const chip = document.createElement('div');
+    chip.className = 'chip';
+    chip.innerHTML = `${r} <button class="chip-x" onclick="removeRecipient(${i})">×</button>`;
+    row.appendChild(chip);
+  });
+  row.appendChild(input);
+}
+
+// ── TEMPLATES ──────────────────────────────────────────────────────────────
+function loadTemplate(i) {
+  const t = TEMPLATES[i];
+  document.getElementById('email-subject').value = t.subject;
+  document.getElementById('email-body').value    = t.body;
+  document.querySelectorAll('.tq').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tpl-card').forEach(c => c.classList.remove('sel'));
+  showView('compose', document.querySelector('.nav-btn.active'));
+  showToast('Template loaded: ' + t.label, 'info');
+}
+
+function clearForm() {
+  recipients = [];
+  renderChips();
+  document.getElementById('to-input').value      = '';
+  document.getElementById('email-subject').value = '';
+  document.getElementById('email-body').value    = '';
+  document.querySelectorAll('.tq').forEach(b => b.classList.remove('active'));
+}
+
+// ── SEND EMAIL ─────────────────────────────────────────────────────────────
+async function sendEmail() {
+  if (!accessToken) { showToast('Not signed in', 'error'); return; }
+
+  // Collect any pending input value
+  const pending = document.getElementById('to-input').value.trim().replace(/,$/, '');
+  if (pending && pending.includes('@')) {
+    addRecipient(pending);
+    document.getElementById('to-input').value = '';
+  }
+
+  if (recipients.length === 0) { showToast('Add at least one recipient', 'error'); return; }
+  const subject = document.getElementById('email-subject').value.trim();
+  const body    = document.getElementById('email-body').value.trim();
+  if (!subject) { showToast('Subject is required', 'error'); return; }
+  if (!body)    { showToast('Message body is empty', 'error'); return; }
+
+  const btn = document.getElementById('send-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span>⏳</span> <span>Sending…</span>';
+
+  try {
+    for (const to of recipients) {
+      await sendOne(to, subject, body);
+    }
+    showToast(`✓ Sent to ${recipients.length} recipient${recipients.length > 1 ? 's' : ''}`, 'success');
+    clearForm();
+  } catch(e) {
+    showToast('Failed to send: ' + e.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<span>📤</span> <span>Send via Gmail</span>';
+  }
+}
+
+async function sendOne(to, subject, body) {
+  const from = userEmail;
+  const raw  = buildRFC2822(from, to, subject, body);
+  const b64  = btoa(unescape(encodeURIComponent(raw)))
+    .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+
+  const res = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send', {
+    method: 'POST',
+    headers: {
+      'Authorization': 'Bearer ' + accessToken,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ raw: b64 })
+  });
+
+  if (!res.ok) {
+    const err = await res.json();
+    addLog(to, subject, false);
+    throw new Error(err.error?.message || 'Gmail API error');
+  }
+
+  sentCount++;
+  updateQuota();
+  addLog(to, subject, true);
+}
+
+function buildRFC2822(from, to, subject, body) {
+  return [
+    `From: ATH Studios <${from}>`,
+    `To: ${to}`,
+    `Subject: ${subject}`,
+    `Content-Type: text/plain; charset=UTF-8`,
+    `MIME-Version: 1.0`,
+    ``,
+    body
+  ].join('\r\n');
+}
+
+// ── LOG ────────────────────────────────────────────────────────────────────
+function addLog(to, subject, ok) {
+  sentLog.unshift({ to, subject, ok, time: new Date() });
+  document.getElementById('sent-count').textContent = sentLog.length;
+  renderLog();
+}
+
+function renderLog() {
+  const el = document.getElementById('sent-list');
+  if (sentLog.length === 0) {
+    el.innerHTML = `<div class="log-empty"><div class="le-icon">📭</div><div class="le-title">Nothing sent yet</div><div class="le-desc">Emails you send this session will appear here.</div></div>`;
+    return;
+  }
+  el.innerHTML = sentLog.map(e => `
+    <div class="log-item">
+      <div class="log-status ${e.ok ? 'ok' : 'fail'}">${e.ok ? '✓' : '✗'}</div>
+      <div class="log-body">
+        <div class="log-to">→ ${e.to}</div>
+        <div class="log-subject">${e.subject}</div>
+        <div class="log-time">${e.time.toLocaleTimeString()}</div>
+      </div>
+      <div class="log-badge ${e.ok ? 'ok' : 'fail'}">${e.ok ? 'Sent' : 'Failed'}</div>
+    </div>
+  `).join('');
+}
+
+function updateQuota() {
+  document.getElementById('quota-text').textContent = `${sentCount} / 500 sent`;
+  document.getElementById('quota-fill').style.width = Math.min(sentCount / 500 * 100, 100) + '%';
+}
+
+// ── NAVIGATION ─────────────────────────────────────────────────────────────
+function showView(id, el) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + id).classList.add('active');
+  if (el) {
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+  }
+}
+
+// ── TOAST ──────────────────────────────────────────────────────────────────
+let toastTimer;
+function showToast(msg, type = 'success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className   = `toast ${type} show`;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+// ── INIT ───────────────────────────────────────────────────────────────────
+window.addEventListener('load', () => {
+  const saved = localStorage.getItem('atsys_client_id');
+  if (saved) {
+    document.getElementById('client-id-input').value = saved;
+    // Wait for GIS script to load
+    const wait = setInterval(() => {
+      if (typeof google !== 'undefined' && google.accounts) {
+        clearInterval(wait);
+        initGIS(saved);
+        document.getElementById('setup-screen').style.display = 'none';
+        document.getElementById('auth-screen').style.display  = 'flex';
+      }
+    }, 100);
+  }
+});
+</script>
+
+</body>
+</html>
