@@ -624,6 +624,14 @@ body {
             <button class="tq" onclick="loadTemplate(3)">Auto-Reply</button>
             <button class="tq" onclick="clearForm()" style="margin-left:auto; border-color:#fee2e2; color:#ef4444;">✕ Clear</button>
           </div>
+          <!-- Mode bar -->
+          <div class="compose-bar" style="border-top:1px solid var(--border); padding-top:10px; padding-bottom:10px; gap:6px;">
+            <span class="bar-label">Format</span>
+            <button class="tq active" id="mode-plain" onclick="setMode('plain')">Plain Text</button>
+            <button class="tq" id="mode-html" onclick="setMode('html')">HTML</button>
+            <button class="tq" id="mode-preview" onclick="setMode('preview')" style="display:none;">👁 Preview</button>
+            <span style="margin-left:auto; font-size:11px; color:var(--muted);" id="mode-hint">Plain text email</span>
+          </div>
 
           <!-- To field (chips) -->
           <div class="recip-row" id="recip-row" onclick="document.getElementById('to-input').focus()">
@@ -641,6 +649,7 @@ body {
           <!-- Body -->
           <div class="body-wrap">
             <textarea id="email-body" placeholder="Write your message here, or pick a template above…"></textarea>
+            <iframe id="html-preview" style="display:none; width:100%; min-height:260px; border:none; border-radius:8px; background:white;"></iframe>
           </div>
 
           <!-- Footer -->
@@ -710,6 +719,39 @@ let tokenClient = null;
 let rawSubject  = '';
 let rawBody     = '';
 let templateVars = {}; // { 'School Name': 'Mapua' }
+let emailMode = 'plain'; // 'plain' | 'html' | 'preview'
+
+function setMode(mode) {
+  emailMode = mode === 'preview' ? 'html' : mode; // preview is still html mode for sending
+  document.getElementById('mode-plain').classList.toggle('active', mode === 'plain');
+  document.getElementById('mode-html').classList.toggle('active', mode === 'html');
+  document.getElementById('mode-preview').classList.toggle('active', mode === 'preview');
+
+  const textarea = document.getElementById('email-body');
+  const preview  = document.getElementById('html-preview');
+  const hint     = document.getElementById('mode-hint');
+  const previewBtn = document.getElementById('mode-preview');
+
+  if (mode === 'plain') {
+    textarea.style.display = '';
+    preview.style.display  = 'none';
+    previewBtn.style.display = 'none';
+    textarea.placeholder = 'Write your message here, or pick a template above…';
+    hint.textContent = 'Plain text email';
+  } else if (mode === 'html') {
+    textarea.style.display = '';
+    preview.style.display  = 'none';
+    previewBtn.style.display = '';
+    textarea.placeholder = '<h1>Hello!</h1>\n<p>Your HTML here…</p>';
+    hint.textContent = 'HTML email — supports inline CSS';
+  } else if (mode === 'preview') {
+    const html = document.getElementById('email-body').value;
+    preview.srcdoc = html;
+    textarea.style.display = 'none';
+    preview.style.display  = '';
+    hint.textContent = 'Preview — click HTML to edit';
+  }
+}
 
 // ── TEMPLATES ─────────────────────────────────────────────────────────────
 const TEMPLATES = [
@@ -1115,14 +1157,17 @@ async function sendOne(to, subject, body) {
 }
 
 function buildRFC2822(from, to, subject, body) {
+  const isHtml = emailMode === 'html';
+  const contentType = isHtml ? 'text/html; charset=UTF-8' : 'text/plain; charset=UTF-8';
+  const finalBody = isHtml ? body : body;
   return [
     `From: ATH Studios <${from}>`,
     `To: ${to}`,
     `Subject: ${subject}`,
-    `Content-Type: text/plain; charset=UTF-8`,
     `MIME-Version: 1.0`,
+    `Content-Type: ${contentType}`,
     ``,
-    body
+    finalBody
   ].join('\r\n');
 }
 
