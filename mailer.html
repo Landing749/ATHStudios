@@ -358,6 +358,71 @@ body {
 .btn-send:hover { transform: translateY(-1px); box-shadow: 0 5px 16px rgba(8,145,178,0.4); }
 .btn-send:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
+/* VAR PANEL */
+.var-panel {
+  display: none; margin-top: 16px;
+  background: white; border: 1.5px solid rgba(8,145,178,0.25);
+  border-radius: 14px; overflow: hidden;
+  box-shadow: 0 2px 16px rgba(5,25,45,0.07);
+  animation: fadeIn 0.22s ease;
+}
+.var-panel-head {
+  background: linear-gradient(135deg, var(--navy), var(--navy2));
+  padding: 12px 20px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.var-panel-title {
+  font-size: 11px; font-weight: 800; color: white;
+  letter-spacing: 0.09em; text-transform: uppercase;
+  display: flex; align-items: center; gap: 8px;
+}
+.var-panel-title .vp-badge {
+  background: var(--teal); color: white;
+  font-size: 9px; padding: 2px 7px; border-radius: 10px;
+}
+.var-panel-hint { font-size: 11px; color: rgba(255,255,255,0.4); }
+.var-fields {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px; padding: 18px 20px;
+}
+.var-field { display: flex; flex-direction: column; gap: 5px; }
+.var-label {
+  font-size: 10px; font-weight: 700; color: var(--muted);
+  letter-spacing: 0.07em; text-transform: uppercase;
+  display: flex; align-items: center; gap: 5px;
+}
+.var-label::before {
+  content: ''; display: inline-block;
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--teal);
+}
+.var-input {
+  padding: 8px 12px; border: 1.5px solid var(--border);
+  border-radius: 8px; font-size: 12px; font-weight: 500;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  color: var(--text); background: var(--light);
+  outline: none; transition: border-color 0.15s, box-shadow 0.15s;
+}
+.var-input:focus { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(8,145,178,0.12); background: white; }
+.var-input::placeholder { color: #CBD5E1; font-weight: 400; }
+.var-input.filled { border-color: var(--mint); background: rgba(16,185,129,0.04); }
+.var-panel-foot {
+  padding: 10px 20px; border-top: 1px solid var(--border);
+  background: var(--light);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.var-progress { display: flex; align-items: center; gap: 10px; font-size: 11px; color: var(--muted); }
+.var-prog-bar { width: 100px; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+.var-prog-fill { height: 100%; background: linear-gradient(90deg, var(--teal), var(--mint)); border-radius: 2px; transition: width 0.3s; }
+.var-apply-btn {
+  padding: 6px 14px; border-radius: 7px; border: none;
+  background: var(--teal); color: white;
+  font-size: 11px; font-weight: 700; cursor: pointer;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  transition: all 0.12s;
+}
+.var-apply-btn:hover { background: var(--navy); }
+
 /* SENT LOG */
 .log-empty { text-align: center; padding: 64px 20px; }
 .log-empty .le-icon { font-size: 40px; margin-bottom: 14px; }
@@ -591,6 +656,25 @@ body {
             </div>
           </div>
         </div>
+
+        <!-- ▌ VARIABLE FILL PANEL -->
+        <div class="var-panel" id="var-panel">
+          <div class="var-panel-head">
+            <div class="var-panel-title">
+              ✦ Fill in Placeholders
+              <span class="vp-badge" id="var-count-badge">0</span>
+            </div>
+            <span class="var-panel-hint">Updates the email live as you type</span>
+          </div>
+          <div class="var-fields" id="var-fields"></div>
+          <div class="var-panel-foot">
+            <div class="var-progress">
+              <span id="var-prog-text">0 / 0 filled</span>
+              <div class="var-prog-bar"><div class="var-prog-fill" id="var-prog-fill" style="width:0%"></div></div>
+            </div>
+            <button class="var-apply-btn" onclick="applyVars()">↻ Refresh Preview</button>
+          </div>
+        </div>
       </div>
 
       <!-- SENT VIEW -->
@@ -621,8 +705,11 @@ let userEmail   = null;
 let sentLog     = [];
 let recipients  = [];
 let sentCount   = 0;
-const SCOPE     = const SCOPE = 'https://www.googleapis.com/auth/gmail.send https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile';
+const SCOPE     = 'https://www.googleapis.com/auth/gmail.send https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile';
 let tokenClient = null;
+let rawSubject  = '';
+let rawBody     = '';
+let templateVars = {}; // { 'School Name': 'Mapua' }
 
 // ── TEMPLATES ─────────────────────────────────────────────────────────────
 const TEMPLATES = [
@@ -856,11 +943,15 @@ function renderChips() {
 // ── TEMPLATES ──────────────────────────────────────────────────────────────
 function loadTemplate(i) {
   const t = TEMPLATES[i];
-  document.getElementById('email-subject').value = t.subject;
-  document.getElementById('email-body').value    = t.body;
+  rawSubject = t.subject;
+  rawBody    = t.body;
+  templateVars = {};
+  document.getElementById('email-subject').value = rawSubject;
+  document.getElementById('email-body').value    = rawBody;
   document.querySelectorAll('.tq').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.tpl-card').forEach(c => c.classList.remove('sel'));
   showView('compose', document.querySelector('.nav-btn.active'));
+  extractAndRenderVars();
   showToast('Template loaded: ' + t.label, 'info');
 }
 
@@ -870,7 +961,96 @@ function clearForm() {
   document.getElementById('to-input').value      = '';
   document.getElementById('email-subject').value = '';
   document.getElementById('email-body').value    = '';
+  rawSubject = ''; rawBody = ''; templateVars = {};
+  document.getElementById('var-panel').style.display = 'none';
   document.querySelectorAll('.tq').forEach(b => b.classList.remove('active'));
+}
+
+// ── VARIABLE SYSTEM ────────────────────────────────────────────────────────
+function extractVarNames(text) {
+  // Match {Variable Name} and [Variable Name]
+  const matches = [];
+  const seen = new Set();
+  const re = /\{([^}]+)\}|\[([^\]]+)\]/g;
+  let m;
+  while ((m = re.exec(text)) !== null) {
+    const name = (m[1] || m[2]).trim();
+    if (!seen.has(name)) { seen.add(name); matches.push(name); }
+  }
+  return matches;
+}
+
+function extractAndRenderVars() {
+  const combined = rawSubject + ' ' + rawBody;
+  const names = extractVarNames(combined);
+  const panel = document.getElementById('var-panel');
+
+  if (names.length === 0) { panel.style.display = 'none'; return; }
+
+  // Preserve existing values, init new ones
+  const next = {};
+  names.forEach(n => { next[n] = templateVars[n] !== undefined ? templateVars[n] : ''; });
+  templateVars = next;
+
+  renderVarFields(names);
+  panel.style.display = 'block';
+  document.getElementById('var-count-badge').textContent = names.length;
+  updateVarProgress();
+}
+
+function renderVarFields(names) {
+  const container = document.getElementById('var-fields');
+  container.innerHTML = names.map(name => {
+    const id  = 'var-' + name.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_]/g, '');
+    const val = templateVars[name] || '';
+    const placeholder = 'Enter ' + name + '…';
+    return `
+      <div class="var-field">
+        <label class="var-label" for="${id}">${name}</label>
+        <input
+          class="var-input${val ? ' filled' : ''}"
+          id="${id}"
+          type="text"
+          value="${escHtml(val)}"
+          placeholder="${escHtml(placeholder)}"
+          oninput="onVarInput('${escHtml(name)}', this)"
+        >
+      </div>`;
+  }).join('');
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function onVarInput(name, el) {
+  templateVars[name] = el.value;
+  el.classList.toggle('filled', el.value.length > 0);
+  applyVars();
+  updateVarProgress();
+}
+
+function applyVars() {
+  let subj = rawSubject;
+  let body = rawBody;
+  Object.entries(templateVars).forEach(([name, val]) => {
+    if (!val) return;
+    // Replace both {Name} and [Name] formats
+    const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    subj = subj.replace(new RegExp(`\\{${escaped}\\}|\\[${escaped}\\]`, 'g'), val);
+    body = body.replace(new RegExp(`\\{${escaped}\\}|\\[${escaped}\\]`, 'g'), val);
+  });
+  document.getElementById('email-subject').value = subj;
+  document.getElementById('email-body').value    = body;
+}
+
+function updateVarProgress() {
+  const names  = Object.keys(templateVars);
+  const filled = names.filter(n => templateVars[n] && templateVars[n].trim()).length;
+  const total  = names.length;
+  const pct    = total ? Math.round(filled / total * 100) : 0;
+  document.getElementById('var-prog-text').textContent  = `${filled} / ${total} filled`;
+  document.getElementById('var-prog-fill').style.width  = pct + '%';
 }
 
 // ── SEND EMAIL ─────────────────────────────────────────────────────────────
