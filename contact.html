@@ -419,17 +419,7 @@
       animation: pulse-red 1.2s ease infinite;
     }
 
-    /* form flash on priority activation */
-    @keyframes flash-red {
-      0%   { box-shadow: none; }
-      20%  { box-shadow: 0 0 0 3px rgba(194,90,90,.5), inset 0 0 40px rgba(194,90,90,.06); }
-      50%  { box-shadow: 0 0 0 6px rgba(194,90,90,.25), inset 0 0 80px rgba(194,90,90,.04); }
-      80%  { box-shadow: 0 0 0 3px rgba(194,90,90,.15); }
-      100% { box-shadow: none; }
-    }
-    .form-card.priority-flash {
-      animation: flash-red .9s ease forwards;
-    }
+    /* form flash is handled via JS box-shadow to avoid overriding the fadeUp animation */
     .form-card.priority-active {
       border-color: rgba(194,90,90,.3) !important;
     }
@@ -619,6 +609,27 @@
     let validPriorityCode = null;
     let isPriority = false;
 
+    // Lock opacity after fadeUp completes — prevents priority flash from overriding it
+    formCard.addEventListener('animationend', (e) => {
+      if (e.animationName === 'fadeUp') {
+        formCard.style.opacity = '1';
+        formCard.style.transform = 'translateY(0)';
+      }
+    });
+
+    // JS-driven flash — only touches box-shadow, never overrides `animation`
+    function flashCardRed() {
+      formCard.style.transition = 'box-shadow .12s ease';
+      formCard.style.boxShadow = '0 0 0 5px rgba(194,90,90,.45), inset 0 0 60px rgba(194,90,90,.06)';
+      setTimeout(() => {
+        formCard.style.boxShadow = '0 0 0 2px rgba(194,90,90,.2)';
+        setTimeout(() => {
+          formCard.style.boxShadow = '';
+          setTimeout(() => { formCard.style.transition = ''; }, 300);
+        }, 500);
+      }, 180);
+    }
+
     // Fetch this year's priority code from Firebase on load
     (async function loadPriorityCode() {
       const year = new Date().getFullYear();
@@ -645,10 +656,7 @@
       priorityBanner.classList.add('show');
       formCard.classList.add('priority-active');
       submitNote.innerHTML = '<strong style="color:#e08080">⚑ Priority Submission.</strong><br />Your inquiry will be reviewed as soon as possible.';
-      // Flash animation
-      formCard.classList.remove('priority-flash');
-      void formCard.offsetWidth; // force reflow
-      formCard.classList.add('priority-flash');
+      flashCardRed();
     }
 
     priorityInput.addEventListener('input', () => {
