@@ -1013,8 +1013,124 @@ function renderDetail(e) {
       <button class="tb-btn danger" id="tbDelete">✕ Delete</button>
     </div>`;
 
-  document.getElementById('tbReply').onclick  = () =>
-    window.open(`mailto:${e.email}?subject=Re: ${encodeURIComponent(e.subject)}`);
+  document.getElementById('tbReply').onclick  = () => {
+    const REPLY_TEMPLATES = {
+      'General Inquiry':
+`Dear ${e.name},
+
+Thank you for reaching out to ATHStudios. We have received your inquiry regarding "${e.subject}" and will be happy to assist you.
+
+[Your response here.]
+
+If you have any further questions, please do not hesitate to contact us.
+
+Warm regards,
+ATHStudios`,
+
+      'Technical Support':
+`Dear ${e.name},
+
+Thank you for contacting ATHStudios Technical Support regarding "${e.subject}".
+
+We have reviewed your report and would like to assist you in resolving this issue.
+
+[Describe the solution or next steps here.]
+
+If the issue persists or you require further assistance, please reply to this email with any additional details.
+
+Warm regards,
+ATHStudios Technical Support`,
+
+      'License Issue':
+`Dear ${e.name},
+
+Thank you for getting in touch regarding your license issue: "${e.subject}".
+
+We have looked into your case and here is what we found:
+
+[License status / resolution details here.]
+
+If you need further clarification or assistance, feel free to reply to this email.
+
+Warm regards,
+ATHStudios`,
+
+      'Data Privacy Concern':
+`Dear ${e.name},
+
+Thank you for bringing this matter to our attention. We take data privacy seriously and have carefully reviewed your concern regarding "${e.subject}".
+
+[Describe the action taken or information provided here.]
+
+This matter has been handled in accordance with our Privacy Policy. If you have any additional questions, please do not hesitate to reach out.
+
+Warm regards,
+ATHStudios`,
+
+      'Bug Report':
+`Dear ${e.name},
+
+Thank you for submitting your bug report regarding "${e.subject}". We appreciate you taking the time to help us improve ATHStudios.
+
+We have logged the following issue for investigation:
+— Subject: ${e.subject}
+— Status: [Under Review / Confirmed / Resolved]
+
+[Additional notes or ETA here.]
+
+We will notify you once a fix has been applied. Thank you for your patience.
+
+Warm regards,
+ATHStudios`,
+
+      'Feature Request':
+`Dear ${e.name},
+
+Thank you for your feature suggestion: "${e.subject}". We genuinely appreciate feedback from our community.
+
+We have reviewed your request and would like to share the following:
+
+[Feature status / feedback here — e.g. "We have added this to our development roadmap."]
+
+Thank you for helping shape the future of ATHStudios.
+
+Warm regards,
+ATHStudios`,
+
+      'Document Request':
+`Dear ${e.name},
+
+Thank you for your document request regarding "${e.subject}".
+
+We have processed your request. Please find the details below:
+
+Document: [Document name]
+Status: [Ready / Processing / Requires additional information]
+[Instructions for receiving the document, if applicable.]
+
+Should you need anything else, please feel free to reach out.
+
+Warm regards,
+ATHStudios`,
+
+      'Other':
+`Dear ${e.name},
+
+Thank you for reaching out to ATHStudios regarding "${e.subject}".
+
+[Your response here.]
+
+If you have any further questions or concerns, please do not hesitate to get in touch.
+
+Warm regards,
+ATHStudios`,
+    };
+
+    const body = REPLY_TEMPLATES[e.type] || REPLY_TEMPLATES['Other'];
+    window.open(
+      `mailto:${e.email}?subject=${encodeURIComponent('Re: ' + e.subject)}&body=${encodeURIComponent(body)}`
+    );
+  };
   document.getElementById('tbRead').onclick   = () =>
     update(ref(db,'contacts/'+e.key),{status:'read'});
   document.getElementById('tbDelete').onclick = () => {
