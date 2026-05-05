@@ -498,7 +498,7 @@
     /* ── Helpers ───────────────────────────────────────────────────────── */
     const generateKey = () => {
         const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-        const rng   = new Uint32Array(56);
+        const rng   = new Uint32Array(25);
         window.crypto.getRandomValues(rng);
         return Array.from(rng, v => chars[v % chars.length]).join('');
     };
