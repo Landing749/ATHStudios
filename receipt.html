@@ -222,6 +222,26 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .toast.error{border-color:rgba(255,80,80,.4);color:#ff8080}
 .toast.info{border-color:rgba(191,160,106,.35);color:var(--g)}
 
+
+/* ── Calculator ── */
+.calc-panel{padding:14px 28px 0}
+.calc-lbl{font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--dim);margin-bottom:8px;display:block}
+.calc-display{background:var(--s4);border:1px solid rgba(191,160,106,.2);border-radius:4px;padding:8px 12px;margin-bottom:8px;text-align:right}
+.calc-expr{font-family:'Geist Mono',monospace;font-size:8px;color:var(--dim);min-height:12px;letter-spacing:.5px}
+.calc-val{font-family:'Geist Mono',monospace;font-size:22px;font-weight:400;color:var(--g3);letter-spacing:-1px;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.calc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+.cb{background:var(--s3);border:1px solid var(--wire2);border-radius:3px;color:var(--text);font-family:'Geist Mono',monospace;font-size:12px;padding:8px 4px;cursor:pointer;transition:all .12s;text-align:center;line-height:1}
+.cb:active{transform:scale(.93)}
+.cb:hover{background:var(--s4);border-color:var(--wire3)}
+.cb-op{background:rgba(191,160,106,.08);border-color:rgba(191,160,106,.2);color:var(--g)}
+.cb-op:hover{background:rgba(191,160,106,.16)}
+.cb-eq{background:var(--g);border-color:var(--g);color:#08080a;font-weight:700}
+.cb-eq:hover{background:var(--g2)}
+.cb-clr{background:rgba(255,80,80,.08);border-color:rgba(255,80,80,.18);color:#ff8080}
+.cb-clr:hover{background:rgba(255,80,80,.16)}
+.cb-del{background:rgba(240,165,0,.08);border-color:rgba(240,165,0,.18);color:#f0a500}
+.cb-del:hover{background:rgba(240,165,0,.16)}
+
 *{scrollbar-width:thin;scrollbar-color:var(--wire2) transparent}
 *::-webkit-scrollbar{width:3px;height:3px}
 *::-webkit-scrollbar-thumb{background:var(--wire2);border-radius:2px}
@@ -319,6 +339,37 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
   </div>
 
   <div class="side-foot">
+
+    <!-- Calculator -->
+    <div class="calc-panel" style="padding-bottom:12px">
+      <span class="calc-lbl">Calculator</span>
+      <div class="calc-display">
+        <div class="calc-expr" id="calc-expr">&nbsp;</div>
+        <div class="calc-val" id="calc-val">0</div>
+      </div>
+      <div class="calc-grid">
+        <button class="cb cb-clr col-span-2" onclick="ci('C')" style="grid-column:span 2">C</button>
+        <button class="cb cb-del" onclick="ci('⌫')">⌫</button>
+        <button class="cb cb-op" onclick="ci('÷')">÷</button>
+        <button class="cb" onclick="ci('7')">7</button>
+        <button class="cb" onclick="ci('8')">8</button>
+        <button class="cb" onclick="ci('9')">9</button>
+        <button class="cb cb-op" onclick="ci('×')">×</button>
+        <button class="cb" onclick="ci('4')">4</button>
+        <button class="cb" onclick="ci('5')">5</button>
+        <button class="cb" onclick="ci('6')">6</button>
+        <button class="cb cb-op" onclick="ci('−')">−</button>
+        <button class="cb" onclick="ci('1')">1</button>
+        <button class="cb" onclick="ci('2')">2</button>
+        <button class="cb" onclick="ci('3')">3</button>
+        <button class="cb cb-op" onclick="ci('+')">+</button>
+        <button class="cb" onclick="ci('%')" style="color:var(--g2)">%</button>
+        <button class="cb" onclick="ci('0')">0</button>
+        <button class="cb" onclick="ci('.')">.</button>
+        <button class="cb cb-eq" onclick="ci('=')">=</button>
+      </div>
+    </div>
+
     <!-- Client logo upload -->
     <div class="cl-upload-wrap" style="padding:0 0 10px">
       <span class="cl-upload-label">Client Logo <span style="color:var(--dim2);font-size:7px;letter-spacing:1px">(optional · session only)</span></span>
@@ -371,10 +422,9 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
         <div id="r-lines"><div class="r-item"><span>—</span><span class="d">—</span><span class="d">—</span><span>—</span></div></div>
         <div class="r-vat-wrap" id="r-vat-wrap">
           <div class="r-vat-row"><span class="r-vat-lbl">Subtotal</span><span class="r-vat-val" id="r-subtotal">₱0.00</span></div>
-          <div class="r-vat-row"><span class="r-vat-lbl">VAT (12%)</span><span class="r-vat-val" id="r-vat-amt">₱0.00</span></div>
-        </div>
+         </div>
         <div class="r-total-wrap">
-          <div><div class="r-total-lbl">Total Due (VAT Incl.)</div><span class="r-badge b-paid" id="r-status">PAID</span></div>
+          <div><div class="r-total-lbl">Total Due</div><span class="r-badge b-paid" id="r-status">PAID</span></div>
           <div class="r-total-amt" id="r-total"><span class="r-peso">₱</span>0.00</div>
         </div>
         <div class="r-remarks-wrap" id="r-rem-wrap" style="display:none"><div class="r-sect-lbl">Remarks</div><div class="r-remarks-txt" id="r-rem-txt"></div></div>
@@ -563,11 +613,9 @@ async function live() {
   document.getElementById('r-lines').innerHTML = html;
 
   const subtotal = amt>0 ? amt : calc;
-  const vatAmt   = subtotal * 0.12;
-  const total    = subtotal + vatAmt;
+  const total    = subtotal;
 
   document.getElementById('r-subtotal').textContent = '₱'+f(subtotal);
-  document.getElementById('r-vat-amt').textContent  = '₱'+f(vatAmt);
   document.getElementById('r-total').innerHTML = `<span class="r-peso">₱</span>${f(total)}`;
 
   const badge = document.getElementById('r-status');
@@ -579,7 +627,7 @@ async function live() {
   const ne=document.getElementById('r-notes-el');
   if(notes){ne.style.display='block';ne.textContent=notes;}else ne.style.display='none';
 
-  await updateSecurity({num,date,client,svc,total,status,method,vatAmt});
+  await updateSecurity({num,date,client,svc,total,status,method});
 }
 
 async function updateSecurity({num,date,client,svc,total,status,method}) {
@@ -633,7 +681,7 @@ async function doExport() {
   let calc=0;
   items.forEach(it=>calc+=(it.qty||1)*(it.price||0));
   const subtotal = amt>0 ? amt : calc;
-  const total    = subtotal * 1.12;
+  const total    = subtotal;
 
   const now = new Date();
   const issuedAt = now.toISOString();
@@ -698,6 +746,40 @@ function showToast(msg,type='info') {
   t.className='toast '+type+' on';
   setTimeout(()=>t.classList.remove('on'),3200);
 }
+
+/* ── Calculator ── */
+(function(){
+  let expr='', done=false;
+  const dv=document.getElementById('calc-val');
+  const ex=document.getElementById('calc-expr');
+  window.ci=function(k){
+    if(k==='C'){expr='';done=false;dv.textContent='0';ex.innerHTML='&nbsp;';return;}
+    if(k==='⌫'){
+      if(done){expr='';done=false;dv.textContent='0';ex.innerHTML='&nbsp;';return;}
+      expr=expr.slice(0,-1);dv.textContent=expr||'0';ex.textContent=expr||'';return;
+    }
+    if(k==='='){
+      if(!expr)return;
+      ex.textContent=expr+' =';
+      try{
+        const r=Function('"use strict";return('+expr.replace(/×/g,'*').replace(/÷/g,'/').replace(/−/g,'-').replace(/%/g,'/100')+')')();
+        if(!isFinite(r)){dv.textContent='Error';expr='';return;}
+        const v=parseFloat(r.toPrecision(12));
+        dv.textContent=v;expr=String(v);done=true;
+      }catch{dv.textContent='Error';expr='';}
+      return;
+    }
+    const isOp=['÷','×','−','+'].includes(k);
+    if(done){done=false;if(!isOp)expr='';}
+    expr+=k;dv.textContent=expr;ex.textContent=expr;
+  };
+  document.addEventListener('keydown',e=>{
+    if(['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName))return;
+    const m={'0':'0','1':'1','2':'2','3':'3','4':'4','5':'5','6':'6','7':'7','8':'8','9':'9','.':'.','%':'%','+':'+','-':'−','*':'×','/':'÷','Enter':'=','=':'=','Backspace':'⌫','Escape':'C'};
+    if(m[e.key]){e.preventDefault();ci(m[e.key]);}
+  });
+})();
+
 </script>
 </body>
 </html>
