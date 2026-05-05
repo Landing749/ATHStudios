@@ -66,7 +66,7 @@ body::after{
   padding:28px 24px 0;
   margin-bottom:60px;
 }
-.tn-logo{width:36px;height:36px;object-fit:contain;flex-shrink:0}
+.tn-logo{width:36px;height:36px;object-fit:cover;border-radius:50%;flex-shrink:0}
 .tn-brand{margin-left:12px}
 .tn-name{font-family:'Cormorant',serif;font-weight:600;font-size:18px;color:#f2ede6;letter-spacing:.2px}
 .tn-sub{font-size:8px;letter-spacing:3px;text-transform:uppercase;color:var(--dim);margin-top:2px}
@@ -106,7 +106,7 @@ body::after{
 .scanner-block{
   background:var(--s1);
   border:1px solid var(--border2);
-  border-radius:12px;
+  border-radius:24px;
   overflow:hidden;
   box-shadow:0 24px 80px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.03);
 }
@@ -203,7 +203,7 @@ body::after{
 .sb-bottom{padding:14px 20px;display:flex;align-items:center;gap:10px;border-top:1px solid var(--border)}
 
 .btn-scan{
-  flex:1;background:var(--g);border:none;border-radius:6px;
+  flex:1;background:var(--g);border:none;border-radius:12px;
   color:#09090d;font-family:'Geist',sans-serif;font-weight:600;
   font-size:10px;letter-spacing:2px;text-transform:uppercase;
   padding:13px 20px;cursor:pointer;
@@ -217,13 +217,25 @@ body::after{
 .btn-scan svg{width:14px;height:14px;flex-shrink:0}
 
 .btn-stop{
-  background:transparent;border:1px solid var(--border2);border-radius:6px;
+  background:transparent;border:1px solid var(--border2);border-radius:12px;
   color:var(--dim2);font-family:'Geist',sans-serif;font-size:10px;
   letter-spacing:2px;text-transform:uppercase;
   padding:13px 18px;cursor:pointer;transition:all .2s;white-space:nowrap;
   display:none;
 }
 .btn-stop:hover{border-color:var(--red-border);color:var(--red)}
+
+/* Camera picker */
+.cam-picker-wrap{padding:10px 20px 0;display:none}
+.cam-picker-label{font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--dim);margin-bottom:6px}
+.cam-picker-select{
+  width:100%;background:var(--s3);border:1px solid var(--border2);border-radius:10px;
+  color:var(--text);font-family:'Geist',sans-serif;font-size:12px;
+  padding:9px 12px;outline:none;cursor:pointer;transition:border-color .15s;
+  -webkit-appearance:none;appearance:none;
+}
+.cam-picker-select:focus{border-color:var(--g)}
+.cam-picker-select option{background:#1c1c26}
 
 /* Divider */
 .or-divider{
@@ -235,14 +247,14 @@ body::after{
 /* Manual input */
 .manual-row{display:flex;gap:10px}
 .manual-field{
-  flex:1;background:var(--s2);border:1px solid var(--border2);border-radius:6px;
+  flex:1;background:var(--s2);border:1px solid var(--border2);border-radius:12px;
   color:var(--text);font-family:'Geist Mono',monospace;font-size:12px;letter-spacing:.3px;
   padding:12px 16px;outline:none;transition:border-color .15s,background .15s;
 }
 .manual-field:focus{border-color:var(--g);background:var(--s3)}
 .manual-field::placeholder{color:#2a2a3c;letter-spacing:.5px}
 .btn-verify{
-  background:transparent;border:1px solid var(--border2);border-radius:6px;
+  background:transparent;border:1px solid var(--border2);border-radius:12px;
   color:var(--dim2);font-family:'Geist',sans-serif;font-size:9.5px;
   letter-spacing:2px;text-transform:uppercase;
   padding:12px 18px;cursor:pointer;transition:all .2s;white-space:nowrap;
@@ -260,7 +272,7 @@ body::after{
 
 /* Loading */
 .res-loading{
-  background:var(--s1);border:1px solid var(--border2);border-radius:12px;
+  background:var(--s1);border:1px solid var(--border2);border-radius:24px;
   padding:52px 24px;text-align:center;
 }
 .res-spinner{
@@ -275,7 +287,7 @@ body::after{
 /* Result card: AUTHENTIC */
 .res-card{
   background:var(--s1);
-  border-radius:12px;
+  border-radius:24px;
   overflow:hidden;
   box-shadow:0 24px 80px rgba(0,0,0,.5);
 }
@@ -332,7 +344,7 @@ body::after{
 
 /* Hash panel */
 .hash-panel{
-  background:var(--s3);border:1px solid var(--border2);border-radius:8px;
+  background:var(--s3);border:1px solid var(--border2);border-radius:16px;
   overflow:hidden;
 }
 .hash-panel-row{padding:14px 18px;border-bottom:1px solid var(--border)}
@@ -354,7 +366,7 @@ body::after{
 
 /* Warning box */
 .warn-box{
-  background:var(--red-bg);border:1px solid var(--red-border);border-radius:8px;
+  background:var(--red-bg);border:1px solid var(--red-border);border-radius:16px;
   padding:18px 20px;display:flex;gap:14px;
 }
 .wb-icon{font-size:20px;flex-shrink:0;line-height:1.2}
@@ -366,13 +378,13 @@ body::after{
 .nf-icon{font-size:56px;display:block;margin-bottom:20px}
 .nf-title{font-family:'Cormorant',serif;font-size:34px;font-weight:600;color:var(--red);margin-bottom:10px;letter-spacing:-.5px}
 .nf-sub{font-size:12px;color:var(--dim2);line-height:1.7;max-width:380px;margin:0 auto 28px}
-.nf-code{font-family:'Geist Mono',monospace;font-size:11px;color:var(--dim);background:var(--s3);border:1px solid var(--border2);border-radius:4px;padding:8px 16px;display:inline-block;margin-bottom:6px;letter-spacing:.5px}
+.nf-code{font-family:'Geist Mono',monospace;font-size:11px;color:var(--dim);background:var(--s3);border:1px solid var(--border2);border-radius:10px;padding:8px 16px;display:inline-block;margin-bottom:6px;letter-spacing:.5px}
 .nf-contact{font-size:11px;color:var(--dim);margin-bottom:28px}
 .nf-contact a{color:var(--g);text-decoration:none}
 
 /* Reset btn */
 .btn-reset{
-  width:100%;background:transparent;border:1px solid var(--border2);border-radius:6px;
+  width:100%;background:transparent;border:1px solid var(--border2);border-radius:12px;
   color:var(--dim2);font-family:'Geist',sans-serif;font-size:10px;
   letter-spacing:2px;text-transform:uppercase;
   padding:13px;cursor:pointer;transition:all .2s;
@@ -470,6 +482,12 @@ body::after{
         </div>
       </div>
 
+      <!-- Camera picker (shown after devices enumerated) -->
+      <div class="cam-picker-wrap" id="cam-picker-wrap">
+        <div class="cam-picker-label">Camera</div>
+        <select class="cam-picker-select" id="cam-picker" onchange="onCameraChange()"></select>
+      </div>
+
       <!-- Controls -->
       <div class="sb-bottom">
         <button class="btn-scan" id="btn-scan" onclick="startCamera()">
@@ -485,7 +503,7 @@ body::after{
 
     <!-- Manual -->
     <div class="manual-row">
-      <input class="manual-field" id="manual-input" placeholder="Paste barcode value  (e.g. ATH2026X7K2AB12CD34)" maxlength="80" onkeydown="if(event.key==='Enter')manualVerify()">
+      <input class="manual-field" id="manual-input" placeholder="Enter Document ID  (e.g. 2026XXXX-YYYYYY)" maxlength="80" onkeydown="if(event.key==='Enter')manualVerify()">
       <button class="btn-verify" onclick="manualVerify()">Verify →</button>
     </div>
 
@@ -518,11 +536,10 @@ db.ref('.info/connected').on('value', s => {
 });
 
 /* ═══ Scanner state ═══ */
-let videoStream   = null;
-let scanLoop      = null;
 let lastScanned   = '';
 let codeReader    = null;
 let isScanning    = false;
+let selectedDeviceId = null;
 
 function setScanState(state) {
   const dot = document.getElementById('scan-dot');
@@ -538,49 +555,60 @@ function setScanState(state) {
   lbl.textContent = s.txt;
 }
 
+/* ═══ Enumerate cameras and populate picker ═══ */
+async function loadCameras() {
+  try {
+    // Need to request permission first so labels are visible
+    await navigator.mediaDevices.getUserMedia({ video: true }).then(s => s.getTracks().forEach(t => t.stop()));
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const cameras = devices.filter(d => d.kind === 'videoinput');
+    const picker  = document.getElementById('cam-picker');
+    const wrap    = document.getElementById('cam-picker-wrap');
+    picker.innerHTML = '';
+    cameras.forEach((cam, i) => {
+      const opt = document.createElement('option');
+      opt.value = cam.deviceId;
+      opt.textContent = cam.label || ('Camera ' + (i + 1));
+      picker.appendChild(opt);
+    });
+    if (cameras.length > 0) {
+      // Default to back camera on phones
+      const back = cameras.find(c => /back|rear|environment/i.test(c.label));
+      selectedDeviceId = back ? back.deviceId : cameras[0].deviceId;
+      picker.value = selectedDeviceId;
+      if (cameras.length > 1) wrap.style.display = 'block';
+    }
+  } catch(e) { /* permissions not granted yet — picker stays hidden */ }
+}
+
+function onCameraChange() {
+  selectedDeviceId = document.getElementById('cam-picker').value;
+  // Restart scanner with new camera if currently scanning
+  if (isScanning) { stopCamera(); startCamera(); }
+}
+
 /* ═══ Camera via ZXing ═══ */
 async function startCamera() {
   const btn   = document.getElementById('btn-scan');
   const stopB = document.getElementById('btn-stop');
   const idle  = document.getElementById('cam-idle');
   const ov    = document.getElementById('scan-ov');
+  const video = document.getElementById('cam-video');
 
   btn.disabled = true;
-  btn.innerHTML = `<div style="width:14px;height:14px;border-radius:50%;border:2px solid rgba(0,0,0,.3);border-top-color:#09090d;animation:spin .7s linear infinite;flex-shrink:0"></div> Requesting permission...`;
-
-  // Step 1: explicitly ask for camera permission first
-  let permStream = null;
-  try {
-    permStream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: { ideal: 'environment' } }
-    });
-  } catch(permErr) {
-    console.error('Permission denied:', permErr);
-    setScanState('error');
-    btn.disabled = false;
-    btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 7V1h-6M1 7V1h6M23 17v6h-6M1 17v6h6"/><rect x="7" y="7" width="10" height="10" rx="1"/></svg> Retry Camera`;
-    idle.innerHTML = `
-      <div class="cam-idle-icon" style="border-color:rgba(255,68,68,.3)">
-        <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity:.6;stroke:var(--red)">
-          <circle cx="16" cy="16" r="13"/><path d="M16 10v6M16 20v2" stroke-linecap="round"/>
-        </svg>
-      </div>
-      <div class="cam-idle-txt" style="color:rgba(255,68,68,.75)">
-        Camera access was denied.<br>
-        <span style="font-size:11px;color:var(--dim2)">Open browser settings → Site permissions → Camera → Allow, then try again.</span>
-      </div>`;
-    return;
-  }
-
-  // Step 2: attach the already-approved stream directly to the video element
   btn.innerHTML = `<div style="width:14px;height:14px;border-radius:50%;border:2px solid rgba(0,0,0,.3);border-top-color:#09090d;animation:spin .7s linear infinite;flex-shrink:0"></div> Starting...`;
 
   try {
-    const video  = document.getElementById('cam-video');
-    const canvas = document.getElementById('cam-canvas');
-    const ctx    = canvas.getContext('2d');
+    // Enumerate cameras (populates picker too)
+    await loadCameras();
 
-    video.srcObject = permStream;
+    // Build constraints - prefer selected device, fallback to environment
+    const constraints = selectedDeviceId
+      ? { video: { deviceId: { exact: selectedDeviceId } } }
+      : { video: { facingMode: { ideal: 'environment' } } };
+
+    const stream = await navigator.mediaDevices.getUserMedia(constraints);
+    video.srcObject = stream;
     await video.play();
 
     video.style.display = 'block';
@@ -591,43 +619,49 @@ async function startCamera() {
     setScanState('active');
     isScanning = true;
 
-    // ZXing frame-by-frame decode using canvas
+    // ZXing decode loop
     const hints = new Map();
     hints.set(ZXing.DecodeHintType.TRY_HARDER, true);
     const reader = new ZXing.BrowserMultiFormatReader(hints);
+    const canvas = document.getElementById('cam-canvas');
+    const ctx    = canvas.getContext('2d');
 
     function tick() {
       if (!isScanning) return;
-      if (video.readyState >= 2) {
-        canvas.width  = video.videoWidth  || 640;
-        canvas.height = video.videoHeight || 480;
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      if (video.readyState >= 2 && video.videoWidth > 0) {
+        canvas.width  = video.videoWidth;
+        canvas.height = video.videoHeight;
+        ctx.drawImage(video, 0, 0);
         try {
+          // Build luminance source from canvas ImageData
           const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-          const lum     = new ZXing.RGBLuminanceSource(imgData.data, canvas.width, canvas.height);
-          const bmp     = new ZXing.BinaryBitmap(new ZXing.HybridBinarizer(lum));
-          const result  = reader.decodeBitmap(bmp);
+          // Convert RGBA → grayscale for ZXing
+          const gray = new Uint8ClampedArray(canvas.width * canvas.height);
+          for (let i = 0; i < gray.length; i++) {
+            const r = imgData.data[i*4], g = imgData.data[i*4+1], b = imgData.data[i*4+2];
+            gray[i] = (r * 0.299 + g * 0.587 + b * 0.114) | 0;
+          }
+          const lum = new ZXing.RGBLuminanceSource(gray, canvas.width, canvas.height);
+          const bmp = new ZXing.BinaryBitmap(new ZXing.HybridBinarizer(lum));
+          const result = reader.decodeBitmap(bmp);
           if (result) {
             const text = result.getText();
             if (text && text !== lastScanned) {
               lastScanned = text;
               setScanState('found');
-              // stop tracks
-              permStream.getTracks().forEach(t => t.stop());
               stopCamera();
-              verifyCode(text.trim());
+              verifyByBarcode(text.trim());
               return;
             }
           }
-        } catch(e) { /* no barcode found in this frame, keep going */ }
+        } catch(e) { /* no code found this frame */ }
       }
-      scanLoop = requestAnimationFrame(tick);
+      requestAnimationFrame(tick);
     }
-    scanLoop = requestAnimationFrame(tick);
+    requestAnimationFrame(tick);
 
   } catch(err) {
-    console.error('Camera start error:', err);
-    permStream.getTracks().forEach(t => t.stop());
+    console.error('Camera error:', err);
     setScanState('error');
     btn.disabled = false;
     btn.style.display = 'flex';
@@ -640,21 +674,15 @@ async function startCamera() {
         </svg>
       </div>
       <div class="cam-idle-txt" style="color:rgba(255,68,68,.75)">
-        Camera failed to start.<br>
-        <span style="font-size:11px;color:var(--dim2)">Try refreshing the page or use manual input below.</span>
+        Camera access denied or unavailable.<br>
+        <span style="font-size:11px;color:var(--dim2)">Allow camera in browser settings, then retry. Or use Document ID below.</span>
       </div>`;
   }
 }
 
 function stopCamera() {
   isScanning = false;
-  if (scanLoop) { cancelAnimationFrame(scanLoop); scanLoop = null; }
-  if (codeReader) {
-    try { codeReader.reset(); } catch(e){}
-    codeReader = null;
-  }
   const video = document.getElementById('cam-video');
-  // stop all camera tracks
   if (video.srcObject) {
     video.srcObject.getTracks().forEach(t => t.stop());
     video.srcObject = null;
@@ -667,56 +695,77 @@ function stopCamera() {
   document.getElementById('btn-scan').innerHTML       = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 7V1h-6M1 7V1h6M23 17v6h-6M1 17v6h6"/><rect x="7" y="7" width="10" height="10" rx="1"/></svg> Start Scanning`;
   document.getElementById('btn-stop').style.display   = 'none';
   setScanState('idle');
-  isScanning = false;
 }
 
-/* ═══ Manual ═══ */
+/* ═══ Manual (Document ID) ═══ */
 function manualVerify() {
   const v = document.getElementById('manual-input').value.trim();
   if (!v) return;
-  verifyCode(v);
+  verifyByDocId(v);
 }
 
-/* ═══ Verify ═══ */
-async function verifyCode(barcode) {
-  const rw = document.getElementById('result-wrap');
-  rw.className = 'result-wrap show';
-  rw.innerHTML = `<div class="res-loading"><div class="res-spinner"></div><div class="res-loading-txt">Querying Secure Ledger...</div></div>`;
-  rw.scrollIntoView({behavior:'smooth', block:'start'});
-
+/* ═══ Verify by barcode value (from scanner) ═══ */
+async function verifyByBarcode(barcode) {
+  showLoading();
   try {
     const snap = await db.ref('receipts/' + barcode).get();
-
     if (!snap.exists()) {
       renderCompromised(barcode, 'NOT_FOUND', null);
       return;
     }
-
     const data = snap.val();
-
-    // Integrity check: reconstruct expected barcode
-    const expectedPrefix = (data.receiptNo || '').replace(/-/g, '');
+    const expectedPrefix  = (data.receiptNo || '').replace(/-/g, '');
     const expectedHashFrag = (data.hash || '').slice(0, 8).toUpperCase();
-    const expectedBarcode = expectedPrefix + expectedHashFrag;
-
+    const expectedBarcode  = expectedPrefix + expectedHashFrag;
     if (barcode !== expectedBarcode) {
       renderCompromised(barcode, 'MISMATCH', data);
       return;
     }
-
     renderAuthentic(data, barcode);
   } catch(err) {
     console.error(err);
-    document.getElementById('result-wrap').innerHTML = `
-      <div class="res-card compromised">
-        <div class="not-found-inner">
-          <span class="nf-icon">⚠️</span>
-          <div class="nf-title">Ledger Unreachable</div>
-          <div class="nf-sub">Could not connect to the ATHStudios secure database. Check your internet connection and try again.</div>
-          <button class="btn-reset" onclick="resetResult()">↩ Try Again</button>
-        </div>
-      </div>`;
+    showLedgerError();
   }
+}
+
+/* ═══ Verify by Document ID (from manual input) ═══ */
+async function verifyByDocId(docId) {
+  showLoading();
+  try {
+    const snap = await db.ref('receipts').orderByChild('docId').equalTo(docId).limitToFirst(1).get();
+    if (!snap.exists()) {
+      renderCompromised(docId, 'NOT_FOUND', null);
+      return;
+    }
+    let data = null, barcode = null;
+    snap.forEach(child => { data = child.val(); barcode = child.key; });
+    renderAuthentic(data, barcode);
+  } catch(err) {
+    console.error(err);
+    showLedgerError();
+  }
+}
+
+/* backwards-compat alias */
+function verifyCode(v) { verifyByBarcode(v); }
+
+function showLoading() {
+  const rw = document.getElementById('result-wrap');
+  rw.className = 'result-wrap show';
+  rw.innerHTML = `<div class="res-loading"><div class="res-spinner"></div><div class="res-loading-txt">Querying Secure Ledger...</div></div>`;
+  rw.scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+function showLedgerError() {
+  document.getElementById('result-wrap').innerHTML = `
+    <div class="res-card compromised">
+      <div class="not-found-inner">
+        <span class="nf-icon">⚠️</span>
+        <div class="nf-title">Ledger Unreachable</div>
+        <div class="nf-sub">Could not connect to the ATHStudios secure database. Check your internet connection and try again.</div>
+        <button class="btn-reset" onclick="resetResult()">↩ Try Again</button>
+      </div>
+    </div>`;
 }
 
 function renderAuthentic(d, barcode) {
@@ -850,7 +899,7 @@ function renderCompromised(barcode, reason, data) {
       <div style="text-align:center;padding:4px 0">
         <div style="font-size:11.5px;color:var(--dim2);line-height:1.7">
           If you believe this is an error, contact ATHStudios at<br>
-          <a href="mailto:arhanmeir.obrero@gmail.com" style="color:var(--g);font-family:'Geist Mono',monospace;text-decoration:none">arhanmeir.obrero@gmail.com</a>
+          <a href="mailto:contact.athstudios@gmail.com" style="color:var(--g);font-family:'Geist Mono',monospace;text-decoration:none">contact.athstudios@gmail.com</a>
         </div>
       </div>
 
