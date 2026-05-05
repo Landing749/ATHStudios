@@ -689,20 +689,45 @@ function manualVerify() {
 async function verifyByBarcode(barcode) {
   showLoading();
   try {
+    // Strategy 1: direct key lookup (barcode IS the Firebase key)
     const snap = await db.ref('receipts/' + barcode).get();
-    if (!snap.exists()) {
-      renderCompromised(barcode, 'NOT_FOUND', null);
+    if (snap.exists()) {
+      const data = snap.val();
+      const expectedPrefix   = (data.receiptNo || '').replace(/-/g, '');
+      const expectedHashFrag = (data.hash || '').slice(0, 8).toUpperCase();
+      const expectedBarcode  = expectedPrefix + expectedHashFrag;
+      // Case-insensitive comparison to handle mixed-case barcodes
+      if (barcode.toUpperCase() !== expectedBarcode.toUpperCase()) {
+        renderCompromised(barcode, 'MISMATCH', data);
+        return;
+      }
+      renderAuthentic(data, barcode);
       return;
     }
-    const data = snap.val();
-    const expectedPrefix  = (data.receiptNo || '').replace(/-/g, '');
-    const expectedHashFrag = (data.hash || '').slice(0, 8).toUpperCase();
-    const expectedBarcode  = expectedPrefix + expectedHashFrag;
-    if (barcode !== expectedBarcode) {
-      renderCompromised(barcode, 'MISMATCH', data);
-      return;
-    }
-    renderAuthentic(data, barcode);
+
+    // Strategy 2: barcode may encode a Document ID — use docindex reverse-lookup
+    try {
+      const idxSnap = await db.ref('docindex/' + barcode).get();
+      if (idxSnap.exists()) {
+        const realKey = idxSnap.val();
+        const snap2 = await db.ref('receipts/' + realKey).get();
+        if (snap2.exists()) { renderAuthentic(snap2.val(), realKey); return; }
+      }
+    } catch(_) {}
+
+    // Strategy 3: orderByChild('docId') fallback
+    try {
+      const snap3 = await db.ref('receipts').orderByChild('docId').equalTo(barcode).limitToFirst(1).get();
+      if (snap3.exists()) {
+        let data = null, key = null;
+        snap3.forEach(child => { data = child.val(); key = child.key; });
+        renderAuthentic(data, key);
+        return;
+      }
+    } catch(_) {}
+
+    // Nothing found by any method
+    renderCompromised(barcode, 'NOT_FOUND', null);
   } catch(err) {
     console.error(err);
     showLedgerError();
