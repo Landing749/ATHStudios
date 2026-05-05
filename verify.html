@@ -536,9 +536,10 @@ db.ref('.info/connected').on('value', s => {
 });
 
 /* ═══ Scanner state ═══ */
-let lastScanned   = '';
-let codeReader    = null;
-let isScanning    = false;
+let lastScanned      = '';
+let codeReader       = null;
+let zxingControls    = null;
+let isScanning       = false;
 let selectedDeviceId = null;
 
 function setScanState(state) {
@@ -608,9 +609,8 @@ async function startCamera() {
       : { video: { facingMode: { ideal: 'environment' } } };
 
     const stream = await navigator.mediaDevices.getUserMedia(constraints);
-    video.srcObject = stream;
-    await video.play();
 
+    // Show camera UI before starting decode
     video.style.display = 'block';
     idle.style.display  = 'none';
     ov.style.display    = 'flex';
@@ -619,46 +619,21 @@ async function startCamera() {
     setScanState('active');
     isScanning = true;
 
-    // ZXing decode loop
-    const hints = new Map();
-    hints.set(ZXing.DecodeHintType.TRY_HARDER, true);
-    const reader = new ZXing.BrowserMultiFormatReader(hints);
-    const canvas = document.getElementById('cam-canvas');
-    const ctx    = canvas.getContext('2d');
-
-    function tick() {
+    // Use ZXing's official continuous-decode API (handles RAF loop internally)
+    const reader = new ZXing.BrowserMultiFormatReader();
+    zxingControls = await reader.decodeFromStream(stream, video, (result, err) => {
       if (!isScanning) return;
-      if (video.readyState >= 2 && video.videoWidth > 0) {
-        canvas.width  = video.videoWidth;
-        canvas.height = video.videoHeight;
-        ctx.drawImage(video, 0, 0);
-        try {
-          // Build luminance source from canvas ImageData
-          const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-          // Convert RGBA → grayscale for ZXing
-          const gray = new Uint8ClampedArray(canvas.width * canvas.height);
-          for (let i = 0; i < gray.length; i++) {
-            const r = imgData.data[i*4], g = imgData.data[i*4+1], b = imgData.data[i*4+2];
-            gray[i] = (r * 0.299 + g * 0.587 + b * 0.114) | 0;
-          }
-          const lum = new ZXing.RGBLuminanceSource(gray, canvas.width, canvas.height);
-          const bmp = new ZXing.BinaryBitmap(new ZXing.HybridBinarizer(lum));
-          const result = reader.decodeBitmap(bmp);
-          if (result) {
-            const text = result.getText();
-            if (text && text !== lastScanned) {
-              lastScanned = text;
-              setScanState('found');
-              stopCamera();
-              verifyByBarcode(text.trim());
-              return;
-            }
-          }
-        } catch(e) { /* no code found this frame */ }
+      if (result) {
+        const text = result.getText();
+        if (text && text !== lastScanned) {
+          lastScanned = text;
+          setScanState('found');
+          stopCamera();
+          verifyByBarcode(text.trim());
+        }
       }
-      requestAnimationFrame(tick);
-    }
-    requestAnimationFrame(tick);
+      // err is NotFoundException on most frames — that is normal, keep scanning
+    });
 
   } catch(err) {
     console.error('Camera error:', err);
@@ -675,13 +650,19 @@ async function startCamera() {
       </div>
       <div class="cam-idle-txt" style="color:rgba(255,68,68,.75)">
         Camera access denied or unavailable.<br>
-        <span style="font-size:11px;color:var(--dim2)">Allow camera in browser settings, then retry. Or use Document ID below.</span>
+        <span style="font-size:11px;color:var(--dim2)">Allow camera in browser settings, then retry. Or enter the code manually below.</span>
       </div>`;
   }
 }
 
 function stopCamera() {
   isScanning = false;
+  // Stop ZXing decode loop and release stream
+  if (zxingControls) {
+    try { zxingControls.stop(); } catch(_) {}
+    zxingControls = null;
+  }
+  // Belt-and-suspenders: ensure media tracks are released
   const video = document.getElementById('cam-video');
   if (video.srcObject) {
     video.srcObject.getTracks().forEach(t => t.stop());
@@ -729,17 +710,41 @@ async function verifyByBarcode(barcode) {
 }
 
 /* ═══ Verify by Document ID (from manual input) ═══ */
-async function verifyByDocId(docId) {
+async function verifyByDocId(input) {
   showLoading();
+  input = input.trim();
   try {
-    const snap = await db.ref('receipts').orderByChild('docId').equalTo(docId).limitToFirst(1).get();
-    if (!snap.exists()) {
-      renderCompromised(docId, 'NOT_FOUND', null);
+    // Strategy 1: direct key lookup — works if the user pasted the raw barcode value
+    const directSnap = await db.ref('receipts/' + input).get();
+    if (directSnap.exists()) {
+      // Re-use barcode verify path (handles integrity check + renderAuthentic)
+      const data = directSnap.val();
+      renderAuthentic(data, input);
       return;
     }
-    let data = null, barcode = null;
-    snap.forEach(child => { data = child.val(); barcode = child.key; });
-    renderAuthentic(data, barcode);
+
+    // Strategy 2: docindex reverse-lookup (written by receipt generator v2+)
+    try {
+      const idxSnap = await db.ref('docindex/' + input).get();
+      if (idxSnap.exists()) {
+        verifyByBarcode(idxSnap.val());
+        return;
+      }
+    } catch(_) {}
+
+    // Strategy 3: orderByChild fallback (requires Firebase index rule — best-effort)
+    try {
+      const snap = await db.ref('receipts').orderByChild('docId').equalTo(input).limitToFirst(1).get();
+      if (snap.exists()) {
+        let data = null, barcode = null;
+        snap.forEach(child => { data = child.val(); barcode = child.key; });
+        renderAuthentic(data, barcode);
+        return;
+      }
+    } catch(_) {}
+
+    // Nothing found by any method
+    renderCompromised(input, 'NOT_FOUND', null);
   } catch(err) {
     console.error(err);
     showLedgerError();
