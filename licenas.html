@@ -156,6 +156,30 @@
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+
+        /* Calculator buttons */
+        .calc-btn {
+            padding: 10px 4px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .calc-btn:active { transform: scale(0.93); }
+        .calc-num {
+            background: #1a1a1a;
+            border: 1px solid rgba(255,255,255,0.08);
+            color: #e0e0e0;
+        }
+        .calc-num:hover { background: #222; border-color: rgba(255,255,255,0.18); }
+        .calc-op {
+            background: rgba(0,212,255,0.08);
+            border: 1px solid rgba(0,212,255,0.2);
+            color: var(--at-blue);
+        }
+        .calc-op:hover { background: rgba(0,212,255,0.16); }
     </style>
 </head>
 <body class="p-4 md:p-8">
@@ -315,6 +339,52 @@
                     <span class="text-gray-700">Waiting for action...</span>
                 </div>
             </div>
+
+            <!-- Calculator -->
+            <div class="glass-panel p-5 border-l-4 border-l-[#00d4ff]/40">
+                <h3 class="text-[10px] uppercase text-gray-500 font-bold mb-4 flex items-center gap-2">
+                    <svg class="w-3.5 h-3.5 text-[#00d4ff]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 14h.01M9 11h.01M12 11h.01M15 11h.01M4 5a2 2 0 012-2h12a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V5z"/>
+                    </svg>
+                    Calculator
+                </h3>
+
+                <!-- Display -->
+                <div class="bg-black rounded-lg border border-white/10 px-4 py-3 mb-3 text-right">
+                    <div id="calcExpr" class="text-[10px] text-gray-600 font-mono min-h-[14px] truncate">&nbsp;</div>
+                    <div id="calcDisplay" class="text-2xl font-bold text-white mono tracking-tight truncate">0</div>
+                </div>
+
+                <!-- Buttons grid -->
+                <div class="grid grid-cols-4 gap-1.5">
+                    <!-- Row 1 -->
+                    <button onclick="calcInput('C')"   class="calc-btn col-span-2 bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20">C</button>
+                    <button onclick="calcInput('⌫')"   class="calc-btn bg-[#1a1a1a] border border-white/10 text-yellow-400 hover:border-yellow-500/40">⌫</button>
+                    <button onclick="calcInput('÷')"   class="calc-btn calc-op">÷</button>
+                    <!-- Row 2 -->
+                    <button onclick="calcInput('7')"   class="calc-btn calc-num">7</button>
+                    <button onclick="calcInput('8')"   class="calc-btn calc-num">8</button>
+                    <button onclick="calcInput('9')"   class="calc-btn calc-num">9</button>
+                    <button onclick="calcInput('×')"   class="calc-btn calc-op">×</button>
+                    <!-- Row 3 -->
+                    <button onclick="calcInput('4')"   class="calc-btn calc-num">4</button>
+                    <button onclick="calcInput('5')"   class="calc-btn calc-num">5</button>
+                    <button onclick="calcInput('6')"   class="calc-btn calc-num">6</button>
+                    <button onclick="calcInput('−')"   class="calc-btn calc-op">−</button>
+                    <!-- Row 4 -->
+                    <button onclick="calcInput('1')"   class="calc-btn calc-num">1</button>
+                    <button onclick="calcInput('2')"   class="calc-btn calc-num">2</button>
+                    <button onclick="calcInput('3')"   class="calc-btn calc-num">3</button>
+                    <button onclick="calcInput('+')"   class="calc-btn calc-op">+</button>
+                    <!-- Row 5 -->
+                    <button onclick="calcInput('%')"   class="calc-btn calc-num text-[#00d4ff]/70">%</button>
+                    <button onclick="calcInput('0')"   class="calc-btn calc-num">0</button>
+                    <button onclick="calcInput('.')"   class="calc-btn calc-num">.</button>
+                    <button onclick="calcInput('=')"   class="calc-btn col-span-1 bg-[#00d4ff] text-black font-bold hover:bg-[#00b8e6]">=</button>
+                </div>
+            </div>
+
         </div>
 
         <!-- ── Registry ─────────────────────────────────────────────── -->
@@ -722,6 +792,95 @@
         document.getElementById('totalCount').innerText = total;
         document.getElementById('activeCount').innerText = active;
     }
+</script>
+
+<!-- ════════════════════════════════════════════════════════════
+     CALCULATOR LOGIC
+════════════════════════════════════════════════════════════ -->
+<script>
+    (() => {
+        let expr     = '';
+        let justCalc = false;
+
+        const display  = document.getElementById('calcDisplay');
+        const exprLine = document.getElementById('calcExpr');
+
+        function updateDisplay(val) {
+            // Trim to fit — show last 12 chars if too long
+            const str = String(val);
+            display.textContent = str.length > 12 ? str.slice(-12) : str;
+        }
+
+        window.calcInput = (key) => {
+            if (key === 'C') {
+                expr = ''; justCalc = false;
+                updateDisplay('0');
+                exprLine.innerHTML = '&nbsp;';
+                return;
+            }
+            if (key === '⌫') {
+                if (justCalc) { expr = ''; justCalc = false; updateDisplay('0'); exprLine.innerHTML = '&nbsp;'; return; }
+                expr = expr.slice(0, -1);
+                updateDisplay(expr || '0');
+                exprLine.innerHTML = expr || '&nbsp;';
+                return;
+            }
+            if (key === '=') {
+                if (!expr) return;
+                exprLine.textContent = expr + ' =';
+                try {
+                    // Replace display symbols with JS operators
+                    const jsExpr = expr
+                        .replace(/×/g, '*')
+                        .replace(/÷/g, '/')
+                        .replace(/−/g, '-')
+                        .replace(/%/g, '/100');
+                    // Safe eval via Function
+                    const result = Function('"use strict"; return (' + jsExpr + ')')();
+                    if (!isFinite(result)) { updateDisplay('Error'); expr = ''; return; }
+                    // Round floating point noise
+                    const rounded = parseFloat(result.toPrecision(12));
+                    updateDisplay(rounded);
+                    expr     = String(rounded);
+                    justCalc = true;
+                } catch {
+                    updateDisplay('Error');
+                    expr = '';
+                }
+                return;
+            }
+
+            // If user types a digit/op after a completed calculation, start fresh for ops, continue for digits
+            const isOp = ['÷','×','−','+'].includes(key);
+            if (justCalc) {
+                justCalc = false;
+                if (isOp) {
+                    // continue chaining from result
+                } else {
+                    expr = ''; // start fresh number
+                }
+            }
+
+            expr += key;
+            updateDisplay(expr);
+            exprLine.textContent = expr;
+        };
+
+        // Keyboard support
+        document.addEventListener('keydown', (e) => {
+            // Only hijack if not focused on an input
+            if (['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return;
+            const map = {
+                '0':'0','1':'1','2':'2','3':'3','4':'4',
+                '5':'5','6':'6','7':'7','8':'8','9':'9',
+                '.':'.','%':'%',
+                '+':'+','-':'−','*':'×','/':'÷',
+                'Enter':'=','=':'=',
+                'Backspace':'⌫','Escape':'C'
+            };
+            if (map[e.key]) { e.preventDefault(); calcInput(map[e.key]); }
+        });
+    })();
 </script>
 </body>
 </html>
