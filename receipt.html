@@ -659,6 +659,8 @@ async function doExport() {
 
   try {
     await db.ref('receipts/'+currentBarcodeVal).set(record);
+    // Write reverse-lookup index so verify page can find by DocID without needing a Firebase index rule
+    await db.ref('docindex/'+docId).set(currentBarcodeVal);
     showToast('✓ Registered on secure ledger','success');
 
     btn.textContent = 'Exporting PNG...';
