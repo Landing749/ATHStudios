@@ -401,6 +401,38 @@ body::after{
   .res-banner{flex-wrap:wrap}
   .res-timestamp{margin-left:0;text-align:left}
 }
+
+/* Verification stats (verify counter, confidence) */
+.ver-stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px 28px;margin-top:0}
+.conf-wrap{display:flex;flex-direction:column;gap:5px}
+.conf-bar{height:5px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden}
+.conf-fill{height:100%;border-radius:3px;transition:width .6s cubic-bezier(.16,1,.3,1)}
+.conf-fill.ok{background:var(--green)}
+.conf-fill.warn{background:#f0c060}
+.conf-fill.bad{background:var(--red)}
+.conf-pct{font-family:'Geist Mono',monospace;font-size:10px;letter-spacing:.5px}
+.conf-pct.ok{color:var(--green)}
+.conf-pct.warn{color:#f0c060}
+.conf-pct.bad{color:var(--red)}
+.chain-panel{background:var(--s3);border:1px solid var(--border2);border-radius:16px;overflow:hidden;margin-top:0}
+.chain-row{padding:12px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.chain-row:last-child{border-bottom:none}
+.chain-icon{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0}
+.chain-icon.ok{background:rgba(45,216,130,.15);color:var(--green)}
+.chain-icon.na{background:rgba(255,255,255,.06);color:var(--dim)}
+.chain-lbl{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--dim2);flex:1}
+.chain-val{font-family:'Geist Mono',monospace;font-size:8.5px;color:var(--text);letter-spacing:.3px}
+.copy-btn{
+  background:transparent;border:1px solid var(--border2);border-radius:10px;
+  color:var(--dim2);font-family:'Geist',sans-serif;font-size:9px;
+  letter-spacing:2px;text-transform:uppercase;
+  padding:9px 16px;cursor:pointer;transition:all .2s;
+}
+.copy-btn:hover{border-color:var(--g);color:var(--g);background:var(--g-glow)}
+.receipt-age{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:8px;padding:4px 10px}
+.age-dot{width:5px;height:5px;border-radius:50%;background:var(--green)}
+.age-txt{font-family:'Geist Mono',monospace;font-size:8.5px;color:var(--dim2);letter-spacing:.5px}
+.anomaly-warn{background:rgba(240,192,96,.06);border:1px solid rgba(240,192,96,.2);border-radius:10px;padding:10px 14px;display:flex;align-items:flex-start;gap:10px;font-size:11px;color:rgba(240,192,96,.85);line-height:1.5}
 </style>
 </head>
 <body>
@@ -430,7 +462,7 @@ body::after{
   <div class="hero">
     <div class="hero-tag">
       <div class="hero-tag-dot"></div>
-      <div class="hero-tag-txt">Cryptographic Verification</div>
+      <div class="hero-tag-txt">Cryptographic Verification · v3.0</div>
     </div>
     <h1 class="hero-h">Verify<br><em>Receipt</em></h1>
     <p class="hero-p">Scan the barcode on any ATHStudios receipt to instantly verify its authenticity against our secure ledger. Every receipt is registered with a SHA-256 hash at time of issue.</p>
@@ -702,6 +734,7 @@ async function verifyByBarcode(barcode) {
         return;
       }
       renderAuthentic(data, barcode);
+      logAndFetchVerification(barcode);
       return;
     }
 
@@ -711,7 +744,7 @@ async function verifyByBarcode(barcode) {
       if (idxSnap.exists()) {
         const realKey = idxSnap.val();
         const snap2 = await db.ref('receipts/' + realKey).get();
-        if (snap2.exists()) { renderAuthentic(snap2.val(), realKey); return; }
+        if (snap2.exists()) { renderAuthentic(snap2.val(), realKey); logAndFetchVerification(realKey); return; }
       }
     } catch(_) {}
 
@@ -722,6 +755,7 @@ async function verifyByBarcode(barcode) {
         let data = null, key = null;
         snap3.forEach(child => { data = child.val(); key = child.key; });
         renderAuthentic(data, key);
+        logAndFetchVerification(key);
         return;
       }
     } catch(_) {}
@@ -745,6 +779,7 @@ async function verifyByDocId(input) {
       // Re-use barcode verify path (handles integrity check + renderAuthentic)
       const data = directSnap.val();
       renderAuthentic(data, input);
+      logAndFetchVerification(input);
       return;
     }
 
@@ -801,10 +836,13 @@ function showLedgerError() {
 function renderAuthentic(d, barcode) {
   const issued   = d.issuedAt ? new Date(d.issuedAt).toLocaleString('en-PH',{dateStyle:'medium',timeStyle:'short'}) : '—';
   const ago      = d.createdAt ? timeAgo(d.createdAt) : '';
+  const ageLabel = receiptAgeLabel(d.createdAt);
   const bFrag    = barcode.slice(-8);
   const hFrag    = (d.hash||'').slice(0,8).toUpperCase();
   const match    = bFrag === hFrag;
   const statusCls= 'status-' + (d.status||'paid');
+  const confidence = match ? 100 : 60;
+  const confCls    = match ? 'ok' : 'warn';
 
   document.getElementById('result-wrap').innerHTML = `
   <div class="res-card authentic">
@@ -874,7 +912,70 @@ function renderAuthentic(d, barcode) {
 
     </div>
 
-    <div style="padding:0 32px 28px"><button class="btn-reset" onclick="resetResult()">↩ Verify Another Receipt</button></div>
+      <div class="line"></div>
+
+      <div class="res-section">
+        <div class="res-section-title">Verification Record &amp; Confidence</div>
+        <div class="ver-stats-grid">
+          <div class="res-kv">
+            <div class="res-k">Times Verified</div>
+            <div class="res-v mono" id="verify-count" style="color:var(--g3)">Loading...</div>
+          </div>
+          <div class="res-kv">
+            <div class="res-k">First Verified</div>
+            <div class="res-v mono" id="first-verified">Loading...</div>
+          </div>
+          <div class="res-kv">
+            <div class="res-k">Confidence Score</div>
+            <div class="conf-wrap">
+              <div class="conf-bar"><div class="conf-fill ${confCls}" style="width:${confidence}%"></div></div>
+              <div class="conf-pct ${confCls}">${confidence}% — ${match ? 'Full integrity confirmed' : 'Hash fragment mismatch'}</div>
+            </div>
+          </div>
+          <div class="res-kv">
+            <div class="res-k">Receipt Age</div>
+            <div class="res-v"><div class="receipt-age"><div class="age-dot"></div><div class="age-txt">${ageLabel || ago || '—'}</div></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="line"></div>
+
+      <div class="res-section">
+        <div class="res-section-title">Security Chain &amp; Ledger Details</div>
+        <div class="chain-panel">
+          <div class="chain-row">
+            <div class="chain-icon ok">✓</div>
+            <div class="chain-lbl">Document Hash (SHA-256)</div>
+            <div class="chain-val">${(d.hash||'').slice(0,16)}...</div>
+          </div>
+          <div class="chain-row">
+            <div class="chain-icon ${d.chainHash ? 'ok' : 'na'}">${d.chainHash ? '✓' : '—'}</div>
+            <div class="chain-lbl">Chain Hash (HMAC-SHA256)</div>
+            <div class="chain-val">${d.chainHash ? d.chainHash.slice(0,16)+'...' : 'Not available (pre-v3.0)'}</div>
+          </div>
+          <div class="chain-row">
+            <div class="chain-icon ${d.seal ? 'ok' : 'na'}">${d.seal ? '✓' : '—'}</div>
+            <div class="chain-lbl">Ledger Seal</div>
+            <div class="chain-val">${d.seal || 'Not available (pre-v3.0)'}</div>
+          </div>
+          <div class="chain-row">
+            <div class="chain-icon ok">✓</div>
+            <div class="chain-lbl">Security Version</div>
+            <div class="chain-val">${d.securityVer || 'v2.x'} · ${d.securityTier || 'STANDARD'}</div>
+          </div>
+        </div>
+        <div class="anomaly-warn" id="anomaly-block" style="display:none;margin-top:10px">
+          ⚠️ <span>High verification activity detected. This receipt has been verified many times. If unexpected, contact ATHStudios.</span>
+        </div>
+      </div>
+
+    </div>
+
+    <div style="padding:0 32px 28px;display:flex;gap:10px">
+      <button class="btn-reset" style="flex:1" onclick="resetResult()">↩ Verify Another Receipt</button>
+      <button class="copy-btn" id="copy-btn" onclick="copyReceiptData(${JSON.stringify(d).replace(/`/g,"'")},'${barcode}')">Copy Details</button>
+    </div>
   </div>`;
 }
 
@@ -945,6 +1046,70 @@ function resetResult() {
   lastScanned = '';
   document.getElementById('manual-input').value = '';
   window.scrollTo({top:0,behavior:'smooth'});
+}
+
+
+/* ═══ Verification Logging & Counter ═══ */
+async function logAndFetchVerification(barcode) {
+  try {
+    const ref = db.ref('verifylog/' + barcode);
+    await ref.transaction(cur => {
+      if (!cur) return { count: 1, firstAt: Date.now(), lastAt: Date.now() };
+      return { count: (cur.count || 0) + 1, firstAt: cur.firstAt || Date.now(), lastAt: Date.now() };
+    });
+    const snap = await ref.get();
+    const vd = snap.val() || {};
+
+    const vcEl = document.getElementById('verify-count');
+    const vfEl = document.getElementById('first-verified');
+    const anomEl = document.getElementById('anomaly-block');
+    if (vcEl) vcEl.textContent = (vd.count || 1) + ' time' + ((vd.count || 1) === 1 ? '' : 's');
+    if (vfEl) {
+      vfEl.textContent = vd.firstAt
+        ? new Date(vd.firstAt).toLocaleString('en-PH',{dateStyle:'medium',timeStyle:'short'})
+        : 'Just now';
+    }
+    // High-activity anomaly flag: >10 verifications
+    if (anomEl && (vd.count || 1) > 10) {
+      anomEl.style.display = 'flex';
+    }
+  } catch(e) {}
+}
+
+function receiptAgeLabel(createdAt) {
+  if (!createdAt) return '';
+  const d = Date.now() - createdAt;
+  const days = Math.floor(d / 86400000);
+  if (days < 1) return 'Issued today';
+  if (days === 1) return '1 day old';
+  if (days < 30) return days + ' days old';
+  const months = Math.floor(days / 30);
+  if (months < 12) return months + ' month' + (months === 1 ? '' : 's') + ' old';
+  const yrs = Math.floor(months / 12);
+  return yrs + ' year' + (yrs === 1 ? '' : 's') + ' old';
+}
+
+function copyReceiptData(d, barcode) {
+  const text = [
+    'ATHStudios Receipt — Verified',
+    '----------------------------',
+    'Receipt No: ' + (d.receiptNo || '—'),
+    'Document ID: ' + (d.docId || '—'),
+    'Billed To: ' + (d.client || '—'),
+    'Date: ' + (d.date || '—'),
+    'Service: ' + (d.service || '—'),
+    'Total: ₱' + fNum(d.total || 0),
+    'Status: ' + (d.status || '—').toUpperCase(),
+    'Payment Via: ' + (d.method || '—'),
+    '----------------------------',
+    'SHA-256: ' + (d.hash || '—'),
+    'Barcode: ' + barcode,
+    'Security Tier: ' + (d.securityTier || 'STANDARD'),
+    'Verified at: ' + new Date().toLocaleString('en-PH'),
+  ].join('\n');
+  navigator.clipboard.writeText(text).catch(() => {});
+  const btn = document.getElementById('copy-btn');
+  if (btn) { btn.textContent = '✓ Copied'; setTimeout(() => btn.textContent = 'Copy Details', 2000); }
 }
 
 function fNum(n) {
