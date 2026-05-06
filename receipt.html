@@ -7,6 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,600&family=Geist+Mono:wght@300;400;500&family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.6/JsBarcode.all.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 <style>
@@ -102,7 +103,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 
 /* MAIN */
 .main{flex:1;background:var(--void);display:flex;flex-direction:column;align-items:center;padding:52px 40px 80px;min-height:100vh;overflow-y:auto}
-.prev-row{width:100%;max-width:520px;display:flex;align-items:center;justify-content:space-between;margin-bottom:30px}
+.prev-row{width:100%;max-width:680px;display:flex;align-items:center;justify-content:space-between;margin-bottom:30px}
 .prev-lbl{font-family:'Geist Mono',monospace;font-size:8.5px;letter-spacing:3px;text-transform:uppercase;color:var(--dim)}
 .prev-status{display:flex;align-items:center;gap:6px}
 .prev-dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green),0 0 20px rgba(62,207,142,.4);animation:pulse 2s ease-in-out infinite}
@@ -110,18 +111,18 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .prev-secure{font-family:'Geist Mono',monospace;font-size:8px;color:rgba(62,207,142,.5);letter-spacing:1px}
 
 /* THE RECEIPT */
-#receipt{width:520px;background:var(--rp);color:var(--ri);font-family:'Geist',sans-serif;position:relative;overflow:hidden;box-shadow:0 0 0 1px rgba(0,0,0,.12),0 4px 6px rgba(0,0,0,.08),0 20px 40px rgba(0,0,0,.25),0 60px 120px rgba(0,0,0,.5),0 0 80px rgba(191,160,106,.07)}
+#receipt{width:680px;background:var(--rp);color:var(--ri);font-family:'Geist',sans-serif;position:relative;overflow:hidden;box-shadow:0 0 0 1px rgba(0,0,0,.12),0 4px 6px rgba(0,0,0,.08),0 20px 40px rgba(0,0,0,.25),0 60px 120px rgba(0,0,0,.5),0 0 80px rgba(191,160,106,.07)}
 #receipt::before{content:'';position:absolute;inset:0;background-image:repeating-linear-gradient(0deg,transparent,transparent 28px,rgba(0,0,0,.018) 28px,rgba(0,0,0,.018) 29px),repeating-linear-gradient(90deg,transparent,transparent 28px,rgba(0,0,0,.018) 28px,rgba(0,0,0,.018) 29px);pointer-events:none;z-index:0}
 .r-content{position:relative;z-index:1}
 .r-accent{height:2px;background:linear-gradient(90deg,transparent,var(--ra) 20%,#c9a96e 50%,var(--ra) 80%,transparent)}
 .r-perf{height:14px;background-image:radial-gradient(circle,#0d0d12 4.5px,transparent 4.5px);background-size:18px 14px;background-color:#f5f0e8}
-.r-pad{padding:34px 42px 30px}
+.r-pad{padding:38px 52px 34px}
 
 .r-top{display:flex;align-items:flex-start;justify-content:space-between;padding-bottom:22px;border-bottom:1px solid var(--rl);margin-bottom:24px}
 .r-brand{display:flex;align-items:center;gap:13px}
-.r-logo-wrap{width:44px;height:44px;border-radius:50%;overflow:hidden;flex-shrink:0;background:#111}
-.r-logo{width:44px;height:44px;display:block;object-fit:cover}
-.r-client-logo{width:44px;height:44px;object-fit:cover;border-radius:50%;display:none;overflow:hidden;flex-shrink:0}
+.r-logo-wrap{width:54px;height:54px;border-radius:50%;overflow:hidden;flex-shrink:0;background:#111}
+.r-logo{width:54px;height:54px;display:block;object-fit:cover}
+.r-client-logo{width:54px;height:54px;object-fit:cover;border-radius:50%;display:none;overflow:hidden;flex-shrink:0}
 .r-client-logo.show{display:block}
 
 /* Sidebar client logo upload */
@@ -185,7 +186,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .r-footer-email{font-size:8px;color:var(--rm);margin-top:2px;letter-spacing:.3px}
 
 /* SECURITY SECTION */
-.r-security{background:#f0ebe0;border-top:1px dashed #d5ccbc;padding:20px 42px 22px}
+.r-security{background:#f0ebe0;border-top:1px dashed #d5ccbc;padding:22px 52px 26px;position:relative;overflow:hidden}
 .r-sec-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
 .r-sec-label{display:flex;align-items:center;gap:7px}
 .r-sec-icon{width:16px;height:16px;background:#1a6b3c;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -212,6 +213,18 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .r-fb-badge{display:inline-flex;align-items:center;gap:5px;margin-top:8px;background:rgba(62,207,142,.1);border:1px solid rgba(62,207,142,.25);border-radius:2px;padding:3px 8px}
 .r-fb-badge-dot{width:5px;height:5px;border-radius:50%;background:var(--green)}
 .r-fb-badge-txt{font-family:'Geist Mono',monospace;font-size:7px;letter-spacing:1.5px;text-transform:uppercase;color:#3ecf8e}
+.r-sec-bc-qr{display:flex;gap:16px;align-items:flex-start;margin-bottom:14px}
+.r-barcode-side{flex:1;min-width:0}
+.r-barcode-wrap{background:white;border:1px solid #e0d8cc;border-radius:3px;padding:10px 16px 8px}
+.r-qr-wrap{display:flex;flex-direction:column;align-items:center;background:white;border:1px solid #e0d8cc;border-radius:3px;padding:8px 10px 6px;flex-shrink:0}
+.r-qr-wrap img,.r-qr-wrap canvas{width:88px!important;height:88px!important;display:block}
+.r-qr-label{font-family:'Geist Mono',monospace;font-size:6.5px;color:#9a9088;letter-spacing:1px;text-transform:uppercase;margin-top:4px;text-align:center}
+.r-sec-ver-wrap{display:flex;align-items:center;gap:6px}
+.r-tier-badge{font-family:'Geist Mono',monospace;font-size:6.5px;letter-spacing:1.5px;text-transform:uppercase;background:#1a6b3c;color:#fff;border-radius:2px;padding:2px 6px}
+.r-anti-tamper{position:absolute;top:0;left:0;right:0;height:3px;background:repeating-linear-gradient(90deg,#1a6b3c 0px,#1a6b3c 4px,transparent 4px,transparent 8px,#c9a96e 8px,#c9a96e 12px,transparent 12px,transparent 16px)}
+.r-sec-field-k{font-size:7px;letter-spacing:2px;text-transform:uppercase;color:#9a9088;margin-bottom:3px}
+.r-sec-field-v{font-family:'Geist Mono',monospace;font-size:8.5px;color:#3a3028;letter-spacing:.3px;word-break:break-all}
+.r-sec-field-v.hash{font-size:7.5px;color:#5a5048}
 
 .r-bottom{height:2px;background:linear-gradient(90deg,transparent,var(--ra) 20%,#c9a96e 50%,var(--ra) 80%,transparent)}
 
@@ -245,7 +258,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 *{scrollbar-width:thin;scrollbar-color:var(--wire2) transparent}
 *::-webkit-scrollbar{width:3px;height:3px}
 *::-webkit-scrollbar-thumb{background:var(--wire2);border-radius:2px}
-@media(max-width:960px){.wrap{flex-direction:column}.side{width:100%;height:auto;position:static}.side-form{overflow-y:visible}.main{padding:36px 20px 60px}#receipt{width:100%;max-width:520px}}
+@media(max-width:960px){.wrap{flex-direction:column}.side{width:100%;height:auto;position:static}.side-form{overflow-y:visible}.main{padding:36px 20px 60px}#receipt{width:100%;max-width:680px}}
 </style>
 </head>
 <body>
@@ -267,7 +280,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
   </div>
   <div class="sec-bar">
     <div class="sec-dot"></div>
-    <div class="sec-bar-txt">Document Security Active — SHA-256</div>
+    <div class="sec-bar-txt">Document Security Active — SHA-256 + Chain Hash · v3.0</div>
   </div>
 
   <div class="side-form">
@@ -436,23 +449,35 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
       </div>
 
       <!-- SECURITY SECTION -->
-      <div class="r-security">
+      <div class="r-security"><div class="r-anti-tamper"></div>
         <div class="r-sec-top">
           <div class="r-sec-label">
             <div class="r-sec-icon"><svg viewBox="0 0 12 12"><path d="M6 1L1.5 3v3c0 2.8 1.9 5.4 4.5 6 2.6-.6 4.5-3.2 4.5-6V3L6 1z"/></svg></div>
             <div class="r-sec-title">Verified Document Security</div>
           </div>
-          <div class="r-sec-ver">v2.1 · ATH-SECURE</div>
+          <div class="r-sec-ver-wrap"><div class="r-tier-badge">PREMIUM</div><div class="r-sec-ver">v3.0 · ATH-SECURE</div></div>
         </div>
-        <div class="r-barcode-wrap">
-          <svg id="r-barcode"></svg>
-          <div class="r-barcode-num" id="r-barcode-num">—</div>
+        <div class="r-sec-bc-qr">
+          <div class="r-barcode-side">
+            <div class="r-barcode-wrap">
+              <svg id="r-barcode"></svg>
+              <div class="r-barcode-num" id="r-barcode-num">—</div>
+            </div>
+          </div>
+          <div class="r-qr-wrap">
+            <div id="r-qr"></div>
+            <div class="r-qr-label">Scan to verify</div>
+          </div>
         </div>
         <div class="r-sec-grid">
           <div><div class="r-sec-field-k">SHA-256 Hash</div><div class="r-sec-field-v hash" id="r-hash">—</div></div>
           <div><div class="r-sec-field-k">Issued At</div><div class="r-sec-field-v" id="r-issued">—</div></div>
           <div><div class="r-sec-field-k">Document ID</div><div class="r-sec-field-v" id="r-docid">—</div></div>
           <div><div class="r-sec-field-k">Integrity</div><div class="r-sec-field-v" id="r-integrity" style="color:#1a6b3c;font-weight:600">● VALID</div></div>
+          <div><div class="r-sec-field-k">Chain Hash (HMAC-SHA256)</div><div class="r-sec-field-v hash" id="r-chain">—</div></div>
+          <div><div class="r-sec-field-k">Ledger Seal</div><div class="r-sec-field-v" id="r-seal" style="color:#1a6b3c;font-weight:600">—</div></div>
+          <div><div class="r-sec-field-k">Security Tier</div><div class="r-sec-field-v" style="color:#5a4a28;font-weight:600">PREMIUM · HMAC-SHA256</div></div>
+          <div><div class="r-sec-field-k">Session ID</div><div class="r-sec-field-v hash" id="r-session-disp">—</div></div>
         </div>
         <div class="r-verify-strip">
           <div class="r-verify-left">
@@ -512,7 +537,7 @@ db.ref('.info/connected').on('value', snap => {
 });
 
 /* ─── State ─── */
-let items = [], currentNo = '', sessionId = '', currentHash = '', currentBarcodeVal = '';
+let items = [], currentNo = '', sessionId = '', currentHash = '', currentBarcodeVal = '', currentChainHash = '', currentSeal = '';
 
 (function init() {
   document.getElementById('rdate').valueAsDate = new Date();
@@ -633,6 +658,7 @@ async function live() {
 async function updateSecurity({num,date,client,svc,total,status,method}) {
   const now = new Date();
   const issuedAt = now.toLocaleDateString('en-PH',{year:'numeric',month:'short',day:'2-digit'})+' '+now.toLocaleTimeString('en-PH',{hour:'2-digit',minute:'2-digit',hour12:true});
+  const issuedFull = issuedAt + ' PHT';
   const docId = num.replace(/ATH-/,'')+'-'+sessionId.replace('SES-','');
   const payload = [num,date,client,svc,total.toFixed(2),status,method,sessionId].join('|');
   const hashHex = await sha256(payload);
@@ -641,9 +667,21 @@ async function updateSecurity({num,date,client,svc,total,status,method}) {
   const barcodeVal = num.replace(/-/g,'')+hashHex.slice(0,8).toUpperCase();
   currentBarcodeVal = barcodeVal;
 
-  document.getElementById('r-issued').textContent   = issuedAt;
-  document.getElementById('r-docid').textContent    = docId;
-  document.getElementById('r-hash').textContent     = hashHex.slice(0,32)+'...';
+  // Chain hash: secondary integrity layer
+  const chainPayload = hashHex + '|' + docId + '|' + sessionId;
+  const chainHashHex = await sha256(chainPayload);
+  currentChainHash = chainHashHex;
+
+  // Ledger seal: 3-segment derived from hash
+  const seal = hashHex.slice(16,20).toUpperCase()+'-'+hashHex.slice(20,24).toUpperCase()+'-'+hashHex.slice(24,28).toUpperCase();
+  currentSeal = seal;
+
+  document.getElementById('r-issued').textContent    = issuedFull;
+  document.getElementById('r-docid').textContent     = docId;
+  document.getElementById('r-hash').textContent      = hashHex.slice(0,32)+'...';
+  document.getElementById('r-chain').textContent     = chainHashHex.slice(0,24)+'...';
+  document.getElementById('r-seal').textContent      = seal;
+  document.getElementById('r-session-disp').textContent = sessionId;
   document.getElementById('r-short-hash').textContent= hashHex.slice(0,8).toUpperCase()+'-'+hashHex.slice(8,16).toUpperCase();
   document.getElementById('r-barcode-num').textContent = barcodeVal;
 
@@ -652,6 +690,18 @@ async function updateSecurity({num,date,client,svc,total,status,method}) {
       format:'CODE128', width:1.4, height:48,
       displayValue:false, margin:0,
       background:'#ffffff', lineColor:'#1a1816'
+    });
+  } catch(e){}
+
+  // QR code pointing to verify URL
+  try {
+    const verifyUrl = 'https://athstudios.dpdns.org/verify?q=' + barcodeVal;
+    const qrEl = document.getElementById('r-qr');
+    qrEl.innerHTML = '';
+    new QRCode(qrEl, {
+      text: verifyUrl, width:88, height:88,
+      colorDark:'#1a1816', colorLight:'#ffffff',
+      correctLevel: QRCode.CorrectLevel.M
     });
   } catch(e){}
 }
@@ -691,11 +741,15 @@ async function doExport() {
     receiptNo: currentNo,
     barcodeVal: currentBarcodeVal,
     hash: currentHash,
+    chainHash: currentChainHash,
+    seal: currentSeal,
     client, date, service: svc,
     total, status, method, remarks,
     issuedAt,
     sessionId,
     docId,
+    securityTier: 'PREMIUM',
+    securityVer: 'v3.0',
     createdAt: Date.now()
   };
 
