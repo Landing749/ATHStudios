@@ -568,103 +568,267 @@ function renderGuilloche(hexHash, containerId) {
   const rE = guillocheRng(hexHash, 0xC0FFEE77);
 
   const W = 680, H = 420;
-  let paths = '';
 
-  const nA = 6 + Math.floor(rA() * 6);
-  for (let i = 0; i < nA; i++) {
-    const f1=1.1+rA()*7, a1=18+rA()*90, ph1=rA()*Math.PI*2;
-    const f2=f1*(0.28+rA()*0.9), a2=a1*(0.08+rA()*0.38), ph2=rA()*Math.PI*2;
-    const f3=f1*(1.5+rA()*2.2), a3=a1*0.06, ph3=rA()*Math.PI*2;
-    const yB=H*(0.04+rA()*0.92), sw=(0.5+rA()*0.9).toFixed(2);
-    const op=(0.028+rA()*0.022).toFixed(3);
-    let d='';
-    for(let j=0;j<=640;j++){
-      const x=(j/640)*W, t=(j/640)*Math.PI*2;
-      const y=yB+Math.sin(t*f1+ph1)*a1+Math.sin(t*f2+ph2)*a2+Math.sin(t*f3+ph3)*a3;
-      d+=(j?'L':'M')+x.toFixed(1)+','+y.toFixed(1);
-    }
-    paths+=`<path d="${d}" fill="none" stroke="rgba(107,90,58,${op})" stroke-width="${sw}" stroke-linecap="round"/>`;
+  /* ═══════════════════════════════════════════════════════════════════
+     GEOMETRIC LATHE ENGINE — with Rosette Cam Modulation
+     ─────────────────────────────────────────────────────────────────
+     Real guilloché is cut by a rose engine or geometric lathe.
+     The mathematics are: exact rational frequency ratios → guaranteed
+     curve closure; families of concentric bands → interlocked fabric;
+     overlapping different-ratio families → moiré interference shimmer;
+     central rose-engine rosace → the medallion that anchors the design.
+
+     CAM MODULATION: Real rose engines mount a rosette cam on the
+     spindle. The cam radius is a Fourier series:
+       r(θ) = R₀ + a₁·cos(nθ) + a₂·cos(2nθ) + …
+     This drives the pen distance d(t) instead of a fixed value,
+     making each band swell at lobe peaks and pinch at intersections —
+     the organic pulse that distinguishes genuine guilloché from
+     uniform-thickness pantograph copies.
+
+     GRADIENT VIGNETTE: Each layer is masked with a radialGradient
+     that fades to transparent at the document edges, replicating the
+     "glow from centre" depth of banknote rosaces.
+  ═══════════════════════════════════════════════════════════════════ */
+
+  // ── Cam profile: Fourier series modulating pen distance ──────────
+  // Returns a multiplier centred on 1.0 that oscillates with nLobes
+  // frequencies, making the traced line swell and pinch organically.
+  // a1, a2 control first- and second-harmonic amplitudes.
+  function cam(t, nLobes, a1, a2) {
+    return 1.0
+      + a1 * Math.cos(nLobes * t)
+      + a2 * Math.cos(2 * nLobes * t);
   }
 
-  const nB = 4 + Math.floor(rB() * 5);
-  for (let i = 0; i < nB; i++) {
-    const ang=(12+rB()*66)*Math.PI/180;
-    const ca=Math.cos(ang), sa=Math.sin(ang);
-    const f1=2+rB()*10, a1=12+rB()*55, ph1=rB()*Math.PI*2;
-    const f2=f1*(0.4+rB()*0.7), a2=a1*0.22, ph2=rB()*Math.PI*2;
-    const baseY=-H*0.3+rB()*(H*1.6);
-    const sw=(0.35+rB()*0.6).toFixed(2);
-    const op=(0.020+rB()*0.018).toFixed(3);
-    let d='';
-    for(let j=0;j<=560;j++){
-      const s=j/560, t=s*Math.PI*2;
-      const along=s*(W*1.5)-W*0.25;
-      const perp=baseY+Math.sin(t*f1+ph1)*a1+Math.sin(t*f2+ph2)*a2;
-      const x=along*ca-perp*sa;
-      const y=along*sa+perp*ca;
-      d+=(j?'L':'M')+x.toFixed(1)+','+y.toFixed(1);
+  // ── Hypotrochoid with cam-modulated pen distance ─────────────────
+  // Rolling circle of radius (base*q) inside fixed circle (base*p).
+  // nLobes = p − q (number of cusps): the cam turns once per lobe.
+  // a1, a2: Fourier coefficients — kept ≤ 0.22 to prevent self-intersection.
+  function closedHypo(cx, cy, p, q, base, dRatio, spl, a1, a2) {
+    const R = base * p, r = base * q;
+    const N = q * spl;
+    const nLobes = Math.max(1, p - q);   // hypotrochoid petal count
+    let s = '';
+    for (let j = 0; j <= N; j++) {
+      const t = (j / N) * q * 2 * Math.PI;
+      const d = r * dRatio * cam(t, nLobes, a1 || 0, a2 || 0);
+      const x = cx + (R - r) * Math.cos(t) + d * Math.cos(((R - r) / r) * t);
+      const y = cy + (R - r) * Math.sin(t) - d * Math.sin(((R - r) / r) * t);
+      s += (j ? 'L' : 'M') + x.toFixed(1) + ',' + y.toFixed(1);
     }
-    paths+=`<path d="${d}" fill="none" stroke="rgba(90,72,42,${op})" stroke-width="${sw}"/>`;
+    return s + 'Z';
   }
 
-  const nC = 3 + Math.floor(rC() * 4);
+  // ── Epitrochoid with cam-modulated pen distance ──────────────────
+  // Rolling circle outside the fixed circle — star-like forms.
+  // nLobes = p (the outer lobe count).
+  function closedEpi(cx, cy, p, q, base, dRatio, spl, a1, a2) {
+    const R = base * p, r = base * q;
+    const N = q * spl;
+    const nLobes = Math.max(1, p);       // epitrochoid lobe count
+    let s = '';
+    for (let j = 0; j <= N; j++) {
+      const t = (j / N) * q * 2 * Math.PI;
+      const d = r * dRatio * cam(t, nLobes, a1 || 0, a2 || 0);
+      const x = cx + (R + r) * Math.cos(t) - d * Math.cos(((R + r) / r) * t);
+      const y = cy + (R + r) * Math.sin(t) - d * Math.sin(((R + r) / r) * t);
+      s += (j ? 'L' : 'M') + x.toFixed(1) + ',' + y.toFixed(1);
+    }
+    return s + 'Z';
+  }
+
+  // ── Rose curve (rhodonea): r = a·cos(k·θ) ──────────────────────
+  // Signature output of the rose-engine lathe.
+  function rosePath(cx, cy, a, k, steps) {
+    const total = (k % 2 === 0 ? 2 : 1) * Math.PI;
+    let s = '';
+    for (let j = 0; j <= steps; j++) {
+      const th = (j / steps) * total;
+      const rv = a * Math.cos(k * th);
+      s += (j ? 'L' : 'M') + (cx + rv * Math.cos(th)).toFixed(1) + ',' + (cy + rv * Math.sin(th)).toFixed(1);
+    }
+    return s + 'Z';
+  }
+
+  // ── Rational ratio tables (coprime pairs → guaranteed closure) ───
+  const hypoR = [[4,1],[5,2],[7,3],[8,3],[9,4],[11,4],[13,5],[15,7],[17,6],[12,5]];
+  const epiR  = [[3,1],[4,1],[5,2],[7,3],[8,3],[9,4],[11,5],[13,6]];
+  const highR = [[13,5],[17,6],[19,7],[21,8],[23,9]];
+
+  // Per-layer path accumulators — kept separate so each gets its own vignette mask
+  let pathsA = '', pathsB = '', pathsC = '', pathsD = '', pathsE = '';
+
+  /* ── LAYER A: ROSACE — the central medallion ──────────────────────
+     Concentric closed rose curves sharing the same centre, anchored
+     by a cam-modulated epitrochoid ring. */
+  const rcx = W * 0.5, rcy = H * 0.5;
+  const kSets = [[4,5,4,5,4,5],[6,7,6,7,6],[8,9,8,9],[12,13,12]];
+  const kList = kSets[Math.floor(rA() * kSets.length)];
+  const roseCount = 5 + Math.floor(rA() * 3);
+  for (let i = 0; i < roseCount; i++) {
+    const radius = 11 + i * (7 + rA() * 5);
+    const k = kList[i % kList.length];
+    const op = (0.034 - i * 0.002).toFixed(3);
+    const sw = (0.55 - i * 0.04).toFixed(2);
+    pathsA += `<path d="${rosePath(rcx, rcy, radius, k, 600)}" fill="none" stroke="rgba(107,90,58,${op})" stroke-width="${sw}"/>`;
+  }
+  // Outer rosace ring — cam-modulated epitrochoids
+  {
+    const [p, q] = epiR[Math.floor(rA() * epiR.length)];
+    const base = 7 + rA() * 5;
+    // derive cam amplitudes from hash — first harmonic 10-18 %, second 4-8 %
+    const ca1 = 0.10 + rA() * 0.08, ca2 = 0.04 + rA() * 0.04;
+    pathsA += `<path d="${closedEpi(rcx, rcy, p, q, base,        0.5 + rA() * 0.3,  280, ca1, ca2)}" fill="none" stroke="rgba(120,96,52,0.028)" stroke-width="0.4"/>`;
+    pathsA += `<path d="${closedEpi(rcx, rcy, p, q, base * 1.35, 0.45 + rA() * 0.25,280, ca1 * 0.8, ca2)}" fill="none" stroke="rgba(107,90,58,0.022)" stroke-width="0.35"/>`;
+  }
+
+  /* ── LAYER B: Interlocking cam-modulated hypotrochoid bands ────────
+     Each band gets its own cam amplitude derived from the hash so
+     neighbouring bands swell at slightly different phases, creating
+     the characteristic "breathing" of banknote guilloché. */
+  const nBFam = 2 + Math.floor(rB() * 2);
+  for (let fam = 0; fam < nBFam; fam++) {
+    const [p, q] = hypoR[Math.floor(rB() * hypoR.length)];
+    const cx = W * (0.12 + rB() * 0.76);
+    const cy = H * (0.12 + rB() * 0.76);
+    const baseMin = 7 + rB() * 11;
+    const bandCount = 4 + Math.floor(rB() * 5);
+    const dRatio = 0.35 + rB() * 0.52;
+    // Cam amplitudes vary per family — outer bands get stronger modulation
+    const baseA1 = 0.08 + rB() * 0.14;    // 8–22 % first harmonic
+    const baseA2 = 0.03 + rB() * 0.07;    // 3–10 % second harmonic
+    for (let b = 0; b < bandCount; b++) {
+      const base = baseMin + b * (2.2 + rB() * 3.2);
+      const sw = (0.28 + rB() * 0.30).toFixed(2);
+      const op = (0.022 + rB() * 0.015).toFixed(3);
+      // Amplitude grows gently with band index: outer rings swell more
+      const a1 = baseA1 * (1 + b * 0.06);
+      const a2 = baseA2 * (1 + b * 0.04);
+      pathsB += `<path d="${closedHypo(cx, cy, p, q, base, dRatio, 130, a1, a2)}" fill="none" stroke="rgba(90,72,42,${op})" stroke-width="${sw}"/>`;
+    }
+  }
+
+  /* ── LAYER C: Epitrochoid interference overlay ─────────────────────
+     Cam-modulated so that where two families cross the swelling and
+     pinching of each creates phase-dependent interference — reinforcing
+     the moiré shimmer that cannot survive photocopying. */
+  const nC = 2 + Math.floor(rC() * 3);
   for (let i = 0; i < nC; i++) {
-    const cx=W*(0.1+rC()*0.8), cy=H*(0.1+rC()*0.8);
-    const R=50+rC()*130, r=R*(0.15+rC()*0.65), dOff=r*(0.25+rC()*0.95);
-    const loops=Math.round(R/(r||1))*2+2;
-    const sw=(0.28+rC()*0.5).toFixed(2);
-    const op=(0.018+rC()*0.018).toFixed(3);
-    let pd='';
-    for(let j=0;j<=900;j++){
-      const t=(j/900)*Math.PI*2*loops;
-      const x=cx+(R-r)*Math.cos(t)+dOff*Math.cos(t*(R-r)/(r||0.001));
-      const y=cy+(R-r)*Math.sin(t)-dOff*Math.sin(t*(R-r)/(r||0.001));
-      pd+=(j?'L':'M')+x.toFixed(1)+','+y.toFixed(1);
+    const [p, q] = epiR[Math.floor(rC() * epiR.length)];
+    const cx = W * (0.1 + rC() * 0.8);
+    const cy = H * (0.1 + rC() * 0.8);
+    const baseMin = 5 + rC() * 9;
+    const bandCount = 3 + Math.floor(rC() * 4);
+    const dRatio = 0.48 + rC() * 0.42;
+    const ca1 = 0.09 + rC() * 0.13;
+    const ca2 = 0.03 + rC() * 0.07;
+    for (let b = 0; b < bandCount; b++) {
+      const base = baseMin + b * (2.8 + rC() * 3.5);
+      const sw = (0.22 + rC() * 0.26).toFixed(2);
+      const op = (0.018 + rC() * 0.014).toFixed(3);
+      pathsC += `<path d="${closedEpi(cx, cy, p, q, base, dRatio, 110, ca1, ca2)}" fill="none" stroke="rgba(107,90,58,${op})" stroke-width="${sw}"/>`;
     }
-    paths+=`<path d="${pd}" fill="none" stroke="rgba(107,90,58,${op})" stroke-width="${sw}"/>`;
   }
 
-  const nD = 3 + Math.floor(rD() * 4);
+  /* ── LAYER D: Secondary rosette scatter ────────────────────────── */
+  const nD = 4 + Math.floor(rD() * 5);
   for (let i = 0; i < nD; i++) {
-    const cx=W*(0.08+rD()*0.84), cy=H*(0.08+rD()*0.84);
-    const petals=3+Math.floor(rD()*9);
-    const rOuter=25+rD()*80, rInner=rOuter*(0.2+rD()*0.5);
-    const twist=rD()*Math.PI;
-    const sw=(0.25+rD()*0.45).toFixed(2);
-    const op=(0.018+rD()*0.018).toFixed(3);
-    let pd='';
-    for(let j=0;j<=480;j++){
-      const t=(j/480)*Math.PI*2;
-      const r=rOuter*Math.abs(Math.cos(petals*t*0.5+twist))+rInner*Math.abs(Math.sin(petals*t));
-      pd+=(j?'L':'M')+(cx+r*Math.cos(t)).toFixed(1)+','+(cy+r*Math.sin(t)).toFixed(1);
-    }
-    paths+=`<path d="${pd}" fill="none" stroke="rgba(120,96,52,${op})" stroke-width="${sw}"/>`;
+    const cx = W * (0.06 + rD() * 0.88);
+    const cy = H * (0.06 + rD() * 0.88);
+    const k = 3 + Math.floor(rD() * 5);
+    const a = 9 + rD() * 26;
+    const k2 = k + 1 + Math.floor(rD() * 2);
+    const op = (0.022 + rD() * 0.014).toFixed(3);
+    const sw = (0.22 + rD() * 0.28).toFixed(2);
+    pathsD += `<path d="${rosePath(cx, cy, a, k, 480)}" fill="none" stroke="rgba(120,96,52,${op})" stroke-width="${sw}"/>`;
+    pathsD += `<path d="${rosePath(cx, cy, a * 0.68, k2, 380)}" fill="none" stroke="rgba(107,90,58,${(parseFloat(op)*0.75).toFixed(3)})" stroke-width="${(parseFloat(sw)*0.75).toFixed(2)}"/>`;
   }
 
-  const nE = 8 + Math.floor(rE() * 8);
+  /* ── LAYER E: High-frequency fine detail (ruling engine texture) ── */
+  const nE = 2 + Math.floor(rE() * 3);
   for (let i = 0; i < nE; i++) {
-    const f1=14+rE()*32, a1=2+rE()*11, ph1=rE()*Math.PI*2;
-    const f2=f1*(1.04+rE()*0.48), a2=a1*0.35, ph2=rE()*Math.PI*2;
-    const f3=f1*0.33, a3=a1*1.6, ph3=rE()*Math.PI*2;
-    const yB=H*(0.02+rE()*0.96);
-    const sw=(0.18+rE()*0.28).toFixed(2);
-    const op=(0.020+rE()*0.018).toFixed(3);
-    let d='';
-    for(let j=0;j<=760;j++){
-      const x=(j/760)*W, t=(j/760)*Math.PI*2;
-      const y=yB+Math.sin(t*f1+ph1)*a1+Math.sin(t*f2+ph2)*a2+Math.sin(t*f3+ph3)*a3;
-      d+=(j?'L':'M')+x.toFixed(1)+','+y.toFixed(1);
+    const [p, q] = highR[Math.floor(rE() * highR.length)];
+    const cx = W * (0.1 + rE() * 0.8);
+    const cy = H * (0.1 + rE() * 0.8);
+    const base0 = 4 + rE() * 8;
+    const bandCount = 3 + Math.floor(rE() * 4);
+    const dRatio = 0.38 + rE() * 0.48;
+    const ea1 = 0.07 + rE() * 0.11;
+    const ea2 = 0.02 + rE() * 0.06;
+    for (let b = 0; b < bandCount; b++) {
+      const base = base0 + b * (1.6 + rE() * 2.2);
+      const sw = (0.15 + rE() * 0.20).toFixed(2);
+      const op = (0.016 + rE() * 0.013).toFixed(3);
+      pathsE += `<path d="${closedHypo(cx, cy, p, q, base, dRatio, 110, ea1, ea2)}" fill="none" stroke="rgba(107,90,58,${op})" stroke-width="${sw}"/>`;
     }
-    paths+=`<path d="${d}" fill="none" stroke="rgba(107,90,58,${op})" stroke-width="${sw}"/>`;
   }
 
-  el.innerHTML=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid slice" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;mix-blend-mode:multiply">
+  /* ── VIGNETTE GRADIENTS ───────────────────────────────────────────
+     Each layer gets a separate radialGradient mask calibrated to its
+     role. The rosace mask is tight and bright (the medallion should
+     glow hard). The field masks are wider and softer. The scatter and
+     fine-detail masks barely reach the edges so those layers are
+     effectively invisible at the perimeter — exactly as on a banknote. */
+  el.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid slice" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;mix-blend-mode:multiply">
     <defs>
       <clipPath id="gc-clip">
         <path fill-rule="evenodd" d="M0,0 H${W} V${H} H0 Z M44,28 H120 V105 H44 Z"/>
       </clipPath>
+
+      <!-- VIGNETTE A: Rosace — tight, bright centre, hard falloff -->
+      <radialGradient id="vgA" cx="50%" cy="50%" r="48%" gradientUnits="objectBoundingBox">
+        <stop offset="0%"   stop-color="white" stop-opacity="1"/>
+        <stop offset="38%"  stop-color="white" stop-opacity="0.92"/>
+        <stop offset="70%"  stop-color="white" stop-opacity="0.45"/>
+        <stop offset="100%" stop-color="white" stop-opacity="0"/>
+      </radialGradient>
+      <mask id="vmA"><rect width="${W}" height="${H}" fill="url(#vgA)"/></mask>
+
+      <!-- VIGNETTE B: Main hypotrochoid field — wide, moderate rolloff -->
+      <radialGradient id="vgB" cx="50%" cy="50%" r="62%" gradientUnits="objectBoundingBox">
+        <stop offset="0%"   stop-color="white" stop-opacity="0.88"/>
+        <stop offset="42%"  stop-color="white" stop-opacity="0.70"/>
+        <stop offset="75%"  stop-color="white" stop-opacity="0.22"/>
+        <stop offset="100%" stop-color="white" stop-opacity="0"/>
+      </radialGradient>
+      <mask id="vmB"><rect width="${W}" height="${H}" fill="url(#vgB)"/></mask>
+
+      <!-- VIGNETTE C: Epitrochoid overlay — slightly off-centre, asymmetric feel -->
+      <radialGradient id="vgC" cx="50%" cy="48%" r="68%" gradientUnits="objectBoundingBox">
+        <stop offset="0%"   stop-color="white" stop-opacity="0.75"/>
+        <stop offset="50%"  stop-color="white" stop-opacity="0.48"/>
+        <stop offset="82%"  stop-color="white" stop-opacity="0.12"/>
+        <stop offset="100%" stop-color="white" stop-opacity="0"/>
+      </radialGradient>
+      <mask id="vmC"><rect width="${W}" height="${H}" fill="url(#vgC)"/></mask>
+
+      <!-- VIGNETTE D: Rosette scatter — soft, never reaches full opacity -->
+      <radialGradient id="vgD" cx="50%" cy="50%" r="58%" gradientUnits="objectBoundingBox">
+        <stop offset="0%"   stop-color="white" stop-opacity="0.60"/>
+        <stop offset="45%"  stop-color="white" stop-opacity="0.30"/>
+        <stop offset="80%"  stop-color="white" stop-opacity="0.06"/>
+        <stop offset="100%" stop-color="white" stop-opacity="0"/>
+      </radialGradient>
+      <mask id="vmD"><rect width="${W}" height="${H}" fill="url(#vgD)"/></mask>
+
+      <!-- VIGNETTE E: Fine ruling detail — barely visible beyond centre third -->
+      <radialGradient id="vgE" cx="50%" cy="50%" r="44%" gradientUnits="objectBoundingBox">
+        <stop offset="0%"   stop-color="white" stop-opacity="0.55"/>
+        <stop offset="40%"  stop-color="white" stop-opacity="0.22"/>
+        <stop offset="75%"  stop-color="white" stop-opacity="0.04"/>
+        <stop offset="100%" stop-color="white" stop-opacity="0"/>
+      </radialGradient>
+      <mask id="vmE"><rect width="${W}" height="${H}" fill="url(#vgE)"/></mask>
     </defs>
-    <g clip-path="url(#gc-clip)">${paths}</g>
+
+    <g clip-path="url(#gc-clip)">
+      <g mask="url(#vmE)">${pathsE}</g>
+      <g mask="url(#vmD)">${pathsD}</g>
+      <g mask="url(#vmC)">${pathsC}</g>
+      <g mask="url(#vmB)">${pathsB}</g>
+      <g mask="url(#vmA)">${pathsA}</g>
+    </g>
   </svg>`;
 }
 
@@ -1053,7 +1217,9 @@ async function doExport() {
 
     btn.textContent = 'Exporting PNG...';
     const el = document.getElementById('receipt');
+    prepareForExport();
     html2canvas(el,{scale:PRINT_SCALE,useCORS:true,allowTaint:true,backgroundColor:'#fcf8f1',logging:false}).then(canvas=>{
+      restoreAfterExport();
       const a=document.createElement('a');
       a.download=`ATHStudios_${currentNo}.png`;
       a.href=injectPngDpi(canvas.toDataURL('image/png'), PRINT_DPI);
@@ -1071,7 +1237,9 @@ async function doExport() {
     btn.disabled=false;
     btn.textContent='Export & Register Receipt';
     const el=document.getElementById('receipt');
+    prepareForExport();
     html2canvas(el,{scale:PRINT_SCALE,useCORS:true,allowTaint:true,backgroundColor:'#fcf8f1',logging:false}).then(canvas=>{
+      restoreAfterExport();
       const a=document.createElement('a');
       a.download=`ATHStudios_${currentNo}.png`;
       a.href=injectPngDpi(canvas.toDataURL('image/png'), PRINT_DPI);
@@ -1080,7 +1248,43 @@ async function doExport() {
   }
 }
 
-function showToast(msg,type='info') {
+function prepareForExport() {
+  // html2canvas does not support mix-blend-mode — strip it before capture
+  document.querySelectorAll('.r-stamp img').forEach(img => {
+    img.dataset.blendBak = img.style.mixBlendMode || '';
+    img.style.mixBlendMode = 'normal';
+    // Use the stamp's own opacity so it's a faint watermark not a solid blob
+    const stamp = img.closest('.r-stamp');
+    if (stamp) {
+      img.dataset.opacityBak = img.style.opacity || '';
+      img.style.opacity = parseFloat(stamp.style.opacity || 1) * 0.18;
+      stamp.dataset.opacityBak = stamp.style.opacity || '';
+      stamp.style.opacity = '1'; // let img opacity handle it
+    }
+  });
+  const gcLayer = document.getElementById('r-guilloche-layer');
+  if (gcLayer) {
+    const svg = gcLayer.querySelector('svg');
+    if (svg) { svg.dataset.blendBak = svg.style.mixBlendMode || ''; svg.style.mixBlendMode = 'normal'; }
+  }
+}
+
+function restoreAfterExport() {
+  document.querySelectorAll('.r-stamp img').forEach(img => {
+    img.style.mixBlendMode = img.dataset.blendBak || '';
+    img.style.opacity = img.dataset.opacityBak || '';
+    const stamp = img.closest('.r-stamp');
+    if (stamp) stamp.style.opacity = stamp.dataset.opacityBak || '';
+  });
+  const gcLayer = document.getElementById('r-guilloche-layer');
+  if (gcLayer) {
+    const svg = gcLayer.querySelector('svg');
+    if (svg) svg.style.mixBlendMode = svg.dataset.blendBak || '';
+  }
+}
+
+
+function showToast(msg,type){
   const t=document.getElementById('toast');
   t.textContent=msg;
   t.className='toast '+type+' on';
