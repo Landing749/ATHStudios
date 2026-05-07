@@ -433,6 +433,75 @@ body::after{
 .age-dot{width:5px;height:5px;border-radius:50%;background:var(--green)}
 .age-txt{font-family:'Geist Mono',monospace;font-size:8.5px;color:var(--dim2);letter-spacing:.5px}
 .anomaly-warn{background:rgba(240,192,96,.06);border:1px solid rgba(240,192,96,.2);border-radius:10px;padding:10px 14px;display:flex;align-items:flex-start;gap:10px;font-size:11px;color:rgba(240,192,96,.85);line-height:1.5}
+
+/* ── VOID status card ── */
+.res-card.voided{border-color:rgba(240,120,64,.35);box-shadow:0 24px 80px rgba(0,0,0,.5),0 0 60px rgba(240,120,64,.04)}
+.res-card.voided .res-banner{background:rgba(240,120,64,.07);border-color:rgba(240,120,64,.22)}
+.res-card.voided .res-badge-icon{background:rgba(240,120,64,.12);border:1px solid rgba(240,120,64,.3)}
+.res-card.voided .res-banner-eyebrow{color:rgba(240,120,64,.6)}
+.res-card.voided .res-banner-title{color:#f07840}
+.void-info-box{background:rgba(240,120,64,.06);border:1px solid rgba(240,120,64,.22);border-radius:14px;padding:16px 18px;display:flex;flex-direction:column;gap:8px}
+.void-info-k{font-size:7.5px;letter-spacing:2px;text-transform:uppercase;color:rgba(240,120,64,.55);margin-bottom:3px}
+.void-info-v{font-family:'Geist Mono',monospace;font-size:10.5px;color:#f07840;letter-spacing:.3px}
+
+/* ── Receipt preview ── */
+.preview-toggle{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 32px;border-top:1px solid var(--border);
+  cursor:pointer;user-select:none;transition:background .15s;
+}
+.preview-toggle:hover{background:rgba(255,255,255,.015)}
+.preview-toggle-label{font-size:8.5px;letter-spacing:2.5px;text-transform:uppercase;color:var(--dim2);display:flex;align-items:center;gap:8px}
+.preview-toggle-arrow{color:var(--dim);font-size:11px;transition:transform .2s}
+.preview-toggle.open .preview-toggle-arrow{transform:rotate(90deg)}
+.preview-panel{display:none;padding:0 32px 28px}
+.preview-panel.open{display:block;animation:riseUp .3s cubic-bezier(.16,1,.3,1)}
+
+/* The receipt paper */
+.rp-wrap{
+  position:relative;overflow:hidden;
+  background:#fcf8f1;border-radius:8px;
+  border:1px solid rgba(0,0,0,.1);
+  box-shadow:0 4px 20px rgba(0,0,0,.25);
+  font-family:'Geist',sans-serif;
+  color:#0f0e0c;
+  padding:28px 32px 24px;
+}
+/* PREVIEW watermark */
+.rp-wrap::before{
+  content:'PREVIEW PREVIEW PREVIEW PREVIEW PREVIEW PREVIEW PREVIEW PREVIEW PREVIEW PREVIEW PREVIEW PREVIEW';
+  position:absolute;top:0;left:-60px;right:-60px;bottom:0;
+  display:flex;align-items:center;
+  font-family:'Cormorant',serif;font-weight:700;
+  font-size:38px;letter-spacing:12px;
+  color:rgba(0,0,0,.055);
+  transform:rotate(-28deg);
+  white-space:nowrap;overflow:hidden;
+  pointer-events:none;z-index:10;
+  word-spacing:30px;
+  line-height:2.2;
+}
+.rp-accent{height:2px;background:linear-gradient(90deg,transparent,#6b5a3a 20%,#c9a96e 50%,#6b5a3a 80%,transparent);margin:-28px -32px 20px;position:relative;z-index:1}
+.rp-header{display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:16px;border-bottom:1px solid #ece5d8;margin-bottom:16px;position:relative;z-index:1}
+.rp-brand{font-family:'Cormorant',serif;font-weight:600;font-size:18px;letter-spacing:.2px}
+.rp-tagline{font-size:7px;letter-spacing:2px;text-transform:uppercase;color:#857e74;margin-top:3px}
+.rp-num-label{font-size:7px;letter-spacing:2px;text-transform:uppercase;color:#857e74;text-align:right}
+.rp-num-val{font-family:'Geist Mono',monospace;font-size:13px;font-weight:500;margin-top:2px;text-align:right}
+.rp-meta{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;margin-bottom:16px;position:relative;z-index:1}
+.rp-mk{font-size:7px;letter-spacing:2px;text-transform:uppercase;color:#857e74;white-space:nowrap;padding-top:1px}
+.rp-mv{font-size:10.5px;font-weight:500}
+.rp-divider{height:1px;background:#ece5d8;margin:12px 0;position:relative;z-index:1}
+.rp-total-row{display:flex;justify-content:space-between;align-items:flex-end;margin-top:10px;position:relative;z-index:1}
+.rp-total-lbl{font-size:7px;letter-spacing:2.5px;text-transform:uppercase;color:#857e74}
+.rp-total-amt{font-family:'Cormorant',serif;font-weight:300;font-size:36px;letter-spacing:-2px;line-height:1}
+.rp-peso{font-size:20px;vertical-align:super;font-weight:300;opacity:.6}
+.rp-status{display:inline-block;font-size:7px;font-weight:600;letter-spacing:2px;text-transform:uppercase;padding:2px 8px;border-radius:2px;margin-top:5px}
+.rp-s-paid{background:#e8f4ee;color:#1a6b3c}
+.rp-s-pending{background:#fdf7e3;color:#7a5800}
+.rp-s-partial{background:#fdf0e6;color:#7a3800}
+.rp-void-stamp{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-18deg);font-family:'Cormorant',serif;font-size:64px;font-weight:700;letter-spacing:6px;color:rgba(200,60,40,.18);border:4px solid rgba(200,60,40,.18);padding:4px 18px;border-radius:4px;white-space:nowrap;pointer-events:none;z-index:11}
+.preview-note{font-size:9px;color:var(--dim);letter-spacing:1px;text-transform:uppercase;font-family:'Geist Mono',monospace;text-align:center;margin-top:10px;opacity:.6}
+
 </style>
 </head>
 <body>
@@ -834,6 +903,9 @@ function showLedgerError() {
 }
 
 function renderAuthentic(d, barcode) {
+  /* ── Voided receipt takes priority ── */
+  if (d.voided) { renderVoided(d, barcode); return; }
+
   const issued   = d.issuedAt ? new Date(d.issuedAt).toLocaleString('en-PH',{dateStyle:'medium',timeStyle:'short'}) : '—';
   const ago      = d.createdAt ? timeAgo(d.createdAt) : '';
   const ageLabel = receiptAgeLabel(d.createdAt);
@@ -871,6 +943,7 @@ function renderAuthentic(d, barcode) {
           <div class="res-kv"><div class="res-k">Date</div><div class="res-v">${d.date||'—'}</div></div>
           <div class="res-kv"><div class="res-k">Service</div><div class="res-v">${d.service||'—'}</div></div>
           <div class="res-kv"><div class="res-k">Payment Via</div><div class="res-v">${d.method||'—'}</div></div>
+          ${d.remarks ? `<div class="res-kv" style="grid-column:span 2"><div class="res-k">Remarks</div><div class="res-v" style="font-size:12px">${d.remarks}</div></div>` : ''}
         </div>
       </div>
 
@@ -972,11 +1045,148 @@ function renderAuthentic(d, barcode) {
 
     </div>
 
-    <div style="padding:0 32px 28px;display:flex;gap:10px">
+    <div style="padding:0 32px 8px;display:flex;gap:10px">
       <button class="btn-reset" style="flex:1" onclick="resetResult()">↩ Verify Another Receipt</button>
       <button class="copy-btn" id="copy-btn" onclick="copyReceiptData(${JSON.stringify(d).replace(/`/g,"'")},'${barcode}')">Copy Details</button>
     </div>
+
+    <!-- Receipt Preview -->
+    <div class="preview-toggle" id="preview-toggle" onclick="togglePreview()">
+      <div class="preview-toggle-label">
+        <span>🧾</span> Receipt Preview
+      </div>
+      <span class="preview-toggle-arrow">›</span>
+    </div>
+    <div class="preview-panel" id="preview-panel">
+      ${buildReceiptPreview(d, false)}
+      <div class="preview-note">Preview only · Not an official document</div>
+    </div>
+
   </div>`;
+}
+
+function renderVoided(d, barcode) {
+  const issued   = d.issuedAt ? new Date(d.issuedAt).toLocaleString('en-PH',{dateStyle:'medium',timeStyle:'short'}) : '—';
+  const ago      = d.createdAt ? timeAgo(d.createdAt) : '';
+  const voidedAt = d.voidedAt  ? new Date(d.voidedAt).toLocaleString('en-PH',{dateStyle:'medium',timeStyle:'short'}) : '—';
+  const statusCls= 'status-' + (d.status||'paid');
+
+  document.getElementById('result-wrap').innerHTML = `
+  <div class="res-card voided">
+
+    <div class="res-banner">
+      <div class="res-badge-icon">🚫</div>
+      <div class="res-banner-text">
+        <div class="res-banner-eyebrow">Verification Status</div>
+        <div class="res-banner-title">VOIDED</div>
+        <div class="res-banner-sub">This receipt has been officially voided and is no longer valid</div>
+      </div>
+      <div class="res-timestamp">
+        <div class="res-ts-val">${issued}</div>
+        <div class="res-ts-ago">${ago}</div>
+      </div>
+    </div>
+
+    <div class="res-body">
+
+      <div class="void-info-box">
+        <div style="font-size:8px;letter-spacing:2.5px;text-transform:uppercase;color:rgba(240,120,64,.55);padding-bottom:10px;border-bottom:1px solid rgba(240,120,64,.15);margin-bottom:4px">Void Record</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px 20px">
+          <div><div class="void-info-k">Voided At</div><div class="void-info-v">${voidedAt}</div></div>
+          <div><div class="void-info-k">Voided By</div><div class="void-info-v">${d.voidedBy||'—'}</div></div>
+          <div style="grid-column:span 2"><div class="void-info-k">Reason</div><div class="void-info-v">${d.voidReason||'—'}</div></div>
+          ${d.voidNotes ? `<div style="grid-column:span 2"><div class="void-info-k">Notes</div><div class="void-info-v">${d.voidNotes}</div></div>` : ''}
+        </div>
+      </div>
+
+      <div class="res-section">
+        <div class="res-section-title">Original Receipt Details</div>
+        <div class="res-grid">
+          <div class="res-kv"><div class="res-k">Receipt No.</div><div class="res-v mono" style="color:var(--dim2)">${d.receiptNo||'—'}</div></div>
+          <div class="res-kv"><div class="res-k">Document ID</div><div class="res-v mono" style="font-size:10px;color:var(--dim2)">${d.docId||'—'}</div></div>
+          <div class="res-kv"><div class="res-k">Billed To</div><div class="res-v" style="color:var(--dim2)">${d.client||'—'}</div></div>
+          <div class="res-kv"><div class="res-k">Date</div><div class="res-v" style="color:var(--dim2)">${d.date||'—'}</div></div>
+          <div class="res-kv"><div class="res-k">Service</div><div class="res-v" style="color:var(--dim2)">${d.service||'—'}</div></div>
+          <div class="res-kv"><div class="res-k">Payment Via</div><div class="res-v" style="color:var(--dim2)">${d.method||'—'}</div></div>
+          <div class="res-kv">
+            <div class="res-k">Total</div>
+            <div class="res-v big" style="color:var(--dim2)">₱${fNum(d.total||0)}</div>
+          </div>
+          <div class="res-kv">
+            <div class="res-k">Original Status</div>
+            <div class="res-v ${statusCls}">${(d.status||'—').toUpperCase()}</div>
+          </div>
+          ${d.remarks ? `<div class="res-kv" style="grid-column:span 2"><div class="res-k">Remarks</div><div class="res-v" style="color:var(--dim2);font-size:12px">${d.remarks}</div></div>` : ''}
+        </div>
+      </div>
+
+    </div>
+
+    <div style="padding:0 32px 8px">
+      <button class="btn-reset" onclick="resetResult()">↩ Verify Another Receipt</button>
+    </div>
+
+    <!-- Voided receipt preview (with void stamp) -->
+    <div class="preview-toggle" id="preview-toggle" onclick="togglePreview()">
+      <div class="preview-toggle-label">
+        <span>🧾</span> View Voided Receipt Preview
+      </div>
+      <span class="preview-toggle-arrow">›</span>
+    </div>
+    <div class="preview-panel" id="preview-panel">
+      ${buildReceiptPreview(d, true)}
+      <div class="preview-note">This receipt is VOID · Not a valid document</div>
+    </div>
+
+  </div>`;
+}
+
+function buildReceiptPreview(d, isVoided) {
+  const statusKey = (d.status||'paid').toLowerCase();
+  const statusLabel = statusKey.toUpperCase();
+  return `
+  <div class="rp-wrap">
+    <div class="rp-accent"></div>
+    ${isVoided ? `<div class="rp-void-stamp">VOID</div>` : ''}
+    <div class="rp-header">
+      <div>
+        <div class="rp-brand">ATHStudios</div>
+        <div class="rp-tagline">Private Web Engineering Atelier</div>
+      </div>
+      <div>
+        <div class="rp-num-label">Official Receipt</div>
+        <div class="rp-num-val">${d.receiptNo||'—'}</div>
+      </div>
+    </div>
+    <div class="rp-meta">
+      <div class="rp-mk">Date</div><div class="rp-mv">${d.date||'—'}</div>
+      <div class="rp-mk">Billed To</div><div class="rp-mv">${d.client||'—'}</div>
+      <div class="rp-mk">Service</div><div class="rp-mv">${d.service||'—'}</div>
+      <div class="rp-mk">Via</div><div class="rp-mv">${d.method||'—'}</div>
+    </div>
+    <div class="rp-divider"></div>
+    <div class="rp-total-row">
+      <div>
+        <div class="rp-total-lbl">Total Due</div>
+        <div><span class="rp-status rp-s-${statusKey}">${statusLabel}</span></div>
+      </div>
+      <div class="rp-total-amt"><span class="rp-peso">₱</span>${fNum(d.total||0)}</div>
+    </div>
+    ${d.remarks ? `<div style="margin-top:14px;padding:10px 12px;background:rgba(0,0,0,.03);border-left:2px solid #c8bfb0;font-size:10px;color:#857e74;line-height:1.6;border-radius:0 3px 3px 0">${d.remarks}</div>` : ''}
+    <div style="margin-top:18px;padding-top:12px;border-top:1px solid #ece5d8;display:flex;justify-content:space-between;align-items:flex-end">
+      <div style="font-size:8px;color:#c8bfb0;font-style:italic">contact.athstudios@gmail.com · athstudios.dpdns.org</div>
+      <div style="font-size:7px;letter-spacing:2px;text-transform:uppercase;color:#c8bfb0">ATHStudios</div>
+    </div>
+  </div>`;
+}
+
+function togglePreview() {
+  const tog = document.getElementById('preview-toggle');
+  const pan = document.getElementById('preview-panel');
+  if (!tog || !pan) return;
+  const open = pan.classList.toggle('open');
+  tog.classList.toggle('open', open);
+}
 }
 
 function renderCompromised(barcode, reason, data) {
