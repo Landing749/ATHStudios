@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ATHStudios — Void Receipt</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=Geist+Mono:wght@300;400;500&family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#07070a;--s1:#0e0e14;--s2:#14141c;--s3:#1c1c26;--s4:#242432;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);
+  --g:#c4a46a;--g2:#dabb82;--g3:#f0d9aa;--g-glow:rgba(196,164,106,0.15);
+  --text:#e0dbd2;--dim:#5e5a6e;--dim2:#8e8a9e;
+  --green:#2dd882;--green-bg:rgba(45,216,130,0.07);--green-border:rgba(45,216,130,0.18);
+  --red:#ff4444;--red-bg:rgba(255,68,68,0.07);--red-border:rgba(255,68,68,0.18);
+  --orange:#f07840;--orange-bg:rgba(240,120,64,0.07);--orange-border:rgba(240,120,64,0.22);
+}
+html{font-size:15px}
+body{background:var(--bg);color:var(--text);font-family:'Geist',sans-serif;min-height:100vh;overflow-x:hidden}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='256' height='256'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity:.028}
+.amb{position:fixed;border-radius:50%;pointer-events:none;z-index:0}
+.amb1{width:900px;height:900px;top:-400px;left:50%;transform:translateX(-50%);background:radial-gradient(circle,rgba(240,120,64,.045) 0%,transparent 55%)}
+.amb2{width:500px;height:500px;bottom:-200px;right:-100px;background:radial-gradient(circle,rgba(196,164,106,.03) 0%,transparent 60%)}
+
+/* PAGE */
+.page{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;min-height:100vh;padding-bottom:100px}
+
+/* NAV */
+.topnav{width:100%;max-width:700px;display:flex;align-items:center;padding:28px 24px 0;margin-bottom:60px}
+.tn-logo{width:36px;height:36px;object-fit:cover;border-radius:50%;flex-shrink:0}
+.tn-brand{margin-left:12px}
+.tn-name{font-family:'Cormorant',serif;font-weight:600;font-size:18px;color:#f2ede6;letter-spacing:.2px}
+.tn-sub{font-size:8px;letter-spacing:3px;text-transform:uppercase;color:var(--dim);margin-top:2px}
+.tn-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.tn-db{display:flex;align-items:center;gap:6px;border:1px solid var(--border2);border-radius:20px;padding:6px 12px}
+.tn-db-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.tn-db-dot.live{background:var(--green);box-shadow:0 0 8px var(--green);animation:breathe 2s ease infinite}
+.tn-db-dot.off{background:var(--red)}
+.tn-db-dot.wait{background:var(--g);animation:breathe 1s ease infinite}
+@keyframes breathe{0%,100%{opacity:1}50%{opacity:.4}}
+.tn-db-txt{font-family:'Geist Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--dim2)}
+.admin-badge{display:flex;align-items:center;gap:6px;background:var(--orange-bg);border:1px solid var(--orange-border);border-radius:20px;padding:6px 12px}
+.admin-badge-dot{width:6px;height:6px;border-radius:50%;background:var(--orange)}
+.admin-badge-txt{font-family:'Geist Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--orange)}
+
+/* HERO */
+.hero{width:100%;max-width:640px;padding:0 24px;margin-bottom:52px;text-align:center}
+.hero-tag{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--orange-border);border-radius:20px;padding:5px 14px;margin-bottom:24px}
+.hero-tag-dot{width:5px;height:5px;border-radius:50%;background:var(--orange);box-shadow:0 0 6px var(--orange)}
+.hero-tag-txt{font-family:'Geist Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--orange)}
+.hero-h{font-family:'Cormorant',serif;font-weight:300;font-size:52px;letter-spacing:-2px;line-height:.95;color:#f0ebe2;margin-bottom:18px}
+.hero-h em{font-style:italic;color:var(--orange)}
+.hero-p{font-size:13px;color:var(--dim2);line-height:1.7;max-width:480px;margin:0 auto}
+
+/* GATE (password) */
+.gate{width:100%;max-width:640px;padding:0 24px;display:flex;flex-direction:column;gap:16px}
+.gate-card{background:var(--s1);border:1px solid var(--orange-border);border-radius:24px;padding:40px 36px;text-align:center;box-shadow:0 24px 80px rgba(0,0,0,.5),0 0 60px rgba(240,120,64,.04)}
+.gate-icon{font-size:40px;margin-bottom:20px;line-height:1}
+.gate-title{font-family:'Cormorant',serif;font-size:26px;color:#f0ebe2;margin-bottom:8px}
+.gate-sub{font-size:12px;color:var(--dim2);margin-bottom:28px;line-height:1.6}
+.gate-input{width:100%;background:var(--s3);border:1px solid var(--border2);border-radius:12px;color:var(--text);font-family:'Geist Mono',monospace;font-size:14px;letter-spacing:2px;padding:14px 18px;outline:none;transition:border-color .15s;text-align:center;margin-bottom:12px}
+.gate-input:focus{border-color:var(--orange)}
+.gate-input::placeholder{color:#2a2a3c;letter-spacing:1px}
+.btn-gate{width:100%;background:var(--orange);border:none;border-radius:12px;color:#fff;font-family:'Geist',sans-serif;font-weight:600;font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:14px;cursor:pointer;transition:all .2s}
+.btn-gate:hover{background:#e06830;box-shadow:0 0 28px rgba(240,120,64,.35)}
+.gate-err{font-family:'Geist Mono',monospace;font-size:10px;letter-spacing:1px;color:var(--red);margin-top:8px;display:none}
+
+/* MAIN CARD */
+.main-card{width:100%;max-width:640px;padding:0 24px;display:flex;flex-direction:column;gap:16px;display:none}
+
+/* Search block */
+.search-block{background:var(--s1);border:1px solid var(--border2);border-radius:24px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.5)}
+.sb-top{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.sb-dots{display:flex;gap:5px}
+.sbd{width:9px;height:9px;border-radius:50%}
+.sbd-r{background:#ff5f57;opacity:.6}.sbd-y{background:#febc2e;opacity:.6}.sbd-g{background:#28c840;opacity:.6}
+.sb-title{font-size:9px;letter-spacing:2.5px;text-transform:uppercase;color:var(--dim2);margin-left:8px}
+.sb-body{padding:24px}
+.search-row{display:flex;gap:10px}
+.search-field{flex:1;background:var(--s2);border:1px solid var(--border2);border-radius:12px;color:var(--text);font-family:'Geist Mono',monospace;font-size:12px;letter-spacing:.3px;padding:12px 16px;outline:none;transition:border-color .15s,background .15s}
+.search-field:focus{border-color:var(--g);background:var(--s3)}
+.search-field::placeholder{color:#2a2a3c}
+.btn-search{background:transparent;border:1px solid var(--border2);border-radius:12px;color:var(--dim2);font-family:'Geist',sans-serif;font-size:9.5px;letter-spacing:2px;text-transform:uppercase;padding:12px 18px;cursor:pointer;transition:all .2s;white-space:nowrap}
+.btn-search:hover{border-color:var(--g);color:var(--g);background:var(--g-glow)}
+
+/* Result */
+.result-wrap{display:none}
+.result-wrap.show{display:block;animation:riseUp .35s cubic-bezier(.16,1,.3,1)}
+@keyframes riseUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+
+/* Receipt card */
+.rec-card{background:var(--s1);border:1px solid var(--border2);border-radius:24px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.5)}
+.rec-card.voided{border-color:var(--red-border)}
+.rec-banner{padding:22px 28px;display:flex;align-items:center;gap:16px;border-bottom:1px solid var(--border)}
+.rec-banner.found{background:rgba(196,164,106,.06)}
+.rec-banner.voided-banner{background:var(--red-bg);border-color:var(--red-border)}
+.rec-banner-icon{width:44px;height:44px;border-radius:50%;border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.rec-banner-info{}
+.rec-banner-label{font-size:8px;letter-spacing:2.5px;text-transform:uppercase;color:var(--dim);margin-bottom:4px}
+.rec-banner-no{font-family:'Geist Mono',monospace;font-size:16px;color:var(--g3);letter-spacing:.3px}
+.rec-banner-date{font-size:10.5px;color:var(--dim2);margin-top:2px}
+.voided-tag{margin-left:auto;background:var(--red-bg);border:1px solid var(--red-border);border-radius:8px;padding:5px 12px;font-family:'Geist Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--red)}
+.rec-body{padding:24px 28px;display:flex;flex-direction:column;gap:20px}
+.rec-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px 24px}
+.rec-kv{}
+.rec-k{font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--dim);margin-bottom:4px}
+.rec-v{font-size:13px;font-weight:500;color:var(--text)}
+.rec-v.mono{font-family:'Geist Mono',monospace;font-size:11px;letter-spacing:.3px}
+.rec-v.gold{color:var(--g3)}
+.rec-v.big{font-family:'Cormorant',serif;font-size:30px;font-weight:300;letter-spacing:-1px;line-height:1}
+.rec-v.paid{color:var(--green)}
+.rec-v.pending{color:#f0c060}
+.rec-v.partial{color:#ff9040}
+.rec-line{height:1px;background:var(--border)}
+.rec-sec-title{font-size:8.5px;letter-spacing:2.5px;text-transform:uppercase;color:var(--dim);padding-bottom:10px;border-bottom:1px solid var(--border)}
+
+/* Void reason already applied */
+.void-info-box{background:var(--red-bg);border:1px solid var(--red-border);border-radius:14px;padding:16px 18px}
+.void-info-row{display:flex;gap:10px;margin-bottom:8px;align-items:flex-start}
+.void-info-row:last-child{margin-bottom:0}
+.void-info-k{font-size:8px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,68,68,.6);margin-bottom:3px}
+.void-info-v{font-family:'Geist Mono',monospace;font-size:10.5px;color:var(--red);letter-spacing:.3px}
+
+/* Void action form */
+.void-form{background:var(--orange-bg);border:1px solid var(--orange-border);border-radius:16px;padding:20px}
+.void-form-title{font-size:9px;letter-spacing:2.5px;text-transform:uppercase;color:var(--orange);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.void-reason-label{font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--dim);margin-bottom:7px;display:block}
+.void-reason-select{width:100%;background:var(--s3);border:1px solid var(--border2);border-radius:10px;color:var(--text);font-family:'Geist',sans-serif;font-size:12.5px;padding:10px 14px;outline:none;cursor:pointer;transition:border-color .15s;-webkit-appearance:none;appearance:none;margin-bottom:10px}
+.void-reason-select:focus{border-color:var(--orange)}
+.void-reason-select option{background:#1c1c26}
+.void-notes-input{width:100%;background:var(--s3);border:1px solid var(--border2);border-radius:10px;color:var(--text);font-family:'Geist',sans-serif;font-size:12px;padding:10px 14px;outline:none;transition:border-color .15s;resize:vertical;min-height:72px;margin-bottom:14px}
+.void-notes-input:focus{border-color:var(--orange)}
+.void-notes-input::placeholder{color:#2a2a3c}
+.void-confirm-row{display:flex;align-items:center;gap:10px;margin-bottom:14px;cursor:pointer;user-select:none}
+.void-confirm-check{width:18px;height:18px;border:1px solid var(--orange-border);border-radius:4px;background:var(--s3);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.void-confirm-check.on{background:var(--orange);border-color:var(--orange)}
+.void-confirm-text{font-size:11.5px;color:var(--dim2);line-height:1.5}
+.void-confirm-text strong{color:var(--orange)}
+.btn-void{width:100%;background:var(--red);border:none;border-radius:12px;color:#fff;font-family:'Geist',sans-serif;font-weight:700;font-size:10px;letter-spacing:3px;text-transform:uppercase;padding:15px;cursor:pointer;transition:all .2s;opacity:.4;pointer-events:none}
+.btn-void.ready{opacity:1;pointer-events:all}
+.btn-void.ready:hover{background:#e03030;box-shadow:0 0 32px rgba(255,68,68,.35)}
+.btn-void:disabled{opacity:.35;cursor:not-allowed;pointer-events:none}
+
+/* Buttons */
+.btn-reset{width:100%;background:transparent;border:1px solid var(--border2);border-radius:12px;color:var(--dim2);font-family:'Geist',sans-serif;font-size:9.5px;letter-spacing:2px;text-transform:uppercase;padding:12px;cursor:pointer;transition:all .2s;margin-top:4px}
+.btn-reset:hover{border-color:var(--g);color:var(--g)}
+
+/* Success / error toasts */
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(12px);background:var(--s2);border:1px solid;border-radius:10px;padding:11px 24px;font-family:'Geist Mono',monospace;font-size:9px;letter-spacing:2.5px;text-transform:uppercase;opacity:0;transition:all .25s;pointer-events:none;z-index:10000;box-shadow:0 8px 30px rgba(0,0,0,.5)}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.success{border-color:rgba(45,216,130,.4);color:var(--green)}
+.toast.error{border-color:rgba(255,68,68,.4);color:var(--red)}
+.toast.info{border-color:rgba(196,164,106,.35);color:var(--g)}
+
+/* Loading spinner */
+.spinner{width:32px;height:32px;border-radius:50%;border:2px solid var(--border2);border-top-color:var(--g);animation:spin .7s linear infinite;margin:0 auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-card{background:var(--s1);border:1px solid var(--border2);border-radius:24px;padding:52px 24px;text-align:center}
+.loading-txt{font-family:'Geist Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--dim2);margin-top:14px}
+
+/* Receipt List */
+.list-block{background:var(--s1);border:1px solid var(--border2);border-radius:24px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.5)}
+.list-top{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.list-top-left{display:flex;align-items:center;gap:10px}
+.list-title{font-size:9px;letter-spacing:2.5px;text-transform:uppercase;color:var(--dim2)}
+.list-count{font-family:'Geist Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--dim);background:var(--s3);border:1px solid var(--border);padding:2px 8px;border-radius:20px}
+.list-filter-row{padding:12px 20px;border-bottom:1px solid var(--border);display:flex;gap:8px;align-items:center}
+.list-filter{flex:1;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Geist Mono',monospace;font-size:11px;padding:8px 12px;outline:none;transition:border-color .15s}
+.list-filter:focus{border-color:var(--g)}
+.list-filter::placeholder{color:#2a2a3c}
+.list-filter-status{background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--dim2);font-family:'Geist',sans-serif;font-size:11px;padding:8px 10px;outline:none;cursor:pointer;-webkit-appearance:none;appearance:none}
+.list-filter-status option{background:#1c1c26}
+.list-scroll{max-height:420px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--border2) transparent}
+.list-scroll::-webkit-scrollbar{width:3px}
+.list-scroll::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.list-item{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px;cursor:pointer;transition:background .15s;position:relative}
+.list-item:last-child{border-bottom:none}
+.list-item:hover{background:rgba(255,255,255,.03)}
+.list-item.voided-item{opacity:.65}
+.list-item-icon{width:34px;height:34px;border-radius:50%;border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.list-item-info{flex:1;min-width:0}
+.list-item-no{font-family:'Geist Mono',monospace;font-size:11px;color:var(--g3);letter-spacing:.3px;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.list-item-client{font-size:11.5px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.list-item-date{font-size:10px;color:var(--dim2);margin-top:2px}
+.list-item-right{text-align:right;flex-shrink:0}
+.list-item-total{font-family:'Cormorant',serif;font-size:18px;font-weight:300;color:var(--g2);letter-spacing:-.5px}
+.list-item-status{font-family:'Geist Mono',monospace;font-size:8px;letter-spacing:1.5px;text-transform:uppercase;margin-top:3px}
+.s-paid{color:var(--green)}.s-pending{color:#f0c060}.s-partial{color:#ff9040}.s-voided{color:var(--red)}
+.list-item-arrow{color:var(--dim);font-size:14px;margin-left:6px;flex-shrink:0}
+.list-empty{padding:40px 24px;text-align:center;color:var(--dim2);font-size:12px}
+.list-loading{padding:40px 24px;text-align:center}
+
+/* Receipt Preview (in void result) */
+.preview-toggle{padding:14px 28px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;border-top:1px solid var(--border);transition:background .15s;user-select:none}
+.preview-toggle:hover{background:rgba(255,255,255,.02)}
+.preview-toggle-label{display:flex;align-items:center;gap:8px;font-size:9px;letter-spacing:2.5px;text-transform:uppercase;color:var(--dim2)}
+.preview-toggle-arrow{font-size:18px;color:var(--dim);transition:transform .2s}
+.preview-toggle.open .preview-toggle-arrow{transform:rotate(90deg)}
+.preview-panel{display:none;padding:20px 28px 28px;border-top:1px solid var(--border);background:rgba(0,0,0,.15)}
+.preview-panel.open{display:block;animation:riseUp .3s cubic-bezier(.16,1,.3,1)}
+.preview-note{text-align:center;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--dim);margin-top:12px}
+
+/* Receipt paper preview */
+.rp-wrap{background:#fcf8f1;border-radius:10px;padding:24px;color:#3a3328;font-family:'Geist',sans-serif;position:relative;overflow:hidden;max-width:420px;margin:0 auto;box-shadow:0 8px 32px rgba(0,0,0,.4)}
+.rp-accent{position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#c4a46a,#f0d9aa,#c4a46a)}
+.rp-void-stamp{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-18deg);font-family:'Geist',sans-serif;font-weight:700;font-size:52px;letter-spacing:6px;color:rgba(255,68,68,.14);pointer-events:none;z-index:1;white-space:nowrap}
+.rp-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid #ece5d8}
+.rp-brand{font-family:'Cormorant',serif;font-size:20px;font-weight:600;color:#3a3328;letter-spacing:-.3px}
+.rp-tagline{font-size:8px;letter-spacing:2px;text-transform:uppercase;color:#b0a898;margin-top:2px}
+.rp-num-label{font-size:8px;letter-spacing:2px;text-transform:uppercase;color:#b0a898;text-align:right}
+.rp-num-val{font-family:'Geist Mono',monospace;font-size:12px;color:#6b5a3a;text-align:right;margin-top:2px}
+.rp-meta{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;margin-bottom:14px;align-items:baseline}
+.rp-mk{font-size:8.5px;letter-spacing:1.5px;text-transform:uppercase;color:#b0a898;white-space:nowrap}
+.rp-mv{font-size:12px;color:#3a3328;font-weight:500}
+.rp-divider{height:1px;background:#ece5d8;margin:14px 0}
+.rp-total-row{display:flex;justify-content:space-between;align-items:flex-end}
+.rp-total-lbl{font-size:8.5px;letter-spacing:2px;text-transform:uppercase;color:#b0a898;margin-bottom:4px}
+.rp-total-amt{font-family:'Cormorant',serif;font-size:34px;font-weight:300;color:#3a3328;letter-spacing:-1px}
+.rp-peso{font-size:22px}
+.rp-status{display:inline-block;font-family:'Geist Mono',monospace;font-size:8px;letter-spacing:2px;text-transform:uppercase;padding:3px 8px;border-radius:4px;margin-top:4px}
+.rp-s-paid{background:rgba(45,216,130,.12);color:#1a9960}.rp-s-pending{background:rgba(240,192,96,.12);color:#b08020}.rp-s-partial{background:rgba(255,144,64,.12);color:#b05820}
+
+/* Void success */
+.void-success{background:var(--s1);border:1px solid var(--red-border);border-radius:24px;padding:52px 32px;text-align:center;box-shadow:0 24px 80px rgba(0,0,0,.5)}
+.vs-icon{font-size:52px;margin-bottom:20px;line-height:1}
+.vs-title{font-family:'Cormorant',serif;font-size:34px;color:var(--red);margin-bottom:8px;letter-spacing:-.5px}
+.vs-sub{font-size:12px;color:var(--dim2);line-height:1.7;margin-bottom:6px}
+.vs-no{font-family:'Geist Mono',monospace;font-size:13px;color:var(--red);background:var(--red-bg);border:1px solid var(--red-border);border-radius:8px;padding:7px 16px;display:inline-block;margin:12px 0 24px;letter-spacing:1px}
+</style>
+</head>
+<body>
+
+<div class="amb amb1"></div>
+<div class="amb amb2"></div>
+<div class="toast" id="toast"></div>
+
+<div class="page">
+
+  <!-- NAV -->
+  <nav class="topnav">
+    <img src="https://landing749.github.io/ATHStudios/logo.png" class="tn-logo" alt="" onerror="this.style.display='none'">
+    <div class="tn-brand">
+      <div class="tn-name">ATHStudios</div>
+      <div class="tn-sub">Void Console</div>
+    </div>
+    <div class="tn-right">
+      <div class="admin-badge">
+        <div class="admin-badge-dot"></div>
+        <div class="admin-badge-txt">Admin</div>
+      </div>
+      <div class="tn-db">
+        <div class="tn-db-dot wait" id="db-dot"></div>
+        <div class="tn-db-txt" id="db-txt">Connecting</div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-tag">
+      <div class="hero-tag-dot"></div>
+      <div class="hero-tag-txt">Admin · Void Console</div>
+    </div>
+    <h1 class="hero-h">Void a<br><em>Receipt</em></h1>
+    <p class="hero-p">Search for a receipt by its receipt number or barcode value and permanently mark it as void in the ATHStudios Secure Ledger. This action is irreversible.</p>
+  </div>
+
+  <!-- GATE -->
+  <div class="gate" id="gate">
+    <div class="gate-card">
+      <div class="gate-icon">🔐</div>
+      <div class="gate-title">Admin Access Required</div>
+      <div class="gate-sub">This tool modifies live ledger records. Enter the admin passphrase to continue.</div>
+      <input class="gate-input" id="gate-input" type="password" placeholder="Enter passphrase" onkeydown="if(event.key==='Enter')unlockGate()">
+      <button class="btn-gate" onclick="unlockGate()">Unlock Console</button>
+      <div class="gate-err" id="gate-err">Incorrect passphrase</div>
+    </div>
+  </div>
+
+  <!-- MAIN (hidden until unlocked) -->
+  <div class="main-card" id="main-card">
+
+    <!-- Search -->
+    <div class="search-block">
+      <div class="sb-top">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="sb-dots">
+            <div class="sbd sbd-r"></div>
+            <div class="sbd sbd-y"></div>
+            <div class="sbd sbd-g"></div>
+          </div>
+          <div class="sb-title">Receipt Lookup</div>
+        </div>
+      </div>
+      <div class="sb-body">
+        <div class="search-row">
+          <input class="search-field" id="search-input" placeholder="ATH-2026-XXXX  or  barcode value" onkeydown="if(event.key==='Enter')doSearch()">
+          <button class="btn-search" onclick="doSearch()">Look up →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result -->
+    <div class="result-wrap" id="result-wrap"></div>
+
+    <!-- Receipt List -->
+    <div class="list-block" id="receipt-list-block">
+      <div class="list-top">
+        <div class="list-top-left">
+          <div class="sb-dots">
+            <div class="sbd sbd-r"></div>
+            <div class="sbd sbd-y"></div>
+            <div class="sbd sbd-g"></div>
+          </div>
+          <div class="list-title">All Receipts</div>
+          <div class="list-count" id="list-count">Loading...</div>
+        </div>
+      </div>
+      <div class="list-filter-row">
+        <input class="list-filter" id="list-filter" placeholder="Filter by client, receipt no, service…" oninput="filterList()">
+        <select class="list-filter-status" id="list-status-filter" onchange="filterList()">
+          <option value="">All</option>
+          <option value="active">Active</option>
+          <option value="voided">Voided</option>
+          <option value="paid">Paid</option>
+          <option value="pending">Pending</option>
+          <option value="partial">Partial</option>
+        </select>
+      </div>
+      <div class="list-scroll" id="list-scroll">
+        <div class="list-loading"><div class="spinner"></div><div class="loading-txt" style="margin-top:14px">Loading receipts…</div></div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+/* ═══ Firebase ═══ */
+firebase.initializeApp({
+  apiKey: "AIzaSyDD-fr24tSTymu9HwDNSTygLzYhQzyiOkM",
+  authDomain: "athstudios-18004.firebaseapp.com",
+  databaseURL: "https://athstudios-18004-default-rtdb.firebaseio.com",
+  projectId: "athstudios-18004",
+  storageBucket: "athstudios-18004.firebasestorage.app",
+  messagingSenderId: "840599967098",
+  appId: "1:840599967098:web:a163597be910187460b2c3"
+});
+const db = firebase.database();
+
+db.ref('.info/connected').on('value', s => {
+  const ok = s.val();
+  const dot = document.getElementById('db-dot');
+  const txt = document.getElementById('db-txt');
+  dot.className = 'tn-db-dot ' + (ok ? 'live' : 'off');
+  txt.textContent = ok ? 'Ledger Live' : 'Offline';
+});
+
+/* ═══ Admin gate ═══ */
+const ADMIN_PASS = 'Athanmeir@1';
+
+let confirmed = false;
+
+function unlockGate() {
+  const val = document.getElementById('gate-input').value;
+  const err = document.getElementById('gate-err');
+  if (val === ADMIN_PASS) {
+    document.getElementById('gate').style.display = 'none';
+    document.getElementById('main-card').style.display = 'flex';
+    confirmed = true;
+    loadReceiptList();
+  } else {
+    err.style.display = 'block';
+    document.getElementById('gate-input').value = '';
+    setTimeout(() => { err.style.display = 'none'; }, 2500);
+  }
+}
+
+/* ═══ Search ═══ */
+let foundData = null, foundKey = null;
+let confirmChecked = false;
+
+async function doSearch() {
+  const raw = document.getElementById('search-input').value.trim();
+  if (!raw) return;
+  showLoading();
+  try {
+    /* Strategy 1: direct key lookup — node name IS the docId */
+    const snap = await db.ref('receipts/' + raw).get();
+    if (snap.exists()) { showReceipt(snap.val(), raw); return; }
+
+    /* Strategy 2: search loaded receiptMap by receiptNo (local, no index needed) */
+    if (Object.keys(receiptMap).length) {
+      const found = Object.entries(receiptMap).find(([k, d]) =>
+        (d.receiptNo || '').toLowerCase() === raw.toLowerCase()
+      );
+      if (found) { showReceipt(found[1], found[0]); return; }
+    }
+
+    /* Strategy 3: docindex reverse-lookup */
+    const snap3 = await db.ref('docindex/' + raw).get();
+    if (snap3.exists()) {
+      const snap4 = await db.ref('receipts/' + snap3.val()).get();
+      if (snap4.exists()) { showReceipt(snap4.val(), snap3.val()); return; }
+    }
+
+    notFound(raw);
+  } catch(e) {
+    showError(e.message);
+  }
+}
+
+function showLoading() {
+  const rw = document.getElementById('result-wrap');
+  rw.className = 'result-wrap show';
+  rw.innerHTML = `<div class="loading-card"><div class="spinner"></div><div class="loading-txt">Querying Ledger...</div></div>`;
+}
+
+function notFound(q) {
+  document.getElementById('result-wrap').innerHTML = `
+  <div class="loading-card">
+    <div style="font-size:40px;margin-bottom:16px">🔍</div>
+    <div style="font-family:'Cormorant',serif;font-size:26px;color:var(--dim2);margin-bottom:8px">Not Found</div>
+    <div style="font-size:11.5px;color:var(--dim);line-height:1.6;margin-bottom:24px">No receipt matched <span style="font-family:'Geist Mono',monospace;color:var(--g)">${q}</span> in the ledger.</div>
+    <button class="btn-reset" onclick="resetSearch()">↩ Try Again</button>
+  </div>`;
+}
+
+function showError(msg) {
+  document.getElementById('result-wrap').innerHTML = `
+  <div class="loading-card">
+    <div style="font-size:40px;margin-bottom:16px">⚠️</div>
+    <div style="font-family:'Cormorant',serif;font-size:26px;color:var(--red);margin-bottom:8px">Ledger Error</div>
+    <div style="font-size:11px;color:var(--dim2);margin-bottom:24px;font-family:'Geist Mono',monospace">${msg}</div>
+    <button class="btn-reset" onclick="resetSearch()">↩ Try Again</button>
+  </div>`;
+}
+
+function showReceipt(d, key) {
+  foundData = d;
+  foundKey  = key;
+  confirmChecked = false;
+
+  const statusCls = d.status || 'paid';
+  const isVoided  = !!d.voided;
+  const voidedAt  = d.voidedAt ? new Date(d.voidedAt).toLocaleString('en-PH',{dateStyle:'medium',timeStyle:'short'}) : '—';
+
+  document.getElementById('result-wrap').innerHTML = `
+  <div class="rec-card ${isVoided ? 'voided' : ''}">
+    <div class="rec-banner ${isVoided ? 'voided-banner' : 'found'}">
+      <div class="rec-banner-icon">${isVoided ? '🚫' : '📄'}</div>
+      <div class="rec-banner-info">
+        <div class="rec-banner-label">${isVoided ? 'Voided Receipt' : 'Receipt Found'}</div>
+        <div class="rec-banner-no">${d.receiptNo || key}</div>
+        <div class="rec-banner-date">${d.date || '—'} · ${d.client || '—'}</div>
+      </div>
+      ${isVoided ? `<div class="voided-tag">VOIDED</div>` : ''}
+    </div>
+
+    <div class="rec-body">
+
+      <div>
+        <div class="rec-sec-title">Receipt Details</div>
+        <div class="rec-grid" style="margin-top:14px">
+          <div class="rec-kv"><div class="rec-k">Receipt No.</div><div class="rec-v gold mono">${d.receiptNo||'—'}</div></div>
+          <div class="rec-kv"><div class="rec-k">Document ID</div><div class="rec-v mono" style="font-size:10px">${d.docId||'—'}</div></div>
+          <div class="rec-kv"><div class="rec-k">Billed To</div><div class="rec-v">${d.client||'—'}</div></div>
+          <div class="rec-kv"><div class="rec-k">Date</div><div class="rec-v">${d.date||'—'}</div></div>
+          <div class="rec-kv"><div class="rec-k">Service</div><div class="rec-v">${d.service||'—'}</div></div>
+          <div class="rec-kv"><div class="rec-k">Payment Via</div><div class="rec-v">${d.method||'—'}</div></div>
+          <div class="rec-kv">
+            <div class="rec-k">Total</div>
+            <div class="rec-v big">₱${fNum(d.total||0)}</div>
+          </div>
+          <div class="rec-kv">
+            <div class="rec-k">Status</div>
+            <div class="rec-v ${statusCls}">${(d.status||'—').toUpperCase()}</div>
+          </div>
+        </div>
+      </div>
+
+      ${isVoided ? `
+      <div class="void-info-box">
+        <div class="rec-sec-title" style="border-color:rgba(255,68,68,.2);color:rgba(255,68,68,.6);margin-bottom:12px">Void Record</div>
+        <div class="rec-grid">
+          <div class="rec-kv"><div class="void-info-k">Voided At</div><div class="void-info-v">${voidedAt}</div></div>
+          <div class="rec-kv"><div class="void-info-k">Voided By</div><div class="void-info-v">${d.voidedBy||'—'}</div></div>
+          <div class="rec-kv" style="grid-column:span 2"><div class="void-info-k">Reason</div><div class="void-info-v">${d.voidReason||'—'}</div></div>
+          ${d.voidNotes ? `<div class="rec-kv" style="grid-column:span 2"><div class="void-info-k">Notes</div><div class="void-info-v">${d.voidNotes}</div></div>` : ''}
+        </div>
+      </div>
+      <button class="btn-reset" onclick="resetSearch()">↩ Search Another</button>
+      ` : `
+      <div class="void-form">
+        <div class="void-form-title">⚠️ Mark as Void</div>
+        <label class="void-reason-label">Reason for voiding</label>
+        <select class="void-reason-select" id="void-reason-select">
+          <option value="">Select a reason...</option>
+          <option value="Client requested cancellation">Client requested cancellation</option>
+          <option value="Duplicate receipt issued">Duplicate receipt issued</option>
+          <option value="Incorrect amount">Incorrect amount</option>
+          <option value="Service not rendered">Service not rendered</option>
+          <option value="Payment reversed / refunded">Payment reversed / refunded</option>
+          <option value="Fraud / unauthorized issuance">Fraud / unauthorized issuance</option>
+          <option value="Administrative error">Administrative error</option>
+          <option value="Other">Other</option>
+        </select>
+        <label class="void-reason-label">Additional notes (optional)</label>
+        <textarea class="void-notes-input" id="void-notes" placeholder="Additional context about this void..."></textarea>
+        <div class="void-confirm-row" onclick="toggleConfirm()">
+          <div class="void-confirm-check" id="void-check"></div>
+          <div class="void-confirm-text">I understand this will permanently mark <strong>${d.receiptNo||key}</strong> as voided in the ATHStudios Secure Ledger. This cannot be undone.</div>
+        </div>
+        <button class="btn-void" id="btn-void" onclick="doVoid()">🚫 Void This Receipt</button>
+      </div>
+      <button class="btn-reset" onclick="resetSearch()">↩ Search Another</button>
+      `}
+
+    </div>
+
+    <!-- Receipt Preview -->
+    <div class="preview-toggle" id="preview-toggle" onclick="togglePreview()">
+      <div class="preview-toggle-label">
+        <span>🧾</span> ${isVoided ? 'View Voided Receipt Preview' : 'Receipt Preview'}
+      </div>
+      <span class="preview-toggle-arrow">›</span>
+    </div>
+    <div class="preview-panel" id="preview-panel">
+      ${buildReceiptPreview(d, isVoided)}
+      <div class="preview-note">${isVoided ? 'This receipt is VOID · Not a valid document' : 'Preview only · Not an official document'}</div>
+    </div>
+
+  </div>
+  </div>`;
+
+  /* Watch reason + confirm to enable void button */
+  const sel = document.getElementById('void-reason-select');
+  if (sel) sel.addEventListener('change', updateVoidBtn);
+}
+
+function toggleConfirm() {
+  confirmChecked = !confirmChecked;
+  const chk = document.getElementById('void-check');
+  if (chk) {
+    chk.classList.toggle('on', confirmChecked);
+    chk.textContent = confirmChecked ? '✓' : '';
+  }
+  updateVoidBtn();
+}
+
+function updateVoidBtn() {
+  const sel = document.getElementById('void-reason-select');
+  const btn = document.getElementById('btn-void');
+  if (!sel || !btn) return;
+  const ready = confirmChecked && sel.value !== '';
+  btn.classList.toggle('ready', ready);
+}
+
+async function doVoid() {
+  if (!foundData || !foundKey) return;
+  const reason = document.getElementById('void-reason-select').value;
+  const notes  = document.getElementById('void-notes').value.trim();
+  if (!reason || !confirmChecked) return;
+
+  const btn = document.getElementById('btn-void');
+  btn.disabled = true;
+  btn.textContent = 'Voiding...';
+
+  try {
+    await db.ref('receipts/' + foundKey).update({
+      voided:    true,
+      voidedAt:  new Date().toISOString(),
+      voidedBy:  'Admin Console',
+      voidReason: reason,
+      voidNotes:  notes || null,
+    });
+
+    const no = foundData.receiptNo || foundKey;
+    document.getElementById('result-wrap').innerHTML = `
+    <div class="void-success">
+      <div class="vs-icon">🚫</div>
+      <div class="vs-title">Receipt Voided</div>
+      <div class="vs-sub">Successfully marked as void in the ATHStudios Secure Ledger.</div>
+      <div class="vs-no">${no}</div>
+      <div class="vs-sub" style="font-size:10.5px;color:var(--dim);margin-bottom:20px">Reason: ${reason}</div>
+      <button class="btn-reset" onclick="resetSearch()">↩ Void Another Receipt</button>
+    </div>`;
+
+    showToast('✓ Receipt voided — ' + no, 'success');
+  } catch(e) {
+    showToast('Error: ' + e.message, 'error');
+    btn.disabled = false;
+    btn.textContent = '🚫 Void This Receipt';
+  }
+}
+
+/* ═══ Receipt List ═══ */
+let allReceipts = []; // [{key, data}]
+const receiptMap = {}; // key -> data
+
+async function loadReceiptList() {
+  try {
+    const snap = await db.ref('receipts').get();
+    if (!snap.exists()) { renderListEmpty(); return; }
+    allReceipts = [];
+    snap.forEach(child => {
+      allReceipts.push({ key: child.key, data: child.val() });
+      receiptMap[child.key] = child.val();
+    });
+    // Sort: non-voided first, then by createdAt descending
+    allReceipts.sort((a, b) => {
+      if (!!a.data.voided !== !!b.data.voided) return a.data.voided ? 1 : -1;
+      return (b.data.createdAt || 0) - (a.data.createdAt || 0);
+    });
+    renderList(allReceipts);
+  } catch(e) {
+    document.getElementById('list-scroll').innerHTML = `<div class="list-empty">Error loading receipts: ${e.message}</div>`;
+  }
+}
+
+function filterList() {
+  const q = (document.getElementById('list-filter').value || '').toLowerCase();
+  const sf = document.getElementById('list-status-filter').value;
+  const filtered = allReceipts.filter(({ data: d }) => {
+    const matchQ = !q ||
+      (d.receiptNo||'').toLowerCase().includes(q) ||
+      (d.client||'').toLowerCase().includes(q) ||
+      (d.service||'').toLowerCase().includes(q) ||
+      (d.docId||'').toLowerCase().includes(q);
+    let matchS = true;
+    if (sf === 'voided') matchS = !!d.voided;
+    else if (sf === 'active') matchS = !d.voided;
+    else if (sf) matchS = !d.voided && (d.status||'').toLowerCase() === sf;
+    return matchQ && matchS;
+  });
+  renderList(filtered);
+}
+
+function renderList(items) {
+  const el = document.getElementById('list-scroll');
+  const countEl = document.getElementById('list-count');
+  countEl.textContent = items.length + ' receipt' + (items.length !== 1 ? 's' : '');
+  if (!items.length) { renderListEmpty(); return; }
+  el.innerHTML = items.map(({ key, data: d }, i) => {
+    const isVoided = !!d.voided;
+    const statusKey = isVoided ? 'voided' : (d.status || 'paid').toLowerCase();
+    const statusLabel = isVoided ? 'VOIDED' : statusKey.toUpperCase();
+    const icon = isVoided ? '🚫' : (statusKey === 'paid' ? '✓' : statusKey === 'pending' ? '⏳' : '◑');
+    return `
+    <div class="list-item ${isVoided ? 'voided-item' : ''}" data-rkey="${key.replace(/"/g,'')}" onclick="selectFromList(this.dataset.rkey)">
+      <div class="list-item-icon" style="${isVoided ? 'border-color:var(--red-border)' : ''}" onclick="selectFromList('${key.replace(/'/g,'')}');event.stopPropagation()">${icon}</div>
+      <div class="list-item-info">
+        <div class="list-item-no">${d.receiptNo || key}</div>
+        <div class="list-item-client">${d.client || '—'}</div>
+        <div class="list-item-date">${d.date || '—'}${d.service ? ' · ' + d.service : ''}</div>
+      </div>
+      <div class="list-item-right">
+        <div class="list-item-total">₱${fNum(d.total||0)}</div>
+        <div class="list-item-status s-${statusKey}">${statusLabel}</div>
+      </div>
+      <div class="list-item-arrow">›</div>
+    </div>`;
+  }).join('');
+}
+
+function renderListEmpty() {
+  document.getElementById('list-scroll').innerHTML = `<div class="list-empty">No receipts found.</div>`;
+  document.getElementById('list-count').textContent = '0 receipts';
+}
+
+function selectFromList(key) {
+  const d = receiptMap[key];
+  if (!d) return;
+  document.getElementById('search-input').value = d.receiptNo || key;
+  showReceipt(d, key);
+  document.getElementById('result-wrap').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+/* ═══ Receipt Preview ═══ */
+function buildReceiptPreview(d, isVoided) {
+  const statusKey = (d.status||'paid').toLowerCase();
+  const statusLabel = statusKey.toUpperCase();
+  return `
+  <div class="rp-wrap">
+    <div class="rp-accent"></div>
+    ${isVoided ? `<div class="rp-void-stamp">VOID</div>` : ''}
+    <div class="rp-header">
+      <div>
+        <div class="rp-brand">ATHStudios</div>
+        <div class="rp-tagline">Private Web Engineering Atelier</div>
+      </div>
+      <div>
+        <div class="rp-num-label">Official Receipt</div>
+        <div class="rp-num-val">${d.receiptNo||'—'}</div>
+      </div>
+    </div>
+    <div class="rp-meta">
+      <div class="rp-mk">Date</div><div class="rp-mv">${d.date||'—'}</div>
+      <div class="rp-mk">Billed To</div><div class="rp-mv">${d.client||'—'}</div>
+      <div class="rp-mk">Service</div><div class="rp-mv">${d.service||'—'}</div>
+      <div class="rp-mk">Via</div><div class="rp-mv">${d.method||'—'}</div>
+    </div>
+    <div class="rp-divider"></div>
+    <div class="rp-total-row">
+      <div>
+        <div class="rp-total-lbl">Total Due</div>
+        <div><span class="rp-status rp-s-${statusKey}">${statusLabel}</span></div>
+      </div>
+      <div class="rp-total-amt"><span class="rp-peso">₱</span>${fNum(d.total||0)}</div>
+    </div>
+    ${d.remarks ? `<div style="margin-top:14px;padding:10px 12px;background:rgba(0,0,0,.04);border-left:2px solid #c8bfb0;font-size:10px;color:#857e74;line-height:1.6;border-radius:0 3px 3px 0">${d.remarks}</div>` : ''}
+    <div style="margin-top:18px;padding-top:12px;border-top:1px solid #ece5d8;display:flex;justify-content:space-between;align-items:flex-end">
+      <div style="font-size:8px;color:#c8bfb0;font-style:italic">contact.athstudios@gmail.com · athstudios.dpdns.org</div>
+      <div style="font-size:7px;letter-spacing:2px;text-transform:uppercase;color:#c8bfb0">ATHStudios</div>
+    </div>
+  </div>`;
+}
+
+function togglePreview() {
+  const tog = document.getElementById('preview-toggle');
+  const pan = document.getElementById('preview-panel');
+  if (!tog || !pan) return;
+  const open = pan.classList.toggle('open');
+  tog.classList.toggle('open', open);
+}
+
+function resetSearch() {
+  foundData = null; foundKey = null; confirmChecked = false;
+  document.getElementById('result-wrap').className = 'result-wrap';
+  document.getElementById('result-wrap').innerHTML = '';
+  document.getElementById('search-input').value = '';
+}
+
+function showToast(msg, type='info') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + type + ' on';
+  setTimeout(() => t.classList.remove('on'), 3400);
+}
+
+function fNum(n) {
+  return parseFloat(n).toLocaleString('en-PH',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+</script>
+</body>
+</html>
