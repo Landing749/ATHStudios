@@ -94,7 +94,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .i-add{background:none;border:1px dashed rgba(191,160,106,.18);border-radius:3px;color:var(--g);font-family:'Geist',sans-serif;font-size:9px;letter-spacing:2px;text-transform:uppercase;padding:8px;cursor:pointer;transition:all .15s;margin-top:2px}
 .i-add:hover{border-color:var(--g);background:var(--g4)}
 
-.side-foot{padding:16px 28px;border-top:1px solid var(--wire);flex-shrink:0;display:flex;flex-direction:column;gap:8px}
+.side-foot{padding:14px 28px;border-top:1px solid var(--wire);flex-shrink:0}
 .btn-main{width:100%;background:var(--g);border:none;border-radius:3px;color:#08080a;font-family:'Geist',sans-serif;font-weight:600;font-size:10px;letter-spacing:2.5px;text-transform:uppercase;padding:14px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
 .btn-main::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent 0%,rgba(255,255,255,.12) 50%,transparent 100%);transform:translateX(-100%);transition:transform .4s}
 .btn-main:hover{background:var(--g2);box-shadow:0 0 32px rgba(191,160,106,.3)}
@@ -112,7 +112,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 
 /* THE RECEIPT */
 #receipt{width:680px;background:var(--rp);color:var(--ri);font-family:'Geist',sans-serif;position:relative;overflow:hidden;box-shadow:0 0 0 1px rgba(0,0,0,.12),0 4px 6px rgba(0,0,0,.08),0 20px 40px rgba(0,0,0,.25),0 60px 120px rgba(0,0,0,.5),0 0 80px rgba(191,160,106,.07)}
-#receipt::before{content:'';position:absolute;inset:0;background-image:repeating-linear-gradient(0deg,transparent,transparent 28px,rgba(0,0,0,.018) 28px,rgba(0,0,0,.018) 29px),repeating-linear-gradient(90deg,transparent,transparent 28px,rgba(0,0,0,.018) 28px,rgba(0,0,0,.018) 29px);pointer-events:none;z-index:0}
+#receipt::before{content:'';position:absolute;inset:0;pointer-events:none;z-index:0}
 .r-content{position:relative;z-index:1}
 .r-accent{height:2px;background:linear-gradient(90deg,transparent,var(--ra) 20%,#c9a96e 50%,var(--ra) 80%,transparent)}
 .r-perf{height:14px;background-image:radial-gradient(circle,#0d0d12 4.5px,transparent 4.5px);background-size:18px 14px;background-color:#f5f0e8}
@@ -237,6 +237,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 
 /* ── Stamps Layer ── */
 .r-stamps-layer{position:absolute;inset:0;pointer-events:none;z-index:5;overflow:hidden}
+.r-guilloche-layer{position:absolute;inset:0;pointer-events:none;z-index:2;overflow:hidden;mix-blend-mode:multiply}
 .r-stamp{position:absolute;display:flex;align-items:center;justify-content:center;border-radius:50%;border:3px solid rgba(107,90,58,0.22);background:rgba(255,255,255,0);overflow:hidden}
 .r-stamp img{width:100%;height:100%;object-fit:cover;border-radius:50%;mix-blend-mode:multiply}
 
@@ -246,7 +247,6 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .toast.success{border-color:rgba(62,207,142,.4);color:var(--green)}
 .toast.error{border-color:rgba(255,80,80,.4);color:#ff8080}
 .toast.info{border-color:rgba(191,160,106,.35);color:var(--g)}
-
 
 /* ── Calculator ── */
 .calc-panel{padding:14px 28px 0}
@@ -361,54 +361,62 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
         <div class="f"><label>Notes / Terms</label><textarea id="notes" rows="2" placeholder="e.g. Thank you for choosing ATHStudios." oninput="live()"></textarea></div>
       </div>
     </div>
+
+    <!-- Calculator (scrollable, inside form area) -->
+    <div class="acc">
+      <div class="acc-hd" onclick="toggle(this)"><span class="acc-hd-num">06</span><span class="acc-hd-lbl">Calculator</span><span class="acc-hd-arrow">›</span></div>
+      <div class="acc-body">
+        <div class="calc-panel" style="padding:0">
+          <div class="calc-display">
+            <div class="calc-expr" id="calc-expr">&nbsp;</div>
+            <div class="calc-val" id="calc-val">0</div>
+          </div>
+          <div class="calc-grid">
+            <button class="cb cb-clr col-span-2" onclick="ci('C')" style="grid-column:span 2">C</button>
+            <button class="cb cb-del" onclick="ci('⌫')">⌫</button>
+            <button class="cb cb-op" onclick="ci('÷')">÷</button>
+            <button class="cb" onclick="ci('7')">7</button>
+            <button class="cb" onclick="ci('8')">8</button>
+            <button class="cb" onclick="ci('9')">9</button>
+            <button class="cb cb-op" onclick="ci('×')">×</button>
+            <button class="cb" onclick="ci('4')">4</button>
+            <button class="cb" onclick="ci('5')">5</button>
+            <button class="cb" onclick="ci('6')">6</button>
+            <button class="cb cb-op" onclick="ci('−')">−</button>
+            <button class="cb" onclick="ci('1')">1</button>
+            <button class="cb" onclick="ci('2')">2</button>
+            <button class="cb" onclick="ci('3')">3</button>
+            <button class="cb cb-op" onclick="ci('+')">+</button>
+            <button class="cb" onclick="ci('%')" style="color:var(--g2)">%</button>
+            <button class="cb" onclick="ci('0')">0</button>
+            <button class="cb" onclick="ci('.')">.</button>
+            <button class="cb cb-eq" onclick="ci('=')">=</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Client logo upload (scrollable, inside form area) -->
+    <div class="acc">
+      <div class="acc-hd" onclick="toggle(this)"><span class="acc-hd-num">07</span><span class="acc-hd-lbl">Client Logo</span><span class="acc-hd-arrow">›</span></div>
+      <div class="acc-body">
+        <div class="cl-upload-wrap" style="padding:0">
+          <label class="cl-upload-box" id="cl-upload-box">
+            <input type="file" id="cl-logo-input" accept="image/*" onchange="onClientLogoChange(this)">
+            <span class="cl-upload-icon">🖼️</span>
+            <span class="cl-upload-txt"><strong>Upload Logo</strong>PNG, JPG, SVG, WEBP</span>
+          </label>
+          <div class="cl-preview-wrap" id="cl-preview-wrap">
+            <img class="cl-preview-img" id="cl-preview-img" src="" alt="">
+            <span class="cl-preview-name" id="cl-preview-name"></span>
+            <button class="cl-clear-btn" onclick="clearClientLogo()" title="Remove">✕</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div class="side-foot">
-
-    <!-- Calculator -->
-    <div class="calc-panel" style="padding-bottom:12px">
-      <span class="calc-lbl">Calculator</span>
-      <div class="calc-display">
-        <div class="calc-expr" id="calc-expr">&nbsp;</div>
-        <div class="calc-val" id="calc-val">0</div>
-      </div>
-      <div class="calc-grid">
-        <button class="cb cb-clr col-span-2" onclick="ci('C')" style="grid-column:span 2">C</button>
-        <button class="cb cb-del" onclick="ci('⌫')">⌫</button>
-        <button class="cb cb-op" onclick="ci('÷')">÷</button>
-        <button class="cb" onclick="ci('7')">7</button>
-        <button class="cb" onclick="ci('8')">8</button>
-        <button class="cb" onclick="ci('9')">9</button>
-        <button class="cb cb-op" onclick="ci('×')">×</button>
-        <button class="cb" onclick="ci('4')">4</button>
-        <button class="cb" onclick="ci('5')">5</button>
-        <button class="cb" onclick="ci('6')">6</button>
-        <button class="cb cb-op" onclick="ci('−')">−</button>
-        <button class="cb" onclick="ci('1')">1</button>
-        <button class="cb" onclick="ci('2')">2</button>
-        <button class="cb" onclick="ci('3')">3</button>
-        <button class="cb cb-op" onclick="ci('+')">+</button>
-        <button class="cb" onclick="ci('%')" style="color:var(--g2)">%</button>
-        <button class="cb" onclick="ci('0')">0</button>
-        <button class="cb" onclick="ci('.')">.</button>
-        <button class="cb cb-eq" onclick="ci('=')">=</button>
-      </div>
-    </div>
-
-    <!-- Client logo upload -->
-    <div class="cl-upload-wrap" style="padding:0 0 10px">
-      <span class="cl-upload-label">Client Logo <span style="color:var(--dim2);font-size:7px;letter-spacing:1px">(optional · session only)</span></span>
-      <label class="cl-upload-box" id="cl-upload-box">
-        <input type="file" id="cl-logo-input" accept="image/*" onchange="onClientLogoChange(this)">
-        <span class="cl-upload-icon">🖼️</span>
-        <span class="cl-upload-txt"><strong>Upload Logo</strong>PNG, JPG, SVG, WEBP</span>
-      </label>
-      <div class="cl-preview-wrap" id="cl-preview-wrap">
-        <img class="cl-preview-img" id="cl-preview-img" src="" alt="">
-        <span class="cl-preview-name" id="cl-preview-name"></span>
-        <button class="cl-clear-btn" onclick="clearClientLogo()" title="Remove">✕</button>
-      </div>
-    </div>
     <button class="btn-main" id="export-btn" onclick="doExport()">Export &amp; Register Receipt</button>
   </div>
 </aside>
@@ -424,6 +432,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
       <div class="r-accent"></div>
       <div class="r-perf"></div>
       <div class="r-pad">
+        <div class="r-guilloche-layer" id="r-guilloche-layer"></div>
         <div class="r-stamps-layer" id="r-stamps-layer"></div>
         <div class="r-top">
           <div class="r-brand">
@@ -530,6 +539,174 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 <div class="toast info" id="toast">—</div>
 
 <script>
+/* ── Guilloche Pattern Engine ── */
+function guillocheRng(hexHash, salt) {
+  const s0 = salt || 0;
+  const h0 = (parseInt(hexHash.slice(0,8),16)  >>> 0) ^ s0;
+  const h1 = (parseInt(hexHash.slice(8,16),16) >>> 0) ^ (s0 * 0x9E3779B9 >>> 0);
+  const h2 = (parseInt(hexHash.slice(16,24)||'0',16)>>>0) ^ s0;
+  const h3 = (parseInt(hexHash.slice(24,32)||'0',16)>>>0);
+  let s = (h0 ^ h1 ^ h2 ^ h3) >>> 0 || 0xDEADBEEF;
+  return function() {
+    s += 0x6D2B79F5; s >>>= 0;
+    let z = s;
+    z = Math.imul(z ^ (z >>> 15), 1 | z);
+    z ^= z + Math.imul(z ^ (z >>> 7), 61 | z);
+    return ((z ^ (z >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function renderGuilloche(hexHash, containerId) {
+  if (!hexHash || hexHash === '—') return;
+  const el = document.getElementById(containerId);
+  if (!el) return;
+
+  const rA = guillocheRng(hexHash, 0x00000001);
+  const rB = guillocheRng(hexHash, 0xABCDEF01);
+  const rC = guillocheRng(hexHash, 0xDEAD1234);
+  const rD = guillocheRng(hexHash, 0xFEEDBEEF);
+  const rE = guillocheRng(hexHash, 0xC0FFEE77);
+
+  const W = 680, H = 420;
+  let paths = '';
+
+  const nA = 6 + Math.floor(rA() * 6);
+  for (let i = 0; i < nA; i++) {
+    const f1=1.1+rA()*7, a1=18+rA()*90, ph1=rA()*Math.PI*2;
+    const f2=f1*(0.28+rA()*0.9), a2=a1*(0.08+rA()*0.38), ph2=rA()*Math.PI*2;
+    const f3=f1*(1.5+rA()*2.2), a3=a1*0.06, ph3=rA()*Math.PI*2;
+    const yB=H*(0.04+rA()*0.92), sw=(0.5+rA()*0.9).toFixed(2);
+    const op=(0.028+rA()*0.022).toFixed(3);
+    let d='';
+    for(let j=0;j<=640;j++){
+      const x=(j/640)*W, t=(j/640)*Math.PI*2;
+      const y=yB+Math.sin(t*f1+ph1)*a1+Math.sin(t*f2+ph2)*a2+Math.sin(t*f3+ph3)*a3;
+      d+=(j?'L':'M')+x.toFixed(1)+','+y.toFixed(1);
+    }
+    paths+=`<path d="${d}" fill="none" stroke="rgba(107,90,58,${op})" stroke-width="${sw}" stroke-linecap="round"/>`;
+  }
+
+  const nB = 4 + Math.floor(rB() * 5);
+  for (let i = 0; i < nB; i++) {
+    const ang=(12+rB()*66)*Math.PI/180;
+    const ca=Math.cos(ang), sa=Math.sin(ang);
+    const f1=2+rB()*10, a1=12+rB()*55, ph1=rB()*Math.PI*2;
+    const f2=f1*(0.4+rB()*0.7), a2=a1*0.22, ph2=rB()*Math.PI*2;
+    const baseY=-H*0.3+rB()*(H*1.6);
+    const sw=(0.35+rB()*0.6).toFixed(2);
+    const op=(0.020+rB()*0.018).toFixed(3);
+    let d='';
+    for(let j=0;j<=560;j++){
+      const s=j/560, t=s*Math.PI*2;
+      const along=s*(W*1.5)-W*0.25;
+      const perp=baseY+Math.sin(t*f1+ph1)*a1+Math.sin(t*f2+ph2)*a2;
+      const x=along*ca-perp*sa;
+      const y=along*sa+perp*ca;
+      d+=(j?'L':'M')+x.toFixed(1)+','+y.toFixed(1);
+    }
+    paths+=`<path d="${d}" fill="none" stroke="rgba(90,72,42,${op})" stroke-width="${sw}"/>`;
+  }
+
+  const nC = 3 + Math.floor(rC() * 4);
+  for (let i = 0; i < nC; i++) {
+    const cx=W*(0.1+rC()*0.8), cy=H*(0.1+rC()*0.8);
+    const R=50+rC()*130, r=R*(0.15+rC()*0.65), dOff=r*(0.25+rC()*0.95);
+    const loops=Math.round(R/(r||1))*2+2;
+    const sw=(0.28+rC()*0.5).toFixed(2);
+    const op=(0.018+rC()*0.018).toFixed(3);
+    let pd='';
+    for(let j=0;j<=900;j++){
+      const t=(j/900)*Math.PI*2*loops;
+      const x=cx+(R-r)*Math.cos(t)+dOff*Math.cos(t*(R-r)/(r||0.001));
+      const y=cy+(R-r)*Math.sin(t)-dOff*Math.sin(t*(R-r)/(r||0.001));
+      pd+=(j?'L':'M')+x.toFixed(1)+','+y.toFixed(1);
+    }
+    paths+=`<path d="${pd}" fill="none" stroke="rgba(107,90,58,${op})" stroke-width="${sw}"/>`;
+  }
+
+  const nD = 3 + Math.floor(rD() * 4);
+  for (let i = 0; i < nD; i++) {
+    const cx=W*(0.08+rD()*0.84), cy=H*(0.08+rD()*0.84);
+    const petals=3+Math.floor(rD()*9);
+    const rOuter=25+rD()*80, rInner=rOuter*(0.2+rD()*0.5);
+    const twist=rD()*Math.PI;
+    const sw=(0.25+rD()*0.45).toFixed(2);
+    const op=(0.018+rD()*0.018).toFixed(3);
+    let pd='';
+    for(let j=0;j<=480;j++){
+      const t=(j/480)*Math.PI*2;
+      const r=rOuter*Math.abs(Math.cos(petals*t*0.5+twist))+rInner*Math.abs(Math.sin(petals*t));
+      pd+=(j?'L':'M')+(cx+r*Math.cos(t)).toFixed(1)+','+(cy+r*Math.sin(t)).toFixed(1);
+    }
+    paths+=`<path d="${pd}" fill="none" stroke="rgba(120,96,52,${op})" stroke-width="${sw}"/>`;
+  }
+
+  const nE = 8 + Math.floor(rE() * 8);
+  for (let i = 0; i < nE; i++) {
+    const f1=14+rE()*32, a1=2+rE()*11, ph1=rE()*Math.PI*2;
+    const f2=f1*(1.04+rE()*0.48), a2=a1*0.35, ph2=rE()*Math.PI*2;
+    const f3=f1*0.33, a3=a1*1.6, ph3=rE()*Math.PI*2;
+    const yB=H*(0.02+rE()*0.96);
+    const sw=(0.18+rE()*0.28).toFixed(2);
+    const op=(0.020+rE()*0.018).toFixed(3);
+    let d='';
+    for(let j=0;j<=760;j++){
+      const x=(j/760)*W, t=(j/760)*Math.PI*2;
+      const y=yB+Math.sin(t*f1+ph1)*a1+Math.sin(t*f2+ph2)*a2+Math.sin(t*f3+ph3)*a3;
+      d+=(j?'L':'M')+x.toFixed(1)+','+y.toFixed(1);
+    }
+    paths+=`<path d="${d}" fill="none" stroke="rgba(107,90,58,${op})" stroke-width="${sw}"/>`;
+  }
+
+  el.innerHTML=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid slice" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;mix-blend-mode:multiply">
+    <defs>
+      <clipPath id="gc-clip">
+        <path fill-rule="evenodd" d="M0,0 H${W} V${H} H0 Z M44,28 H120 V105 H44 Z"/>
+      </clipPath>
+    </defs>
+    <g clip-path="url(#gc-clip)">${paths}</g>
+  </svg>`;
+}
+
+/* ── Print DPI settings ── */
+const PRINT_DPI   = 250;
+const PRINT_SCALE = PRINT_DPI / 96;
+
+/* ── PNG pHYs DPI metadata injector ── */
+function injectPngDpi(dataUrl, dpi) {
+  const base64 = dataUrl.split(',')[1];
+  const bin    = atob(base64);
+  const src    = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) src[i] = bin.charCodeAt(i);
+  const crcTable = new Uint32Array(256);
+  for (let n = 0; n < 256; n++) {
+    let c = n;
+    for (let k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+    crcTable[n] = c;
+  }
+  function crc32(buf, off, len) {
+    let crc = 0xFFFFFFFF;
+    for (let i = off; i < off + len; i++) crc = crcTable[(crc ^ buf[i]) & 0xFF] ^ (crc >>> 8);
+    return (crc ^ 0xFFFFFFFF) >>> 0;
+  }
+  const ppm = Math.round(dpi * 100 / 2.54);
+  const phys = new Uint8Array(21);
+  const w32 = (arr, off, v) => { arr[off]=(v>>>24)&0xFF; arr[off+1]=(v>>>16)&0xFF; arr[off+2]=(v>>>8)&0xFF; arr[off+3]=v&0xFF; };
+  w32(phys, 0, 9);
+  phys[4]=0x70;phys[5]=0x48;phys[6]=0x59;phys[7]=0x73;
+  w32(phys, 8,  ppm);
+  w32(phys, 12, ppm);
+  phys[16] = 1;
+  w32(phys, 17, crc32(phys, 4, 13));
+  const out = new Uint8Array(src.length + 21);
+  out.set(src.slice(0, 33), 0);
+  out.set(phys,              33);
+  out.set(src.slice(33),     54);
+  let s = '';
+  for (let i = 0; i < out.length; i++) s += String.fromCharCode(out[i]);
+  return 'data:image/png;base64,' + btoa(s);
+}
+
 /* ─── Firebase Init ─── */
 const firebaseConfig = {
   apiKey: "AIzaSyDD-fr24tSTymu9HwDNSTygLzYhQzyiOkM",
@@ -729,6 +906,7 @@ async function updateSecurity({num,date,client,svc,total,status,method}) {
     }
   }
   renderStamps(currentStamps, currentStampLogoBase64 || (document.querySelector('.r-logo') ? document.querySelector('.r-logo').src : null));
+  renderGuilloche(hashHex, 'r-guilloche-layer');
 
   try {
     JsBarcode('#r-barcode', barcodeVal, {
@@ -875,12 +1053,12 @@ async function doExport() {
 
     btn.textContent = 'Exporting PNG...';
     const el = document.getElementById('receipt');
-    html2canvas(el,{scale:3,useCORS:true,allowTaint:true,backgroundColor:'#fcf8f1',logging:false}).then(canvas=>{
+    html2canvas(el,{scale:PRINT_SCALE,useCORS:true,allowTaint:true,backgroundColor:'#fcf8f1',logging:false}).then(canvas=>{
       const a=document.createElement('a');
       a.download=`ATHStudios_${currentNo}.png`;
-      a.href=canvas.toDataURL('image/png');
+      a.href=injectPngDpi(canvas.toDataURL('image/png'), PRINT_DPI);
       a.click();
-      showToast('✓ Receipt exported & secured','success');
+      showToast(`\u2713 Receipt exported at ${PRINT_DPI} DPI`,'success');
       btn.disabled=false;
       btn.textContent='Export & Register Receipt';
     });
@@ -889,14 +1067,14 @@ async function doExport() {
     const reason = err.code === 'PERMISSION_DENIED'
       ? 'Firebase rules blocked the save — check database rules'
       : (err.message || 'Unknown error');
-    showToast('Firebase: ' + reason + ' — exporting anyway','error');
+    showToast('Firebase: ' + reason + ' \u2014 exporting anyway','error');
     btn.disabled=false;
     btn.textContent='Export & Register Receipt';
     const el=document.getElementById('receipt');
-    html2canvas(el,{scale:3,useCORS:true,allowTaint:true,backgroundColor:'#fcf8f1',logging:false}).then(canvas=>{
+    html2canvas(el,{scale:PRINT_SCALE,useCORS:true,allowTaint:true,backgroundColor:'#fcf8f1',logging:false}).then(canvas=>{
       const a=document.createElement('a');
       a.download=`ATHStudios_${currentNo}.png`;
-      a.href=canvas.toDataURL('image/png');
+      a.href=injectPngDpi(canvas.toDataURL('image/png'), PRINT_DPI);
       a.click();
     });
   }
