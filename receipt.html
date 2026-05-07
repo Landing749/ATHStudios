@@ -3,12 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ATHStudios — Receipt Studio v5</title>
+<title>ATHStudios — Receipt Studio</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,600&family=Geist+Mono:wght@300;400;500&family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.6/JsBarcode.all.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 <style>
@@ -22,49 +21,24 @@
   --rp:#fcf8f1;--ri:#0f0e0c;--rm:#857e74;--rl:#ece5d8;--ra:#6b5a3a;
 }
 html{font-size:14px}
-body{background:var(--void);color:var(--text);font-family:'Geist',sans-serif;min-height:100vh;overflow-x:clip}
+body{background:var(--void);color:var(--text);font-family:'Geist',sans-serif;min-height:100vh;overflow-x:hidden}
 body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23g)' opacity='1'/%3E%3C/svg%3E");opacity:.032;pointer-events:none;z-index:9000}
 .glow{position:fixed;border-radius:50%;pointer-events:none}
 .glow-a{width:900px;height:900px;top:-400px;left:-300px;background:radial-gradient(circle,rgba(191,160,106,.07) 0%,transparent 60%);z-index:0}
 .glow-b{width:600px;height:600px;bottom:-200px;right:-100px;background:radial-gradient(circle,rgba(191,160,106,.04) 0%,transparent 60%);z-index:0}
 .glow-c{width:300px;height:300px;top:40%;left:430px;background:radial-gradient(circle,rgba(62,207,142,.025) 0%,transparent 65%);z-index:0}
-.wrap{position:relative;z-index:1;display:flex;min-height:100vh;overflow-x:auto}
+.wrap{position:relative;z-index:1;display:flex;min-height:100vh}
 
 /* SIDEBAR */
-.side{width:420px;flex-shrink:0;background:var(--s1);border-right:1px solid var(--wire);display:flex;flex-direction:column;height:100vh;position:sticky;top:0;transition:width .22s cubic-bezier(.4,0,.2,1);overflow:hidden}
-.side.collapsed{width:48px}
-.side.collapsed .side-form,
-.side.collapsed .side-foot,
-.side.collapsed .fb-bar,
-.side.collapsed .sec-bar{display:none}
-.side.collapsed .nav-name,
-.side.collapsed .nav-sub,
-.side.collapsed .nav-chip{display:none}
-.side.collapsed .side-nav{padding:22px 8px;justify-content:center}
-.side.collapsed .nav-logo-wrap{margin:0}
-/* Toggle button */
-.sidebar-toggle{
-  margin-left:auto;
-  width:26px;height:26px;
-  background:rgba(255,255,255,.04);
-  border:1px solid var(--wire2);
-  border-radius:3px;
-  cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
-  flex-shrink:0;
-  color:var(--dim2);
-  font-size:13px;
-  transition:all .15s;
-  line-height:1
-}
-.sidebar-toggle:hover{background:rgba(255,255,255,.09);border-color:var(--g);color:var(--g)}
-.side.collapsed .sidebar-toggle{margin:0;width:30px;height:30px}
+.side{width:420px;flex-shrink:0;background:var(--s1);border-right:1px solid var(--wire);display:flex;flex-direction:column;height:100vh;position:sticky;top:0}
 .side-nav{padding:22px 28px;border-bottom:1px solid var(--wire);display:flex;align-items:center;gap:11px;flex-shrink:0}
 .nav-logo-wrap{width:32px;height:32px;border-radius:50%;overflow:hidden;flex-shrink:0}
 .nav-logo{width:32px;height:32px;display:block;object-fit:cover}
 .nav-name{font-family:'Cormorant',serif;font-weight:500;font-size:17px;color:#f0ece4;letter-spacing:.3px}
 .nav-sub{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--dim);margin-top:2px}
 .nav-chip{margin-left:auto;font-size:8.5px;letter-spacing:2px;text-transform:uppercase;color:var(--g);border:1px solid rgba(191,160,106,.22);padding:4px 10px;border-radius:2px;flex-shrink:0}
+
+/* Firebase status */
 .fb-bar{display:flex;align-items:center;gap:8px;padding:9px 28px;border-bottom:1px solid var(--wire);flex-shrink:0;background:rgba(0,0,0,.2)}
 .fb-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
 .fb-dot.connecting{background:#f0a500;box-shadow:0 0 6px #f0a500;animation:blink 1.2s ease infinite}
@@ -74,12 +48,15 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .fb-txt{font-family:'Geist Mono',monospace;font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:var(--dim2)}
 .fb-txt span{color:var(--text)}
 .fb-ses{margin-left:auto;font-family:'Geist Mono',monospace;font-size:8px;color:rgba(191,160,106,.5)}
+
 .sec-bar{display:flex;align-items:center;gap:8px;padding:9px 28px;background:var(--green-dim);border-bottom:1px solid rgba(62,207,142,.1);flex-shrink:0}
 .sec-dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);flex-shrink:0;animation:blink 2.5s ease infinite}
 .sec-bar-txt{font-family:'Geist Mono',monospace;font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:var(--green)}
+
 .side-form{flex:1;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--wire2) transparent}
 .side-form::-webkit-scrollbar{width:3px}
 .side-form::-webkit-scrollbar-thumb{background:var(--wire2);border-radius:2px}
+
 .acc{border-bottom:1px solid var(--wire)}
 .acc-hd{padding:15px 28px;display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;transition:background .15s}
 .acc-hd:hover{background:rgba(255,255,255,.02)}
@@ -89,20 +66,24 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .acc.open .acc-hd-arrow{transform:rotate(90deg)}
 .acc-body{padding:0 28px 20px;display:none;flex-direction:column;gap:13px}
 .acc.open .acc-body{display:flex}
+
 .f{display:flex;flex-direction:column;gap:6px}
 .f label{font-size:8.5px;letter-spacing:2px;text-transform:uppercase;color:var(--dim)}
 .f input,.f textarea,.f select{background:var(--s3);border:1px solid var(--wire2);border-radius:3px;color:var(--text);font-family:'Geist',sans-serif;font-size:12.5px;padding:10px 12px;outline:none;transition:border-color .15s,background .15s;resize:none;-webkit-appearance:none;appearance:none}
 .f input:focus,.f textarea:focus,.f select:focus{border-color:var(--g);background:var(--s4)}
 .f input::placeholder,.f textarea::placeholder{color:#2e2e3e}
 .f select option{background:#1a1a24}
+
 .rcpt-no-display{background:var(--s3);border:1px solid rgba(191,160,106,.28);border-radius:3px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between}
 .rcpt-no-val{font-family:'Geist Mono',monospace;font-size:13px;color:var(--g3);letter-spacing:.5px}
 .rcpt-no-regen{background:none;border:1px solid var(--wire2);border-radius:2px;color:var(--dim2);font-family:'Geist',sans-serif;font-size:8.5px;letter-spacing:1.5px;text-transform:uppercase;padding:4px 8px;cursor:pointer;transition:all .15s}
 .rcpt-no-regen:hover{border-color:var(--g);color:var(--g)}
+
 .g2col{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .big-amt{position:relative}
 .big-sym{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-family:'Cormorant',serif;font-size:20px;color:var(--g);pointer-events:none;line-height:1}
 .big-amt input{padding-left:26px;font-family:'Cormorant',serif;font-size:28px;font-weight:300;color:var(--g3);letter-spacing:-1px}
+
 .items-stack{display:flex;flex-direction:column;gap:5px}
 .irow{display:grid;grid-template-columns:1fr 52px 72px 26px;gap:5px;align-items:center;animation:pop .15s ease}
 @keyframes pop{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
@@ -112,6 +93,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .i-del:hover{border-color:rgba(255,60,60,.4);color:#ff6060;background:rgba(255,60,60,.08)}
 .i-add{background:none;border:1px dashed rgba(191,160,106,.18);border-radius:3px;color:var(--g);font-family:'Geist',sans-serif;font-size:9px;letter-spacing:2px;text-transform:uppercase;padding:8px;cursor:pointer;transition:all .15s;margin-top:2px}
 .i-add:hover{border-color:var(--g);background:var(--g4)}
+
 .side-foot{padding:16px 28px;border-top:1px solid var(--wire);flex-shrink:0;display:flex;flex-direction:column;gap:8px}
 .btn-main{width:100%;background:var(--g);border:none;border-radius:3px;color:#08080a;font-family:'Geist',sans-serif;font-weight:600;font-size:10px;letter-spacing:2.5px;text-transform:uppercase;padding:14px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
 .btn-main::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent 0%,rgba(255,255,255,.12) 50%,transparent 100%);transform:translateX(-100%);transition:transform .4s}
@@ -120,311 +102,143 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .btn-main:disabled{opacity:.5;cursor:not-allowed}
 
 /* MAIN */
-.main{flex:1;min-width:0;background:var(--void);display:flex;flex-direction:column;align-items:center;padding:52px 40px 80px;min-height:100vh;overflow-y:auto;overflow-x:auto}
-.prev-row{width:100%;max-width:720px;display:flex;align-items:center;justify-content:space-between;margin-bottom:30px}
+.main{flex:1;background:var(--void);display:flex;flex-direction:column;align-items:center;padding:52px 40px 80px;min-height:100vh;overflow-y:auto}
+.prev-row{width:100%;max-width:680px;display:flex;align-items:center;justify-content:space-between;margin-bottom:30px}
 .prev-lbl{font-family:'Geist Mono',monospace;font-size:8.5px;letter-spacing:3px;text-transform:uppercase;color:var(--dim)}
 .prev-status{display:flex;align-items:center;gap:6px}
 .prev-dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green),0 0 20px rgba(62,207,142,.4);animation:pulse 2s ease-in-out infinite}
 @keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 8px var(--green),0 0 20px rgba(62,207,142,.4)}50%{opacity:.5;box-shadow:0 0 4px var(--green)}}
 .prev-secure{font-family:'Geist Mono',monospace;font-size:8px;color:rgba(62,207,142,.5);letter-spacing:1px}
 
-/* ── THE RECEIPT ── */
-#receipt{
-  width:720px;
-  /* A4 proportions: 277mm usable height / 190mm usable width × 720px = 1049px */
-  min-height:1050px;
-  display:flex;
-  flex-direction:column;
-  background:var(--rp);
-  color:var(--ri);
-  font-family:'Geist',sans-serif;
-  position:relative;
-  overflow:hidden;
-  box-shadow:0 0 0 1px rgba(0,0,0,.12),0 4px 6px rgba(0,0,0,.08),0 20px 40px rgba(0,0,0,.25),0 60px 120px rgba(0,0,0,.5),0 0 80px rgba(191,160,106,.07)
-}
-/* Body watermark */
-#receipt::after{
-  content:'OFFICIAL RECEIPT';
-  position:absolute;
-  top:42%;left:50%;
-  transform:translate(-50%,-50%) rotate(-28deg);
-  font-family:'Cormorant',serif;
-  font-size:52px;
-  font-weight:700;
-  letter-spacing:10px;
-  color:rgba(0,0,0,.018);
-  pointer-events:none;
-  z-index:2;
-  white-space:nowrap;
-  user-select:none
-}
-/* Fine grid paper texture */
-#receipt::before{
-  content:'';
-  position:absolute;inset:0;
-  background-image:
-    repeating-linear-gradient(0deg,transparent,transparent 23px,rgba(0,0,0,.014) 23px,rgba(0,0,0,.014) 24px),
-    repeating-linear-gradient(90deg,transparent,transparent 23px,rgba(0,0,0,.014) 23px,rgba(0,0,0,.014) 24px);
-  pointer-events:none;z-index:0
-}
-.r-content{position:relative;z-index:1;flex:1;display:flex;flex-direction:column}
+/* THE RECEIPT */
+#receipt{width:680px;background:var(--rp);color:var(--ri);font-family:'Geist',sans-serif;position:relative;overflow:hidden;box-shadow:0 0 0 1px rgba(0,0,0,.12),0 4px 6px rgba(0,0,0,.08),0 20px 40px rgba(0,0,0,.25),0 60px 120px rgba(0,0,0,.5),0 0 80px rgba(191,160,106,.07)}
+#receipt::before{content:'';position:absolute;inset:0;background-image:repeating-linear-gradient(0deg,transparent,transparent 28px,rgba(0,0,0,.018) 28px,rgba(0,0,0,.018) 29px),repeating-linear-gradient(90deg,transparent,transparent 28px,rgba(0,0,0,.018) 28px,rgba(0,0,0,.018) 29px);pointer-events:none;z-index:0}
+.r-content{position:relative;z-index:1}
 .r-accent{height:2px;background:linear-gradient(90deg,transparent,var(--ra) 20%,#c9a96e 50%,var(--ra) 80%,transparent)}
+.r-perf{height:14px;background-image:radial-gradient(circle,#0d0d12 4.5px,transparent 4.5px);background-size:18px 14px;background-color:#f5f0e8}
+.r-pad{padding:38px 52px 34px;position:relative}
 
-/* Perforated edge */
-.r-perf{
-  height:14px;
-  background-image:radial-gradient(circle,#0d0d12 4.5px,transparent 4.5px);
-  background-size:18px 14px;
-  background-color:#f5f0e8
-}
-
-.r-edge-micro{display:none}
-
-.r-pad{padding:36px 52px 30px;flex:1;display:flex;flex-direction:column}
-
-/* Receipt header */
 .r-top{display:flex;align-items:flex-start;justify-content:space-between;padding-bottom:22px;border-bottom:1px solid var(--rl);margin-bottom:24px}
 .r-brand{display:flex;align-items:center;gap:13px}
 .r-logo-wrap{width:54px;height:54px;border-radius:50%;overflow:hidden;flex-shrink:0;background:#111}
 .r-logo{width:54px;height:54px;display:block;object-fit:cover}
 .r-client-logo{width:54px;height:54px;object-fit:cover;border-radius:50%;display:none;overflow:hidden;flex-shrink:0}
 .r-client-logo.show{display:block}
+
+/* Sidebar client logo upload */
+.cl-upload-wrap{padding:14px 28px 0}
+.cl-upload-label{font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--dim);margin-bottom:8px;display:block}
+.cl-upload-box{
+  display:flex;align-items:center;gap:10px;
+  border:1px dashed var(--wire);border-radius:10px;
+  padding:10px 14px;cursor:pointer;transition:border-color .2s;
+  background:transparent;
+}
+.cl-upload-box:hover{border-color:var(--acc)}
+.cl-upload-box input[type=file]{display:none}
+.cl-upload-icon{font-size:18px;flex-shrink:0;line-height:1}
+.cl-upload-txt{font-size:10px;color:var(--dim2);line-height:1.4}
+.cl-upload-txt strong{display:block;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--dim);font-weight:600}
+.cl-preview-wrap{display:none;align-items:center;gap:10px;margin-top:8px}
+.cl-preview-wrap.show{display:flex}
+.cl-preview-img{width:36px;height:36px;border-radius:50%;object-fit:cover;border:1px solid var(--wire)}
+.cl-preview-name{font-size:10px;color:var(--dim2);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cl-clear-btn{background:none;border:none;color:var(--dim);font-size:12px;cursor:pointer;padding:2px 6px;border-radius:4px;transition:color .15s}
+.cl-clear-btn:hover{color:#e05252}
 .r-co{font-family:'Cormorant',serif;font-weight:600;font-size:22px;letter-spacing:.2px;line-height:1}
 .r-tagline{font-size:7.5px;letter-spacing:2px;text-transform:uppercase;color:var(--rm);margin-top:4px}
 .r-num-block{text-align:right}
 .r-num-label{font-size:7.5px;letter-spacing:2.5px;text-transform:uppercase;color:var(--rm)}
 .r-num-val{font-family:'Geist Mono',monospace;font-size:16px;font-weight:500;letter-spacing:-.3px;margin-top:2px}
 
-/* Meta */
 .r-meta{display:grid;grid-template-columns:auto 1fr;gap:6px 18px;margin-bottom:24px}
 .r-mk{font-size:7.5px;letter-spacing:2px;text-transform:uppercase;color:var(--rm);white-space:nowrap;padding-top:1px}
 .r-mv{font-size:12px;font-weight:500}
 
-/* Items table */
-.r-items-head{display:grid;grid-template-columns:1fr 36px 80px 80px;gap:4px;padding-bottom:8px;border-bottom:1px solid var(--rl);margin-bottom:2px}
+.r-items-head{display:grid;grid-template-columns:1fr 36px 72px 72px;gap:4px;padding-bottom:8px;border-bottom:1px solid var(--rl);margin-bottom:2px}
 .r-items-head span{font-size:7.5px;letter-spacing:2px;text-transform:uppercase;color:var(--rm)}
 .r-items-head span:nth-child(n+2){text-align:right}
-.r-item{display:grid;grid-template-columns:1fr 36px 80px 80px;gap:4px;padding:6.5px 0;border-bottom:1px solid rgba(0,0,0,.05)}
+.r-item{display:grid;grid-template-columns:1fr 36px 72px 72px;gap:4px;padding:6.5px 0;border-bottom:1px solid rgba(0,0,0,.05)}
 .r-item span{font-size:11.5px}
 .r-item span.d{color:var(--rm);font-size:10.5px}
 .r-item span:nth-child(n+2){text-align:right}
 
-/* Totals */
 .r-vat-wrap{margin-top:6px;padding:8px 0;border-top:1px dashed rgba(0,0,0,.15)}
-.r-vat-row{display:flex;justify-content:space-between;align-items:center;padding:2.5px 0}
+.r-vat-row{display:flex;justify-content:space-between;align-items:center;padding:2px 0}
 .r-vat-lbl{font-size:9.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--rm)}
 .r-vat-val{font-family:'Geist Mono',monospace;font-size:11px;color:var(--ri)}
 .r-total-wrap{margin-top:4px;padding-top:16px;border-top:1.5px solid var(--ri);display:flex;align-items:flex-end;justify-content:space-between}
 .r-total-lbl{font-size:7.5px;letter-spacing:3px;text-transform:uppercase;color:var(--rm);margin-bottom:6px}
 .r-badge{display:inline-block;font-size:7.5px;font-weight:600;letter-spacing:2px;text-transform:uppercase;padding:3px 9px;border-radius:2px}
-.b-paid{background:#e8f4ee;color:#1a6b3c}
-.b-pending{background:#fdf7e3;color:#7a5800}
-.b-partial{background:#fdf0e6;color:#7a3800}
+.b-paid{background:#e8f4ee;color:#1a6b3c}.b-pending{background:#fdf7e3;color:#7a5800}.b-partial{background:#fdf0e6;color:#7a3800}
 .r-total-amt{font-family:'Cormorant',serif;font-weight:300;font-size:44px;letter-spacing:-2px;line-height:1}
 .r-peso{font-size:26px;vertical-align:super;font-weight:300;margin-right:1px;opacity:.6}
 
-/* Remarks/notes */
 .r-remarks-wrap{margin-top:20px;background:rgba(0,0,0,.03);border-left:2px solid #c8bfb0;padding:12px 15px;border-radius:0 3px 3px 0}
 .r-sect-lbl{font-size:7.5px;letter-spacing:2.5px;text-transform:uppercase;color:var(--rm);margin-bottom:5px}
 .r-remarks-txt{font-size:11.5px;line-height:1.65}
 .r-notes-txt{font-family:'Cormorant',serif;font-style:italic;font-size:14px;color:var(--rm);line-height:1.6;margin-top:14px;padding-top:14px;border-top:1px dashed var(--rl)}
 
-/* Footer */
-.r-footer{margin-top:auto;padding-top:18px;border-top:1px solid var(--rl);display:flex;align-items:center;justify-content:space-between}
+.r-footer{margin-top:24px;padding-top:18px;border-top:1px solid var(--rl);display:flex;align-items:center;justify-content:space-between}
 .r-footer-l{font-family:'Cormorant',serif;font-style:italic;font-size:11.5px;color:var(--rm);line-height:1.5}
 .r-footer-r{text-align:right}
 .r-footer-brand{font-size:8px;letter-spacing:2.5px;text-transform:uppercase;font-weight:600}
 .r-footer-email{font-size:8px;color:var(--rm);margin-top:2px;letter-spacing:.3px}
 
-/* ────────────────────────────────────────────────
-   SECURITY SECTION — v4 Enhanced
-──────────────────────────────────────────────── */
-.r-security{
-  position:relative;
-  background:#f0ebe0;
-  border-top:1px dashed #d5ccbc;
-  overflow:hidden
-}
-
-/* Guilloche SVG layer */
-.r-guilloche-wrap{
-  position:absolute;inset:0;
-  pointer-events:none;z-index:0;overflow:hidden
-}
-#r-guilloche-svg{
-  position:absolute;inset:0;
-  width:100%;height:100%;
-  opacity:1
-}
-
-/* Fine diagonal hatch overlay */
-.r-security::before{
-  content:'';
-  position:absolute;inset:0;
-  background-image:repeating-linear-gradient(
-    -50deg,
-    transparent 0px,transparent 18px,
-    rgba(0,0,0,.009) 18px,rgba(0,0,0,.009) 19px
-  );
-  pointer-events:none;z-index:1
-}
-
-/* Security content above guilloche */
-.r-sec-inner{position:relative;z-index:2;padding:0 52px 26px}
-
-/* Anti-tamper bar — subtle security pattern */
-.r-anti-tamper{
-  height:3px;
-  background:repeating-linear-gradient(90deg,
-    #1a6b3c 0px,#1a6b3c 4px,
-    transparent 4px,transparent 8px,
-    #c9a96e 8px,#c9a96e 12px,
-    transparent 12px,transparent 16px
-  );
-  position:relative;z-index:3
-}
-
-
-
-/* Microtext strips */
-.r-microtext-strip{
-  height:10px;overflow:hidden;
-  white-space:nowrap;
-  font-size:3px;
-  letter-spacing:0.6px;
-  color:rgba(80,62,30,.24);
-  font-family:'Geist Mono',monospace;
-  padding:3.5px 4px 0;
-  line-height:1.1;
-  user-select:none;
-  position:relative;z-index:3;
-  background:rgba(180,160,120,.06)
-}
-.r-microtext-strip.bottom-micro{
-  padding:2px 4px 0;
-  color:rgba(80,62,30,.20)
-}
-
-/* Section header */
-.r-sec-top{
-  display:flex;align-items:center;justify-content:space-between;
-  padding-top:16px;margin-bottom:14px
-}
+/* SECURITY SECTION */
+.r-security{background:#f0ebe0;border-top:1px dashed #d5ccbc;padding:22px 52px 26px;position:relative;overflow:hidden}
+.r-sec-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
 .r-sec-label{display:flex;align-items:center;gap:7px}
 .r-sec-icon{width:16px;height:16px;background:#1a6b3c;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .r-sec-icon svg{width:9px;height:9px;fill:white}
 .r-sec-title{font-size:8px;letter-spacing:2.5px;text-transform:uppercase;color:#5a5048;font-weight:600}
-.r-sec-badges{display:flex;align-items:center;gap:6px}
 .r-sec-ver{font-family:'Geist Mono',monospace;font-size:7.5px;color:#9a9088;letter-spacing:1px}
-.r-tier-badge{font-family:'Geist Mono',monospace;font-size:6.5px;letter-spacing:1.5px;text-transform:uppercase;background:#1a6b3c;color:#fff;border-radius:2px;padding:2px 6px}
-.r-uv-badge{
-  display:inline-flex;align-items:center;gap:4px;
-  font-size:6.5px;letter-spacing:1.5px;text-transform:uppercase;
-  color:rgba(110,60,200,.65);
-  border:1px solid rgba(110,60,200,.22);
-  border-radius:2px;padding:2px 6px;
-  background:rgba(110,60,200,.05);
-  font-family:'Geist Mono',monospace
-}
 
-/* Barcode + QR layout */
-.r-sec-bc-qr{display:flex;gap:16px;align-items:flex-start;margin-bottom:14px}
-.r-barcode-side{flex:1;min-width:0}
-.r-barcode-wrap{
-  background:white;border:1px solid #e0d8cc;border-radius:3px;
-  padding:10px 16px 8px;
-  box-shadow:inset 0 1px 3px rgba(0,0,0,.05)
-}
+.r-barcode-wrap{display:flex;flex-direction:column;align-items:center;background:white;border:1px solid #e0d8cc;border-radius:3px;padding:10px 16px 8px;margin-bottom:14px}
 #r-barcode{display:block;max-width:100%}
 .r-barcode-num{font-family:'Geist Mono',monospace;font-size:8px;color:var(--rm);letter-spacing:1px;margin-top:4px;text-align:center}
 
-/* QR */
-.r-qr-wrap{
-  display:flex;flex-direction:column;align-items:center;
-  background:white;border:1px solid #e0d8cc;border-radius:3px;
-  padding:8px 10px 6px;flex-shrink:0;
-  box-shadow:inset 0 1px 3px rgba(0,0,0,.05)
-}
-.r-qr-wrap img,.r-qr-wrap canvas{width:88px!important;height:88px!important;display:block}
-.r-qr-label{font-family:'Geist Mono',monospace;font-size:6.5px;color:#9a9088;letter-spacing:1px;text-transform:uppercase;margin-top:4px;text-align:center}
+.r-sec-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 20px}
+.r-sec-field-k{font-size:7px;letter-spacing:2px;text-transform:uppercase;color:#9a9088;margin-bottom:3px}
+.r-sec-field-v{font-family:'Geist Mono',monospace;font-size:8.5px;color:#3a3028;letter-spacing:.3px;word-break:break-all}
+.r-sec-field-v.hash{font-size:7.5px;color:#5a5048}
 
-/* Security fields grid */
-.r-sec-grid{
-  display:grid;
-  grid-template-columns:1fr 1fr 1fr;
-  gap:7px 16px;
-  margin-bottom:12px;
-  padding:12px;
-  background:rgba(255,255,255,.42);
-  border:1px solid rgba(0,0,0,.07);
-  border-radius:3px
-}
-.r-sec-field-k{
-  font-size:6.8px;letter-spacing:2px;text-transform:uppercase;
-  color:#9a9088;margin-bottom:3px;white-space:nowrap
-}
-.r-sec-field-v{
-  font-family:'Geist Mono',monospace;font-size:8px;
-  color:#3a3028;letter-spacing:.2px;word-break:break-all;line-height:1.4
-}
-.r-sec-field-v.hash{font-size:7px;color:#6a6058;letter-spacing:.1px}
-.r-sec-field-v.valid{color:#1a6b3c;font-weight:600;font-size:8.5px}
-.r-sec-field-v.seal{color:#7a5800;font-weight:600;font-size:9px;letter-spacing:1.5px}
-.r-sec-field-v.fp{font-size:7.5px;color:#4a3820;letter-spacing:.5px}
-.r-sec-field-full{grid-column:1 / -1}
-
-/* Verify strip */
-.r-verify-strip{
-  background:linear-gradient(135deg,#1a1a1a 0%,#2a2520 100%);
-  border-radius:3px;padding:9px 14px;
-  display:flex;align-items:center;justify-content:space-between;gap:10px;
-  margin-bottom:10px;
-  border:1px solid rgba(255,255,255,.06)
-}
+.r-verify-strip{margin-top:12px;background:linear-gradient(135deg,#1a1a1a 0%,#2a2520 100%);border-radius:3px;padding:9px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px}
 .r-verify-left{display:flex;align-items:center;gap:8px}
 .r-shield{font-size:13px;line-height:1}
 .r-verify-txt{font-size:7.5px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.55)}
 .r-verify-url{font-family:'Geist Mono',monospace;font-size:7.5px;color:rgba(191,160,106,.8);letter-spacing:.5px}
-.r-verify-right{display:flex;flex-direction:column;align-items:flex-end;gap:3px}
-.r-verify-hash{font-family:'Geist Mono',monospace;font-size:7px;color:rgba(191,160,106,.6);letter-spacing:.3px}
 
-/* Firebase badge */
-.r-fb-badge{
-  display:inline-flex;align-items:center;gap:5px;
-  background:rgba(62,207,142,.1);border:1px solid rgba(62,207,142,.25);
-  border-radius:2px;padding:3px 8px
-}
+/* Firebase badge on receipt */
+.r-fb-badge{display:inline-flex;align-items:center;gap:5px;margin-top:8px;background:rgba(62,207,142,.1);border:1px solid rgba(62,207,142,.25);border-radius:2px;padding:3px 8px}
 .r-fb-badge-dot{width:5px;height:5px;border-radius:50%;background:var(--green)}
 .r-fb-badge-txt{font-family:'Geist Mono',monospace;font-size:7px;letter-spacing:1.5px;text-transform:uppercase;color:#3ecf8e}
-.r-ledger-row{display:flex;align-items:center;justify-content:space-between;margin-top:8px}
-
-/* Integrity band */
-.r-integrity-band{
-  margin-top:10px;
-  padding:7px 12px;
-  background:linear-gradient(90deg,rgba(26,107,60,.08),rgba(26,107,60,.04));
-  border:1px solid rgba(26,107,60,.15);
-  border-left:3px solid #1a6b3c;
-  border-radius:0 3px 3px 0;
-  display:flex;align-items:center;justify-content:space-between;gap:10px
-}
-.r-ib-left{display:flex;align-items:center;gap:7px}
-.r-ib-icon{font-size:11px;line-height:1}
-.r-ib-txt{font-size:7.5px;letter-spacing:1.5px;text-transform:uppercase;color:#1a6b3c;font-weight:600}
-.r-ib-sub{font-family:'Geist Mono',monospace;font-size:6.5px;color:#3a8a58;letter-spacing:.5px;margin-top:2px}
-.r-ib-code{font-family:'Geist Mono',monospace;font-size:8.5px;color:#1a6b3c;font-weight:700;letter-spacing:2px}
+.r-sec-bc-qr{display:flex;gap:16px;align-items:flex-start;margin-bottom:14px}
+.r-barcode-side{flex:1;min-width:0}
+.r-barcode-wrap{background:white;border:1px solid #e0d8cc;border-radius:3px;padding:10px 16px 8px}
+.r-qr-wrap{display:flex;flex-direction:column;align-items:center;background:white;border:1px solid #e0d8cc;border-radius:3px;padding:8px 10px 6px;flex-shrink:0}
+.r-qr-wrap img,.r-qr-wrap canvas{width:88px!important;height:88px!important;display:block}
+.r-qr-label{font-family:'Geist Mono',monospace;font-size:6.5px;color:#9a9088;letter-spacing:1px;text-transform:uppercase;margin-top:4px;text-align:center}
+.r-sec-ver-wrap{display:flex;align-items:center;gap:6px}
+.r-tier-badge{font-family:'Geist Mono',monospace;font-size:6.5px;letter-spacing:1.5px;text-transform:uppercase;background:#1a6b3c;color:#fff;border-radius:2px;padding:2px 6px}
+.r-anti-tamper{position:absolute;top:0;left:0;right:0;height:3px;background:repeating-linear-gradient(90deg,#1a6b3c 0px,#1a6b3c 4px,transparent 4px,transparent 8px,#c9a96e 8px,#c9a96e 12px,transparent 12px,transparent 16px)}
+.r-sec-field-k{font-size:7px;letter-spacing:2px;text-transform:uppercase;color:#9a9088;margin-bottom:3px}
+.r-sec-field-v{font-family:'Geist Mono',monospace;font-size:8.5px;color:#3a3028;letter-spacing:.3px;word-break:break-all}
+.r-sec-field-v.hash{font-size:7.5px;color:#5a5048}
 
 .r-bottom{height:2px;background:linear-gradient(90deg,transparent,var(--ra) 20%,#c9a96e 50%,var(--ra) 80%,transparent)}
 
-/* Responsive: if sidebar + receipt don't fit, allow scrolling gracefully */
-@media (max-width: 1260px) {
-  .main{padding:40px 24px 80px}
-}
-@media (max-width: 1100px) {
-  .main{padding:32px 16px 80px}
-  #receipt{width:680px}
-  .prev-row{max-width:680px}
-}
+/* ── Signature Line ── */
+.r-sig-wrap{display:flex;gap:32px;margin-top:28px;padding-top:22px;border-top:1px dashed var(--rl)}
+.r-sig-block{flex:1;display:flex;flex-direction:column;gap:6px}
+.r-sig-line{height:1px;background:var(--ri);opacity:.35;margin-bottom:2px}
+.r-sig-label{font-size:7.5px;letter-spacing:2px;text-transform:uppercase;color:var(--rm)}
+.r-sig-name{font-size:9px;color:var(--ri);font-weight:500;letter-spacing:.3px;min-height:12px}
+
+/* ── Stamps Layer ── */
+.r-stamps-layer{position:absolute;inset:0;pointer-events:none;z-index:5;overflow:hidden}
+.r-stamp{position:absolute;display:flex;align-items:center;justify-content:center;border-radius:50%;border:3px solid rgba(107,90,58,0.22);background:rgba(255,255,255,0);overflow:hidden}
+.r-stamp img{width:100%;height:100%;object-fit:cover;border-radius:50%;mix-blend-mode:multiply}
 
 /* TOAST */
 .toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(12px);background:var(--s2);border:1px solid;border-radius:3px;padding:11px 24px;font-family:'Geist Mono',monospace;font-size:9px;letter-spacing:2.5px;text-transform:uppercase;opacity:0;transition:all .25s;pointer-events:none;z-index:9998;box-shadow:0 8px 30px rgba(0,0,0,.4)}
@@ -433,7 +247,8 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .toast.error{border-color:rgba(255,80,80,.4);color:#ff8080}
 .toast.info{border-color:rgba(191,160,106,.35);color:var(--g)}
 
-/* Calculator */
+
+/* ── Calculator ── */
 .calc-panel{padding:14px 28px 0}
 .calc-lbl{font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--dim);margin-bottom:8px;display:block}
 .calc-display{background:var(--s4);border:1px solid rgba(191,160,106,.2);border-radius:4px;padding:8px 12px;margin-bottom:8px;text-align:right}
@@ -452,204 +267,10 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .cb-del{background:rgba(240,165,0,.08);border-color:rgba(240,165,0,.18);color:#f0a500}
 .cb-del:hover{background:rgba(240,165,0,.16)}
 
-/* Copy badge on receipt */
-.r-copy-badge{
-  display:inline-block;font-family:'Geist Mono',monospace;
-  font-size:7px;font-weight:700;letter-spacing:3.5px;text-transform:uppercase;
-  padding:3px 10px;border-radius:2px;margin-top:6px;
-  border:1px solid transparent
-}
-.r-copy-original {background:#f5e9c8;color:#7a5200;border-color:#c9a96e}
-.r-copy-duplicate {background:#dbeafe;color:#1e3a8a;border-color:#93c5fd}
-.r-copy-triplicate{background:#dcfce7;color:#14532d;border-color:#86efac}
-
-/* Copy downloads section in sidebar */
-.copy-dl-wrap{padding:0 28px 10px;display:flex;flex-direction:column;gap:5px}
-.copy-dl-lbl{font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--dim);margin-bottom:2px;display:block}
-.copy-dl-row{display:grid;grid-template-columns:1fr 1fr;gap:5px}
-.btn-copy{background:none;border:1px solid var(--wire2);border-radius:3px;color:var(--dim2);
-  font-family:'Geist',sans-serif;font-size:8.5px;letter-spacing:1.5px;text-transform:uppercase;
-  padding:8px 4px;cursor:pointer;transition:all .15s;text-align:center;line-height:1}
-.btn-copy:hover{background:rgba(255,255,255,.04);border-color:var(--g);color:var(--g)}
-.btn-copy:disabled{opacity:.4;cursor:not-allowed}
-.btn-dup {border-color:rgba(147,197,253,.25);color:#93c5fd}
-.btn-dup:hover{background:rgba(147,197,253,.08);border-color:#93c5fd;color:#93c5fd}
-.btn-tri {border-color:rgba(134,239,172,.25);color:#86efac}
-.btn-tri:hover{background:rgba(134,239,172,.08);border-color:#86efac;color:#86efac}
-.btn-zip {grid-column:span 2;background:rgba(191,160,106,.06);border-color:rgba(191,160,106,.3);color:var(--g);font-size:9px;padding:9px}
-.btn-zip:hover{background:rgba(191,160,106,.14);border-color:var(--g)}
-
-/* VAT Toggle switch */
-.tog{position:relative;display:inline-block;width:36px;height:20px;flex-shrink:0}
-.tog input{opacity:0;width:0;height:0}
-.tog-sl{position:absolute;cursor:pointer;inset:0;background:var(--s4);border:1px solid var(--wire2);border-radius:20px;transition:all .2s}
-.tog-sl::before{content:'';position:absolute;width:14px;height:14px;left:2px;top:2px;background:var(--dim);border-radius:50%;transition:all .2s}
-.tog input:checked+.tog-sl{background:rgba(191,160,106,.18);border-color:var(--g)}
-.tog input:checked+.tog-sl::before{transform:translateX(16px);background:var(--g)}
-.tog-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0 2px}
-.tog-row label:first-child{font-size:8.5px;letter-spacing:2px;text-transform:uppercase;color:var(--dim);margin:0}
-
-/* Duplicate guard modal */
-.dup-modal{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.72);opacity:0;pointer-events:none;transition:opacity .2s}
-.dup-modal.on{opacity:1;pointer-events:all}
-.dup-box{background:var(--s2);border:1px solid rgba(255,80,80,.25);border-radius:6px;padding:28px 30px;max-width:380px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.6)}
-.dup-icon{font-size:28px;margin-bottom:12px;line-height:1}
-.dup-title{font-family:'Cormorant',serif;font-size:20px;color:#f0ece4;margin-bottom:6px}
-.dup-sub{font-size:11px;color:var(--dim2);line-height:1.6;margin-bottom:6px}
-.dup-no{font-family:'Geist Mono',monospace;font-size:13px;color:var(--g);background:var(--s3);border:1px solid var(--wire2);border-radius:3px;padding:7px 12px;margin:10px 0 18px;display:block;text-align:center;letter-spacing:1px}
-.dup-actions{display:flex;gap:8px}
-.dup-btn{flex:1;padding:10px;border-radius:3px;border:1px solid;font-family:'Geist',sans-serif;font-size:9px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;font-weight:600;transition:all .15s}
-.dup-cancel{background:none;border-color:var(--wire2);color:var(--dim2)}
-.dup-cancel:hover{border-color:var(--g);color:var(--g)}
-.dup-overwrite{background:rgba(255,80,80,.12);border-color:rgba(255,80,80,.35);color:#ff8080}
-.dup-overwrite:hover{background:rgba(255,80,80,.22)}
-
-/* Client logo upload */
-.cl-upload-wrap{padding:14px 28px 0}
-.cl-upload-label{font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--dim);margin-bottom:8px;display:block}
-.cl-upload-box{display:flex;align-items:center;gap:10px;border:1px dashed var(--wire);border-radius:10px;padding:10px 14px;cursor:pointer;transition:border-color .2s;background:transparent}
-.cl-upload-box:hover{border-color:var(--g)}
-.cl-upload-box input[type=file]{display:none}
-.cl-upload-icon{font-size:18px;flex-shrink:0;line-height:1}
-.cl-upload-txt{font-size:10px;color:var(--dim2);line-height:1.4}
-.cl-upload-txt strong{display:block;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--dim);font-weight:600}
-.cl-preview-wrap{display:none;align-items:center;gap:10px;margin-top:8px}
-.cl-preview-wrap.show{display:flex}
-.cl-preview-img{width:36px;height:36px;border-radius:50%;object-fit:cover;border:1px solid var(--wire)}
-.cl-preview-name{font-size:10px;color:var(--dim2);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.cl-clear-btn{background:none;border:none;color:var(--dim);font-size:12px;cursor:pointer;padding:2px 6px;border-radius:4px;transition:color .15s}
-.cl-clear-btn:hover{color:#e05252}
-
-/* ── Company Seal Stamp ── */
-.r-seal-stamp{
-  position:absolute;
-  bottom:340px;right:44px;
-  width:120px;height:120px;
-  border-radius:50%;
-  overflow:hidden;
-  pointer-events:none;
-  z-index:3;
-  opacity:.07;
-  outline:2px solid rgba(107,90,58,.3);
-  outline-offset:4px
-}
-.r-seal-stamp::before{
-  content:'';
-  position:absolute;inset:0;
-  border-radius:50%;
-  border:2px dashed rgba(107,90,58,.5);
-  z-index:2
-}
-.r-seal-stamp img{
-  width:100%;height:100%;
-  object-fit:cover;
-  filter:sepia(1) contrast(1.3)
-}
-/* ── Vertical Serial Number ── */
-.r-serial-margin{
-  position:absolute;
-  top:0;left:0;
-  width:14px;height:100%;
-  display:flex;align-items:center;justify-content:center;
-  pointer-events:none;z-index:4;
-  background:rgba(0,0,0,.016)
-}
-.r-serial-margin-r{
-  position:absolute;
-  top:0;right:0;
-  width:14px;height:100%;
-  display:flex;align-items:center;justify-content:center;
-  pointer-events:none;z-index:4;
-  background:rgba(0,0,0,.016)
-}
-.r-serial-txt{
-  font-family:'Geist Mono',monospace;
-  font-size:5px;
-  letter-spacing:2.5px;
-  color:rgba(90,72,40,.3);
-  white-space:nowrap;
-  transform:rotate(-90deg);
-  user-select:none
-}
-.r-serial-txt-r{
-  font-family:'Geist Mono',monospace;
-  font-size:5px;
-  letter-spacing:2.5px;
-  color:rgba(90,72,40,.3);
-  white-space:nowrap;
-  transform:rotate(90deg);
-  user-select:none
-}
-/* ── Void Pantograph + Serial Matrix canvases ── */
-#r-void-canvas{
-  position:absolute;
-  top:0;left:0;
-  width:100%;height:100%;
-  pointer-events:none;
-  z-index:3;
-  mix-blend-mode:multiply;
-  opacity:1
-}
-#r-matrix-canvas{
-  position:absolute;
-  top:0;left:0;
-  width:100%;height:100%;
-  pointer-events:none;
-  z-index:2;
-  mix-blend-mode:multiply
-}
-
-@media print{
-  .r-seal-stamp{opacity:.13 !important}
-  .r-serial-txt,.r-serial-txt-r{color:rgba(90,72,40,.5) !important}
-  #r-void-canvas{opacity:1 !important;mix-blend-mode:multiply !important}
-  #r-matrix-canvas{opacity:1 !important}
-}
-@media print {
-  /* Hide everything except the receipt */
-  body { background: white !important; }
-  .glow, .wrap > .side, .main > .prev-row, body::before { display: none !important; }
-  .main { padding: 0 !important; background: white !important; align-items: center; }
-  #receipt {
-    width: 190mm !important;
-    max-width: 190mm !important;
-    min-height: 277mm !important;
-    box-shadow: none !important;
-    border: none !important;
-    margin: 0 auto !important;
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-    color-adjust: exact !important;
-  }
-  /* Force all background colors to print */
-  * {
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-    color-adjust: exact !important;
-  }
-  /* Freeze all animations */
-  *, *::before, *::after {
-    animation: none !important;
-    transition: none !important;
-  }
-  /* Security section prints with its background */
-  .r-security { background: #f0ebe0 !important; }
-  .r-guilloche-wrap { display: block !important; }
-  .r-microtext-strip { display: block !important; }
-  .r-anti-tamper { display: block !important; }
-  .r-integrity-band { background: #e8f4ee !important; }
-  .r-verify-strip { background: #1a1a1a !important; }
-  /* No page break inside receipt */
-  #receipt { page-break-inside: avoid; }
-  @page {
-    size: A4 portrait;
-    margin: 8mm;
-  }
-}
 *{scrollbar-width:thin;scrollbar-color:var(--wire2) transparent}
 *::-webkit-scrollbar{width:3px;height:3px}
 *::-webkit-scrollbar-thumb{background:var(--wire2);border-radius:2px}
-@media(max-width:960px){.wrap{flex-direction:column}.side{width:100%;height:auto;position:static}.side-form{overflow-y:visible}.main{padding:36px 20px 60px}#receipt{width:100%;max-width:720px}}
+@media(max-width:960px){.wrap{flex-direction:column}.side{width:100%;height:auto;position:static}.side-form{overflow-y:visible}.main{padding:36px 20px 60px}#receipt{width:100%;max-width:680px}}
 </style>
 </head>
 <body>
@@ -662,8 +283,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
   <div class="side-nav">
     <div class="nav-logo-wrap"><img src="data:image/jpeg;base64,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" class="nav-logo" alt="" onerror="this.style.display='none'"></div>
     <div><div class="nav-name">ATHStudios</div><div class="nav-sub">Receipt Studio</div></div>
-    <div class="nav-chip">v4 · Secured</div>
-    <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()" title="Collapse sidebar">‹</button>
+    <div class="nav-chip">Secured</div>
   </div>
   <div class="fb-bar">
     <div class="fb-dot connecting" id="fb-dot"></div>
@@ -672,7 +292,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
   </div>
   <div class="sec-bar">
     <div class="sec-dot"></div>
-    <div class="sec-bar-txt">SHA-256 + HMAC Chain · Guilloche · A4 PDF Export · v4.0</div>
+    <div class="sec-bar-txt">Document Security Active — SHA-256 + Chain Hash · v3.0</div>
   </div>
 
   <div class="side-form">
@@ -731,14 +351,6 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
             <select id="method" onchange="live()"><option>GCash</option><option>Maya</option><option>Bank Transfer</option><option>Cash</option><option>Check</option><option>Online</option></select>
           </div>
         </div>
-        <div class="tog-row">
-          <label>Enable VAT</label>
-          <label class="tog"><input type="checkbox" id="vatEnabled" onchange="document.getElementById('vatRateField').style.display=this.checked?'flex':'none';live()"><span class="tog-sl"></span></label>
-        </div>
-        <div class="f" id="vatRateField" style="display:none">
-          <label>VAT Rate (%)</label>
-          <input type="number" id="vatRate" value="12" min="0" max="100" step="0.01" oninput="live()">
-        </div>
       </div>
     </div>
     <!-- 05 Notes -->
@@ -749,345 +361,166 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
         <div class="f"><label>Notes / Terms</label><textarea id="notes" rows="2" placeholder="e.g. Thank you for choosing ATHStudios." oninput="live()"></textarea></div>
       </div>
     </div>
-    <!-- 06 Calculator -->
-    <div class="acc">
-      <div class="acc-hd" onclick="toggle(this)"><span class="acc-hd-num">06</span><span class="acc-hd-lbl">Calculator</span><span class="acc-hd-arrow">›</span></div>
-      <div class="acc-body" style="padding-bottom:14px">
-        <div class="calc-panel" style="padding:0">
-          <div class="calc-display">
-            <div class="calc-expr" id="calc-expr">&nbsp;</div>
-            <div class="calc-val" id="calc-val">0</div>
-          </div>
-          <div class="calc-grid" style="margin-top:6px">
-            <button class="cb cb-clr" onclick="ci('C')" style="grid-column:span 2">C</button>
-            <button class="cb cb-del" onclick="ci('⌫')">⌫</button>
-            <button class="cb cb-op" onclick="ci('÷')">÷</button>
-            <button class="cb" onclick="ci('7')">7</button>
-            <button class="cb" onclick="ci('8')">8</button>
-            <button class="cb" onclick="ci('9')">9</button>
-            <button class="cb cb-op" onclick="ci('×')">×</button>
-            <button class="cb" onclick="ci('4')">4</button>
-            <button class="cb" onclick="ci('5')">5</button>
-            <button class="cb" onclick="ci('6')">6</button>
-            <button class="cb cb-op" onclick="ci('−')">−</button>
-            <button class="cb" onclick="ci('1')">1</button>
-            <button class="cb" onclick="ci('2')">2</button>
-            <button class="cb" onclick="ci('3')">3</button>
-            <button class="cb cb-op" onclick="ci('+')">+</button>
-            <button class="cb" onclick="ci('%')" style="color:var(--g2)">%</button>
-            <button class="cb" onclick="ci('0')">0</button>
-            <button class="cb" onclick="ci('.')">.</button>
-            <button class="cb cb-eq" onclick="ci('=')">=</button>
-          </div>
-        </div>
-      </div>
-    </div>
-    <!-- 07 Client Logo -->
-    <div class="acc">
-      <div class="acc-hd" onclick="toggle(this)"><span class="acc-hd-num">07</span><span class="acc-hd-lbl">Client Logo <span style="color:var(--dim2);font-size:7px;letter-spacing:1px">(optional)</span></span><span class="acc-hd-arrow">›</span></div>
-      <div class="acc-body" style="padding-bottom:14px">
-        <label class="cl-upload-box" id="cl-upload-box">
-          <input type="file" id="cl-logo-input" accept="image/*" onchange="onClientLogoChange(this)">
-          <span class="cl-upload-icon">🖼️</span>
-          <span class="cl-upload-txt"><strong>Upload Logo</strong>PNG, JPG, SVG, WEBP</span>
-        </label>
-        <div class="cl-preview-wrap" id="cl-preview-wrap">
-          <img class="cl-preview-img" id="cl-preview-img" src="" alt="">
-          <span class="cl-preview-name" id="cl-preview-name"></span>
-          <button class="cl-clear-btn" onclick="clearClientLogo()" title="Remove">✕</button>
-        </div>
-      </div>
-    </div>
   </div>
 
   <div class="side-foot">
-    <div class="copy-dl-wrap" style="padding:0 0 6px">
-      <span class="copy-dl-lbl">Additional Copies</span>
-      <div class="copy-dl-row">
-        <button class="btn-copy btn-dup" id="btn-dup" onclick="downloadCopy('DUPLICATE')" disabled>↓ Duplicate</button>
-        <button class="btn-copy btn-tri" id="btn-tri" onclick="downloadCopy('TRIPLICATE')" disabled>↓ Triplicate</button>
+
+    <!-- Calculator -->
+    <div class="calc-panel" style="padding-bottom:12px">
+      <span class="calc-lbl">Calculator</span>
+      <div class="calc-display">
+        <div class="calc-expr" id="calc-expr">&nbsp;</div>
+        <div class="calc-val" id="calc-val">0</div>
       </div>
-      <div class="copy-dl-row">
-        <button class="btn-copy btn-zip" id="btn-zip" onclick="downloadZip()" disabled>⬇ ZIP — All 3 Copies</button>
+      <div class="calc-grid">
+        <button class="cb cb-clr col-span-2" onclick="ci('C')" style="grid-column:span 2">C</button>
+        <button class="cb cb-del" onclick="ci('⌫')">⌫</button>
+        <button class="cb cb-op" onclick="ci('÷')">÷</button>
+        <button class="cb" onclick="ci('7')">7</button>
+        <button class="cb" onclick="ci('8')">8</button>
+        <button class="cb" onclick="ci('9')">9</button>
+        <button class="cb cb-op" onclick="ci('×')">×</button>
+        <button class="cb" onclick="ci('4')">4</button>
+        <button class="cb" onclick="ci('5')">5</button>
+        <button class="cb" onclick="ci('6')">6</button>
+        <button class="cb cb-op" onclick="ci('−')">−</button>
+        <button class="cb" onclick="ci('1')">1</button>
+        <button class="cb" onclick="ci('2')">2</button>
+        <button class="cb" onclick="ci('3')">3</button>
+        <button class="cb cb-op" onclick="ci('+')">+</button>
+        <button class="cb" onclick="ci('%')" style="color:var(--g2)">%</button>
+        <button class="cb" onclick="ci('0')">0</button>
+        <button class="cb" onclick="ci('.')">.</button>
+        <button class="cb cb-eq" onclick="ci('=')">=</button>
       </div>
     </div>
-    <button class="btn-main" id="export-btn" onclick="doExport()">Export A4 JPG &amp; Register</button>
-    <button class="btn-main" style="background:var(--s3);color:var(--text);border:1px solid var(--wire2);margin-top:-4px" onclick="window.print()">🖨 Print Receipt</button>
+
+    <!-- Client logo upload -->
+    <div class="cl-upload-wrap" style="padding:0 0 10px">
+      <span class="cl-upload-label">Client Logo <span style="color:var(--dim2);font-size:7px;letter-spacing:1px">(optional · session only)</span></span>
+      <label class="cl-upload-box" id="cl-upload-box">
+        <input type="file" id="cl-logo-input" accept="image/*" onchange="onClientLogoChange(this)">
+        <span class="cl-upload-icon">🖼️</span>
+        <span class="cl-upload-txt"><strong>Upload Logo</strong>PNG, JPG, SVG, WEBP</span>
+      </label>
+      <div class="cl-preview-wrap" id="cl-preview-wrap">
+        <img class="cl-preview-img" id="cl-preview-img" src="" alt="">
+        <span class="cl-preview-name" id="cl-preview-name"></span>
+        <button class="cl-clear-btn" onclick="clearClientLogo()" title="Remove">✕</button>
+      </div>
+    </div>
+    <button class="btn-main" id="export-btn" onclick="doExport()">Export &amp; Register Receipt</button>
   </div>
 </aside>
 
 <main class="main">
   <div class="prev-row">
-    <div class="prev-lbl">Live Preview — A4 PDF Output</div>
-    <div class="prev-status"><div class="prev-dot"></div><div class="prev-secure">SECURED · GUILLOCHE v4</div></div>
+    <div class="prev-lbl">Live Preview</div>
+    <div class="prev-status"><div class="prev-dot"></div><div class="prev-secure">SECURED</div></div>
   </div>
 
   <div id="receipt">
-    <!-- Void Pantograph canvas -->
-    <canvas id="r-void-canvas"></canvas>
-    <!-- Serial Matrix canvas -->
-    <canvas id="r-matrix-canvas"></canvas>
-    <!-- Company Seal Stamp -->
-    <div class="r-seal-stamp" id="r-seal-el">
-      <img id="r-seal-img" src="" alt="">
-    </div>
-    <!-- Vertical Serial — Left -->
-    <div class="r-serial-margin"><span class="r-serial-txt" id="r-serial-l">ATH-SECURE · — · VERIFIED</span></div>
-    <!-- Vertical Serial — Right -->
-    <div class="r-serial-margin-r"><span class="r-serial-txt-r" id="r-serial-r">OFFICIAL RECEIPT · — · ATHStudios</span></div>
     <div class="r-content">
       <div class="r-accent"></div>
       <div class="r-perf"></div>
-      <!-- Edge microtext top -->
-      <div class="r-edge-micro" id="r-edge-micro-top"></div>
-
       <div class="r-pad">
-        <!-- HEADER -->
+        <div class="r-stamps-layer" id="r-stamps-layer"></div>
         <div class="r-top">
           <div class="r-brand">
             <div class="r-logo-wrap"><img src="data:image/jpeg;base64,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" class="r-logo" alt="" onerror="this.style.display='none'"></div>
-            <div>
-              <div class="r-co">ATHStudios</div>
-              <div class="r-tagline">Private Web Engineering Atelier</div>
-            </div>
+            <div><div class="r-co">ATHStudios</div><div class="r-tagline">Private Web Engineering Atelier</div></div>
           </div>
           <div class="r-num-block" style="display:flex;align-items:center;gap:14px">
             <img class="r-client-logo" id="r-client-logo-preview" src="" alt="">
             <div style="text-align:right">
-              <div class="r-num-label">Official Receipt</div>
+              <div class="r-num-label">Receipt</div>
               <div class="r-num-val" id="r-num">—</div>
-              <div id="r-copy-badge" class="r-copy-badge r-copy-original">ORIGINAL</div>
             </div>
           </div>
         </div>
-
-        <!-- ISSUER INFO -->
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px;padding:10px 14px;background:rgba(0,0,0,.025);border-radius:3px;border-left:2px solid #c9a96e">
-          <div>
-            <div style="font-size:7px;letter-spacing:2px;text-transform:uppercase;color:var(--rm);margin-bottom:4px">Issued By</div>
-            <div style="font-size:10.5px;font-weight:600;color:var(--ri)">ATHStudios — Private Web Engineering Atelier</div>
-            <div style="font-size:9px;color:var(--rm);margin-top:2px">contact.athstudios@gmail.com · athstudios.dpdns.org</div>
-          </div>
-          <div style="text-align:right">
-            <div style="font-size:7px;letter-spacing:2px;text-transform:uppercase;color:var(--rm);margin-bottom:4px">Doc. Type</div>
-            <div style="font-size:10px;font-weight:600;color:var(--ri)">Official Receipt</div>
-            <div style="font-size:8px;color:var(--rm);margin-top:2px">Non-VAT · Service</div>
-          </div>
-        </div>
-
-        <!-- META -->
         <div class="r-meta">
           <span class="r-mk">Date</span><span class="r-mv" id="r-date">—</span>
           <span class="r-mk">Billed To</span><span class="r-mv" id="r-client">—</span>
           <span class="r-mk">Service</span><span class="r-mv" id="r-svc-disp">—</span>
           <span class="r-mk">Via</span><span class="r-mv" id="r-method">GCash</span>
         </div>
-
-        <!-- ITEMS -->
-        <div class="r-items-head"><span>Description</span><span>Qty</span><span>Unit Price</span><span>Amount</span></div>
+        <div class="r-items-head"><span>Description</span><span>Qty</span><span>Unit</span><span>Total</span></div>
         <div id="r-lines"><div class="r-item"><span>—</span><span class="d">—</span><span class="d">—</span><span>—</span></div></div>
-
-        <!-- TOTALS -->
-        <div class="r-vat-wrap">
+        <div class="r-vat-wrap" id="r-vat-wrap">
           <div class="r-vat-row"><span class="r-vat-lbl">Subtotal</span><span class="r-vat-val" id="r-subtotal">₱0.00</span></div>
-          <div class="r-vat-row" id="r-vat-row" style="display:none"><span class="r-vat-lbl" id="r-vat-lbl">VAT (12%)</span><span class="r-vat-val" id="r-vat-amt">₱0.00</span></div>
-        </div>
+         </div>
         <div class="r-total-wrap">
           <div><div class="r-total-lbl">Total Due</div><span class="r-badge b-paid" id="r-status">PAID</span></div>
           <div class="r-total-amt" id="r-total"><span class="r-peso">₱</span>0.00</div>
         </div>
-
-        <!-- REMARKS / NOTES -->
-        <div class="r-remarks-wrap" id="r-rem-wrap" style="display:none">
-          <div class="r-sect-lbl">Remarks</div>
-          <div class="r-remarks-txt" id="r-rem-txt"></div>
-        </div>
+        <div class="r-remarks-wrap" id="r-rem-wrap" style="display:none"><div class="r-sect-lbl">Remarks</div><div class="r-remarks-txt" id="r-rem-txt"></div></div>
         <div class="r-notes-txt" id="r-notes-el" style="display:none"></div>
-
-        <!-- TERMS & CONDITIONS -->
-        <div style="margin-top:18px;padding:12px 14px;background:rgba(0,0,0,.025);border-radius:3px;border-top:1px dashed rgba(0,0,0,.12)">
-          <div class="r-sect-lbl" style="margin-bottom:6px">Terms &amp; Conditions</div>
-          <div style="font-size:8px;color:var(--rm);line-height:1.65;columns:2;gap:16px">
-            All services rendered are considered complete and accepted upon issuance of this receipt. No refunds shall be issued after project delivery unless otherwise agreed in writing. Intellectual property developed under contract remains the property of ATHStudios until full payment is received. This document serves as official proof of transaction and must be retained for warranty and support claims. Disputes must be raised within 7 business days of this receipt date. ATHStudios reserves the right to suspend service in the event of non-payment. This receipt is non-transferable.
+        <div class="r-sig-wrap">
+          <div class="r-sig-block">
+            <div class="r-sig-name" style="min-height:28px"></div>
+            <div class="r-sig-line"></div>
+            <div class="r-sig-label">Authorized Signatory · ATHStudios</div>
+          </div>
+          <div class="r-sig-block">
+            <div class="r-sig-name" style="min-height:28px"></div>
+            <div class="r-sig-line"></div>
+            <div class="r-sig-label">Received by · Date</div>
           </div>
         </div>
+        <div class="r-footer">
+          <div class="r-footer-l">QR Attendance · School Portals<br>Custom Software · Web &amp; Mobile</div>
+          <div class="r-footer-r"><div class="r-footer-brand">ATHStudios</div><div class="r-footer-email">contact.athstudios@gmail.com</div></div>
+        </div>
+      </div>
 
-        <!-- SIGNATURE BLOCK -->
-        <div style="margin-top:20px;display:grid;grid-template-columns:1fr 1fr;gap:20px">
-          <div>
-            <div style="border-top:1px solid #c8bfb0;padding-top:8px;margin-top:28px">
-              <div style="font-size:7.5px;letter-spacing:2px;text-transform:uppercase;color:var(--rm)">Authorized Signatory</div>
-              <div style="font-family:'Cormorant',serif;font-size:13px;margin-top:3px;color:var(--ri)">ATHStudios</div>
-              <div style="font-size:7.5px;color:var(--rm);margin-top:2px">Private Web Engineering Atelier</div>
+      <!-- SECURITY SECTION -->
+      <div class="r-security"><div class="r-anti-tamper"></div>
+        <div class="r-sec-top">
+          <div class="r-sec-label">
+            <div class="r-sec-icon"><svg viewBox="0 0 12 12"><path d="M6 1L1.5 3v3c0 2.8 1.9 5.4 4.5 6 2.6-.6 4.5-3.2 4.5-6V3L6 1z"/></svg></div>
+            <div class="r-sec-title">Verified Document Security</div>
+          </div>
+          <div class="r-sec-ver-wrap"><div class="r-tier-badge">PREMIUM</div><div class="r-sec-ver">v3.0 · ATH-SECURE</div></div>
+        </div>
+        <div class="r-sec-bc-qr">
+          <div class="r-barcode-side">
+            <div class="r-barcode-wrap">
+              <svg id="r-barcode"></svg>
+              <div class="r-barcode-num" id="r-barcode-num">—</div>
             </div>
           </div>
-          <div>
-            <div style="border-top:1px solid #c8bfb0;padding-top:8px;margin-top:28px">
-              <div style="font-size:7.5px;letter-spacing:2px;text-transform:uppercase;color:var(--rm)">Received By</div>
-              <div style="font-size:8px;color:var(--rm);margin-top:3px">Client / Representative Signature</div>
-              <div style="font-size:7.5px;color:#c8bfb0;margin-top:2px">Date received: _______________</div>
-            </div>
+          <div class="r-qr-wrap">
+            <div id="r-qr"></div>
+            <div class="r-qr-label">Scan to verify</div>
           </div>
         </div>
-
-        <!-- FOOTER -->
-        <div class="r-footer" style="margin-top:18px">
-          <div class="r-footer-l">QR Attendance · School Portals<br>Custom Software · Web &amp; Mobile Dev.</div>
-          <div class="r-footer-r">
-            <div class="r-footer-brand">ATHStudios</div>
-            <div class="r-footer-email">contact.athstudios@gmail.com</div>
-            <div style="font-size:7.5px;color:var(--rm);margin-top:2px;letter-spacing:.3px">athstudios.dpdns.org</div>
+        <div class="r-sec-grid">
+          <div><div class="r-sec-field-k">SHA-256 Hash</div><div class="r-sec-field-v hash" id="r-hash">—</div></div>
+          <div><div class="r-sec-field-k">Issued At</div><div class="r-sec-field-v" id="r-issued">—</div></div>
+          <div><div class="r-sec-field-k">Document ID</div><div class="r-sec-field-v" id="r-docid">—</div></div>
+          <div><div class="r-sec-field-k">Integrity</div><div class="r-sec-field-v" id="r-integrity" style="color:#1a6b3c;font-weight:600">● VALID</div></div>
+          <div><div class="r-sec-field-k">Chain Hash (HMAC-SHA256)</div><div class="r-sec-field-v hash" id="r-chain">—</div></div>
+          <div><div class="r-sec-field-k">Ledger Seal</div><div class="r-sec-field-v" id="r-seal" style="color:#1a6b3c;font-weight:600">—</div></div>
+          <div><div class="r-sec-field-k">Security Tier</div><div class="r-sec-field-v" style="color:#5a4a28;font-weight:600">PREMIUM · HMAC-SHA256</div></div>
+          <div><div class="r-sec-field-k">Session ID</div><div class="r-sec-field-v hash" id="r-session-disp">—</div></div>
+        </div>
+        <div class="r-verify-strip">
+          <div class="r-verify-left">
+            <span class="r-shield">🔒</span>
+            <span class="r-verify-txt">Scan barcode or verify at</span>
+            <span class="r-verify-url">athstudios.dpdns.org/verify</span>
+          </div>
+          <div class="r-verify-url" id="r-short-hash">—</div>
+        </div>
+        <div style="margin-top:10px">
+          <div class="r-fb-badge" id="r-fb-badge">
+            <div class="r-fb-badge-dot"></div>
+            <div class="r-fb-badge-txt">Registered on ATHStudios Secure Ledger</div>
           </div>
         </div>
       </div>
 
-      <!-- ══════════════════════════════════════
-           SECURITY SECTION v4 — Enhanced
-      ══════════════════════════════════════ -->
-      <div class="r-security">
-        <!-- Guilloche SVG background -->
-        <div class="r-guilloche-wrap">
-          <svg id="r-guilloche-svg" xmlns="http://www.w3.org/2000/svg"></svg>
-        </div>
-
-        <!-- Anti-tamper & holographic strips -->
-        <div class="r-anti-tamper"></div>
-
-        <!-- Microtext top -->
-        <div class="r-microtext-strip" id="r-micro-top"></div>
-
-        <div class="r-sec-inner">
-          <!-- Header -->
-          <div class="r-sec-top">
-            <div class="r-sec-label">
-              <div class="r-sec-icon"><svg viewBox="0 0 12 12"><path d="M6 1L1.5 3v3c0 2.8 1.9 5.4 4.5 6 2.6-.6 4.5-3.2 4.5-6V3L6 1z"/></svg></div>
-              <div class="r-sec-title">Verified Document Security</div>
-            </div>
-            <div class="r-sec-badges">
-              <div class="r-uv-badge">◈ UV AUTH</div>
-              <div class="r-tier-badge">PREMIUM</div>
-              <div class="r-sec-ver">v4.0 · ATH-SECURE</div>
-            </div>
-          </div>
-
-          <!-- Barcode + QR -->
-          <div class="r-sec-bc-qr">
-            <div class="r-barcode-side">
-              <div class="r-barcode-wrap">
-                <svg id="r-barcode"></svg>
-                <div class="r-barcode-num" id="r-barcode-num">—</div>
-              </div>
-            </div>
-            <div class="r-qr-wrap">
-              <div id="r-qr"></div>
-              <div class="r-qr-label">Scan to verify</div>
-            </div>
-          </div>
-
-          <!-- Security fields — 3 column grid -->
-          <div class="r-sec-grid">
-            <div>
-              <div class="r-sec-field-k">SHA-256 Hash</div>
-              <div class="r-sec-field-v hash" id="r-hash">—</div>
-            </div>
-            <div>
-              <div class="r-sec-field-k">Issued At (PHT)</div>
-              <div class="r-sec-field-v" id="r-issued">—</div>
-            </div>
-            <div>
-              <div class="r-sec-field-k">Integrity Status</div>
-              <div class="r-sec-field-v valid" id="r-integrity">● VALID</div>
-            </div>
-
-            <div>
-              <div class="r-sec-field-k">Document ID</div>
-              <div class="r-sec-field-v" id="r-docid">—</div>
-            </div>
-            <div>
-              <div class="r-sec-field-k">Chain Hash (HMAC)</div>
-              <div class="r-sec-field-v hash" id="r-chain">—</div>
-            </div>
-            <div>
-              <div class="r-sec-field-k">Ledger Seal</div>
-              <div class="r-sec-field-v seal" id="r-seal">—</div>
-            </div>
-
-            <div>
-              <div class="r-sec-field-k">Session ID</div>
-              <div class="r-sec-field-v hash" id="r-session-disp">—</div>
-            </div>
-            <div>
-              <div class="r-sec-field-k">Doc Fingerprint</div>
-              <div class="r-sec-field-v fp" id="r-fingerprint">—</div>
-            </div>
-            <div>
-              <div class="r-sec-field-k">Anti-Tamper Code</div>
-              <div class="r-sec-field-v seal" id="r-antitamper">—</div>
-            </div>
-
-            <div class="r-sec-field-full">
-              <div class="r-sec-field-k">Validity Token · Security Tier</div>
-              <div class="r-sec-field-v" id="r-validity-row" style="color:#5a4a28;font-weight:600;letter-spacing:1px">— · PREMIUM · HMAC-SHA256 · ATH-SECURE v4.0</div>
-            </div>
-          </div>
-
-          <!-- Integrity band -->
-          <div class="r-integrity-band">
-            <div class="r-ib-left">
-              <span class="r-ib-icon">🔐</span>
-              <div>
-                <div class="r-ib-txt">Document Integrity Verified</div>
-                <div class="r-ib-sub">SHA-256 + HMAC chain · Immutable ledger entry · Firebase registered</div>
-              </div>
-            </div>
-            <div class="r-ib-code" id="r-short-hash">—</div>
-          </div>
-
-          <!-- Verify strip -->
-          <div class="r-verify-strip" style="margin-top:10px">
-            <div class="r-verify-left">
-              <span class="r-shield">🔒</span>
-              <span class="r-verify-txt">Verify at</span>
-              <span class="r-verify-url">athstudios.dpdns.org/verify</span>
-            </div>
-            <div class="r-verify-right">
-              <div class="r-verify-hash" id="r-verify-hash-display">—</div>
-              <div class="r-verify-url" style="font-size:6.5px;opacity:.6">Scan QR or enter barcode number</div>
-            </div>
-          </div>
-
-          <!-- Timestamp Proof & copy notice -->
-          <div style="margin-top:8px;display:grid;grid-template-columns:1fr 1fr;gap:8px">
-            <div style="padding:8px 10px;background:rgba(26,107,60,.06);border:1px solid rgba(26,107,60,.12);border-radius:3px">
-              <div class="r-sec-field-k" style="margin-bottom:3px">Blockchain Timestamp Proof</div>
-              <div class="r-sec-field-v" id="r-ts-proof" style="font-size:7px;color:#3a6a50;word-break:break-all">—</div>
-            </div>
-            <div style="padding:8px 10px;background:rgba(90,60,20,.05);border:1px solid rgba(90,60,20,.1);border-radius:3px">
-              <div class="r-sec-field-k" style="margin-bottom:3px">Copy Detection String</div>
-              <div class="r-sec-field-v" id="r-copy-detect" style="font-size:7px;color:#5a4020;word-break:break-all">—</div>
-            </div>
-          </div>
-
-          <div style="margin-top:8px;padding:6px 10px;background:rgba(0,0,0,.04);border-radius:3px;display:flex;align-items:center;justify-content:space-between">
-            <div style="font-family:'Geist Mono',monospace;font-size:6.5px;color:#9a9088;letter-spacing:1.5px;text-transform:uppercase">⚠ This document is cryptographically sealed. Any alteration invalidates all security features.</div>
-            <div style="font-family:'Geist Mono',monospace;font-size:6.5px;color:#bfa06a;letter-spacing:1px;white-space:nowrap;margin-left:12px">ORIGINAL ONLY</div>
-          </div>
-          <div class="r-ledger-row">
-            <div class="r-fb-badge" id="r-fb-badge">
-              <div class="r-fb-badge-dot"></div>
-              <div class="r-fb-badge-txt">Registered · ATHStudios Secure Ledger · Firebase RTDB</div>
-            </div>
-            <div style="font-family:'Geist Mono',monospace;font-size:6.5px;color:#9a9088;letter-spacing:1px">ATH-SECURE v4.0</div>
-          </div>
-        </div><!-- /r-sec-inner -->
-
-        <!-- Microtext bottom -->
-        <div class="r-microtext-strip bottom-micro" id="r-micro-bottom"></div>
-      </div><!-- /r-security -->
-
       <div class="r-perf" style="transform:scaleY(-1)"></div>
-      <!-- Edge microtext bottom -->
-      <div class="r-edge-micro" id="r-edge-micro-bottom"></div>
       <div class="r-bottom"></div>
     </div>
   </div>
@@ -1097,7 +530,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 <div class="toast info" id="toast">—</div>
 
 <script>
-/* ─── Firebase ─── */
+/* ─── Firebase Init ─── */
 const firebaseConfig = {
   apiKey: "AIzaSyDD-fr24tSTymu9HwDNSTygLzYhQzyiOkM",
   authDomain: "athstudios-18004.firebaseapp.com",
@@ -1108,8 +541,11 @@ const firebaseConfig = {
   appId: "1:840599967098:web:a163597be910187460b2c3",
   measurementId: "G-YTGCRF71J5"
 };
+
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
+
+// Test connection
 db.ref('.info/connected').on('value', snap => {
   const connected = snap.val();
   const dot = document.getElementById('fb-dot');
@@ -1126,21 +562,15 @@ db.ref('.info/connected').on('value', snap => {
 });
 
 /* ─── State ─── */
-let items = [], currentNo = '', sessionId = '', currentHash = '',
-    currentBarcodeVal = '', currentChainHash = '', currentSeal = '',
-    currentFingerprint = '', currentAntiTamper = '', currentValidityToken = '';
+let items = [], currentNo = '', sessionId = '', currentHash = '', currentBarcodeVal = '', currentChainHash = '', currentSeal = '';
+let currentStamps = [];
+let currentStampLogoBase64 = '';
 
 (function init() {
   document.getElementById('rdate').valueAsDate = new Date();
   sessionId = 'SES-' + randHex(6).toUpperCase();
   document.getElementById('ses-display').textContent = sessionId;
   regenNo();
-  // Build heavy security graphics after DOM is ready
-  setTimeout(() => {
-    buildSeal();
-    buildVoidPantograph();
-    buildSerialMatrix(currentNo);
-  }, 300);
 })();
 
 function randAlpha(n) {
@@ -1150,19 +580,17 @@ function randAlpha(n) {
 function randHex(n) {
   return Array.from({length:n}, () => Math.floor(Math.random()*16).toString(16)).join('');
 }
+
 function regenNo() {
   const yr = new Date().getFullYear();
   currentNo = `ATH-${yr}-${randAlpha(4)}`;
   document.getElementById('rcpt-no-display').textContent = currentNo;
+  currentStamps = []; // reset stamps for new number
   live();
-  // Heavy canvas ops only on number regen, not every keystroke
-  setTimeout(() => {
-    buildSeal();
-    buildVoidPantograph();
-    buildSerialMatrix(currentNo);
-  }, 80);
 }
+
 function toggle(hd) { hd.closest('.acc').classList.toggle('open'); }
+
 function addItem() { items.push({desc:'',qty:1,price:0}); renderForm(); live(); }
 function removeItem(i) { items.splice(i,1); renderForm(); live(); }
 function renderForm() {
@@ -1176,9 +604,12 @@ function renderForm() {
 }
 function esc(s) { return (s||'').replace(/"/g,'&quot;'); }
 
+
 let clientLogoDataUrl = null;
+
 function onClientLogoChange(input) {
-  const file = input.files[0]; if (!file) return;
+  const file = input.files[0];
+  if (!file) return;
   const reader = new FileReader();
   reader.onload = e => {
     clientLogoDataUrl = e.target.result;
@@ -1192,33 +623,33 @@ function onClientLogoChange(input) {
   };
   reader.readAsDataURL(file);
 }
+
 function clearClientLogo() {
   clientLogoDataUrl = null;
   document.getElementById('cl-logo-input').value = '';
   document.getElementById('cl-preview-wrap').classList.remove('show');
   document.getElementById('cl-upload-box').style.display = 'flex';
   const rLogo = document.getElementById('r-client-logo-preview');
-  rLogo.src = ''; rLogo.classList.remove('show');
+  rLogo.src = '';
+  rLogo.classList.remove('show');
 }
-
-/* ─── Live Update ─── */
 async function live() {
-  const client  = document.getElementById('clientName').value || '—';
-  const num     = currentNo || '—';
-  const dv      = document.getElementById('rdate').value;
-  const svc     = document.getElementById('svc').value;
-  const amt     = parseFloat(document.getElementById('totalAmt').value) || 0;
-  const status  = document.getElementById('status').value;
-  const method  = document.getElementById('method').value;
-  const remarks = document.getElementById('remarks').value.trim();
-  const notes   = document.getElementById('notes').value.trim();
-  const date    = dv ? new Date(dv+'T00:00:00').toLocaleDateString('en-PH',{year:'numeric',month:'long',day:'numeric'}) : '—';
+  const client = document.getElementById('clientName').value || '—';
+  const num    = currentNo || '—';
+  const dv     = document.getElementById('rdate').value;
+  const svc    = document.getElementById('svc').value;
+  const amt    = parseFloat(document.getElementById('totalAmt').value) || 0;
+  const status = document.getElementById('status').value;
+  const method = document.getElementById('method').value;
+  const remarks= document.getElementById('remarks').value.trim();
+  const notes  = document.getElementById('notes').value.trim();
+  const date   = dv ? new Date(dv+'T00:00:00').toLocaleDateString('en-PH',{year:'numeric',month:'long',day:'numeric'}) : '—';
 
-  document.getElementById('r-num').textContent    = num;
-  document.getElementById('r-date').textContent   = date;
-  document.getElementById('r-client').textContent = client;
-  document.getElementById('r-svc-disp').textContent = svc||'—';
-  document.getElementById('r-method').textContent = method;
+  document.getElementById('r-num').textContent     = num;
+  document.getElementById('r-date').textContent    = date;
+  document.getElementById('r-client').textContent  = client;
+  document.getElementById('r-svc-disp').textContent= svc||'—';
+  document.getElementById('r-method').textContent  = method;
 
   let html='', calc=0;
   if (items.length>0) {
@@ -1235,650 +666,250 @@ async function live() {
   document.getElementById('r-lines').innerHTML = html;
 
   const subtotal = amt>0 ? amt : calc;
-  const vatEnabled = document.getElementById('vatEnabled').checked;
-  const vatRate    = parseFloat(document.getElementById('vatRate').value) || 12;
-  const vatAmt     = vatEnabled ? subtotal * (vatRate / 100) : 0;
-  const total      = subtotal + vatAmt;
+  const total    = subtotal;
 
   document.getElementById('r-subtotal').textContent = '₱'+f(subtotal);
-
-  const vatRow = document.getElementById('r-vat-row');
-  if (vatEnabled) {
-    vatRow.style.display = 'flex';
-    document.getElementById('r-vat-lbl').textContent = `VAT (${vatRate}%)`;
-    document.getElementById('r-vat-amt').textContent = '₱'+f(vatAmt);
-  } else {
-    vatRow.style.display = 'none';
-  }
-
   document.getElementById('r-total').innerHTML = `<span class="r-peso">₱</span>${f(total)}`;
 
   const badge = document.getElementById('r-status');
   badge.className = 'r-badge '+(status==='paid'?'b-paid':status==='pending'?'b-pending':'b-partial');
   badge.textContent = status.toUpperCase();
 
-  const rw = document.getElementById('r-rem-wrap');
-  if(remarks){rw.style.display='block';document.getElementById('r-rem-txt').textContent=remarks;}
-  else rw.style.display='none';
-  const ne = document.getElementById('r-notes-el');
-  if(notes){ne.style.display='block';ne.textContent=notes;}
-  else ne.style.display='none';
+  const rw=document.getElementById('r-rem-wrap');
+  if(remarks){rw.style.display='block';document.getElementById('r-rem-txt').textContent=remarks;}else rw.style.display='none';
+  const ne=document.getElementById('r-notes-el');
+  if(notes){ne.style.display='block';ne.textContent=notes;}else ne.style.display='none';
 
   await updateSecurity({num,date,client,svc,total,status,method});
 }
 
-/* ─── Security Update ─── */
 async function updateSecurity({num,date,client,svc,total,status,method}) {
   const now = new Date();
-  const issuedAt = now.toLocaleDateString('en-PH',{year:'numeric',month:'short',day:'2-digit'})+
-                   ' '+now.toLocaleTimeString('en-PH',{hour:'2-digit',minute:'2-digit',hour12:true})+' PHT';
-  const docId  = num.replace(/ATH-/,'')+'-'+sessionId.replace('SES-','');
-  const payload= [num,date,client,svc,total.toFixed(2),status,method,sessionId].join('|');
-  const hashHex= await sha256(payload);
-  currentHash  = hashHex;
+  const issuedAt = now.toLocaleDateString('en-PH',{year:'numeric',month:'short',day:'2-digit'})+' '+now.toLocaleTimeString('en-PH',{hour:'2-digit',minute:'2-digit',hour12:true});
+  const issuedFull = issuedAt + ' PHT';
+  const docId = num.replace(/ATH-/,'')+'-'+sessionId.replace('SES-','');
+  const payload = [num,date,client,svc,total.toFixed(2),status,method,sessionId].join('|');
+  const hashHex = await sha256(payload);
+  currentHash = hashHex;
 
   const barcodeVal = num.replace(/-/g,'')+hashHex.slice(0,8).toUpperCase();
   currentBarcodeVal = barcodeVal;
 
-  const chainPayload = hashHex+'|'+docId+'|'+sessionId;
+  // Chain hash: secondary integrity layer
+  const chainPayload = hashHex + '|' + docId + '|' + sessionId;
   const chainHashHex = await sha256(chainPayload);
-  currentChainHash   = chainHashHex;
+  currentChainHash = chainHashHex;
 
+  // Ledger seal: 3-segment derived from hash
   const seal = hashHex.slice(16,20).toUpperCase()+'-'+hashHex.slice(20,24).toUpperCase()+'-'+hashHex.slice(24,28).toUpperCase();
   currentSeal = seal;
 
-  /* Document Fingerprint: hash of hash+client+total */
-  const fpPayload = hashHex + client + total.toFixed(2) + num;
-  const fpHex = await sha256(fpPayload);
-  currentFingerprint = fpHex.slice(0,8).toUpperCase()+'-'+fpHex.slice(8,12).toUpperCase()+'-'+fpHex.slice(12,16).toUpperCase();
-
-  /* Anti-Tamper Code: derived from chain hash */
-  currentAntiTamper = chainHashHex.slice(0,4).toUpperCase()+'-'+
-                      chainHashHex.slice(4,8).toUpperCase()+'-'+
-                      chainHashHex.slice(8,12).toUpperCase()+'-'+
-                      chainHashHex.slice(12,16).toUpperCase();
-
-  /* Validity Token */
-  const vtPayload = hashHex.slice(0,8)+num+sessionId;
-  const vtHex = await sha256(vtPayload);
-  currentValidityToken = vtHex.slice(0,6).toUpperCase()+'-'+vtHex.slice(6,10).toUpperCase();
-
-  /* Update DOM */
-  document.getElementById('r-issued').textContent   = issuedAt;
-  document.getElementById('r-docid').textContent    = docId;
-  document.getElementById('r-hash').textContent     = hashHex.slice(0,24)+'...'+hashHex.slice(-8);
-  document.getElementById('r-chain').textContent    = chainHashHex.slice(0,20)+'...'+chainHashHex.slice(-6);
-  document.getElementById('r-seal').textContent     = seal;
+  document.getElementById('r-issued').textContent    = issuedFull;
+  document.getElementById('r-docid').textContent     = docId;
+  document.getElementById('r-hash').textContent      = hashHex.slice(0,32)+'...';
+  document.getElementById('r-chain').textContent     = chainHashHex.slice(0,24)+'...';
+  document.getElementById('r-seal').textContent      = seal;
   document.getElementById('r-session-disp').textContent = sessionId;
-  document.getElementById('r-fingerprint').textContent  = currentFingerprint;
-  document.getElementById('r-antitamper').textContent   = currentAntiTamper;
-  document.getElementById('r-validity-row').textContent =
-    currentValidityToken+' · PREMIUM · HMAC-SHA256 · ATH-SECURE v4.0';
-  document.getElementById('r-short-hash').textContent =
-    hashHex.slice(0,8).toUpperCase()+'-'+hashHex.slice(8,16).toUpperCase();
+  document.getElementById('r-short-hash').textContent= hashHex.slice(0,8).toUpperCase()+'-'+hashHex.slice(8,16).toUpperCase();
   document.getElementById('r-barcode-num').textContent = barcodeVal;
-  document.getElementById('r-verify-hash-display').textContent =
-    'SEAL: '+seal;
 
-  /* Timestamp Proof */
-  const tsPayload = issuedAt + docId + hashHex.slice(0,16);
-  const tsHex = await sha256(tsPayload);
-  document.getElementById('r-ts-proof').textContent =
-    tsHex.slice(0,8).toUpperCase()+'-'+tsHex.slice(8,16).toUpperCase()+'-'+
-    tsHex.slice(16,24).toUpperCase()+'-'+tsHex.slice(24,32).toUpperCase();
+  // ── Generate & render stamps once per receipt number ──
+  if (!currentStamps.length || currentStamps._forNo !== currentNo) {
+    currentStamps = generateStamps();
+    currentStamps._forNo = currentNo;
+    // Fetch logo as base64 for persistent stamp storage
+    const logoEl = document.querySelector('.r-logo');
+    const logoSrc = logoEl ? logoEl.src : null;
+    if (logoSrc && !currentStampLogoBase64) {
+      // Logo is already a data URL (base64 inline in HTML)
+      currentStampLogoBase64 = logoSrc.startsWith('data:') ? logoSrc : null;
+      if (!currentStampLogoBase64) {
+        fetchLogoAsBase64(logoSrc).then(b64 => { currentStampLogoBase64 = b64; renderStamps(currentStamps, b64); });
+      }
+    }
+  }
+  renderStamps(currentStamps, currentStampLogoBase64 || (document.querySelector('.r-logo') ? document.querySelector('.r-logo').src : null));
 
-  /* Copy Detection String */
-  const cdHex = await sha256(currentChainHash + seal + sessionId);
-  document.getElementById('r-copy-detect').textContent =
-    'CDS-'+cdHex.slice(0,6).toUpperCase()+'-'+cdHex.slice(6,12).toUpperCase()+
-    '-'+cdHex.slice(12,18).toUpperCase();
-
-  /* Barcode */
   try {
     JsBarcode('#r-barcode', barcodeVal, {
-      format:'CODE128', width:1.5, height:52,
+      format:'CODE128', width:1.4, height:48,
       displayValue:false, margin:0,
       background:'#ffffff', lineColor:'#1a1816'
     });
-    /* Strip the fixed pixel dimensions JsBarcode injects so CSS width:100% takes over */
-    const bsvg = document.getElementById('r-barcode');
-    if (bsvg) {
-      const vb = bsvg.getAttribute('viewBox') ||
-                 `0 0 ${bsvg.getAttribute('width')} ${bsvg.getAttribute('height')}`;
-      bsvg.setAttribute('viewBox', vb);
-      bsvg.setAttribute('preserveAspectRatio', 'none');
-      bsvg.removeAttribute('width');
-      bsvg.removeAttribute('height');
-      bsvg.style.width  = '100%';
-      bsvg.style.height = '52px';
-    }
   } catch(e){}
 
-  /* QR Code */
+  // QR code pointing to verify URL
   try {
-    const verifyUrl = 'https://athstudios.dpdns.org/verify?q='+barcodeVal;
+    const verifyUrl = 'https://athstudios.dpdns.org/verify?q=' + barcodeVal;
     const qrEl = document.getElementById('r-qr');
     qrEl.innerHTML = '';
     new QRCode(qrEl, {
       text: verifyUrl, width:88, height:88,
       colorDark:'#1a1816', colorLight:'#ffffff',
-      correctLevel: QRCode.CorrectLevel.H
+      correctLevel: QRCode.CorrectLevel.M
     });
   } catch(e){}
-
-  /* Lightweight live updates only */
-  buildGuilloche();
-  buildMicrotext(num, hashHex);
-  buildEdgeMicro(num, hashHex);
-  buildSerialMargins(num);
 }
 
-/* ─── Guilloche Generator ─── */
-function buildGuilloche() {
-  const svg = document.getElementById('r-guilloche-svg');
-  const W = svg.parentElement.offsetWidth || 720;
-  const H = svg.parentElement.offsetHeight || 380;
-  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
-  svg.setAttribute('preserveAspectRatio', 'none');
-
-  const parts = [];
-
-  /* Layer 1: wide gold sine waves */
-  for (let i = 0; i < 22; i++) {
-    const y0    = (H / 22) * i + H/44;
-    const freq  = 5 + (i % 4);
-    const amp   = 6 + (i % 5);
-    const phase = (i / 22) * Math.PI * 2;
-    let d = '';
-    for (let x = 0; x <= W; x += 1.2) {
-      const y = y0 + amp * Math.sin((x / W) * freq * Math.PI * 2 + phase);
-      d += x === 0 ? `M${x.toFixed(1)},${y.toFixed(2)}`
-                   : ` L${x.toFixed(1)},${y.toFixed(2)}`;
-    }
-    parts.push(`<path d="${d}" fill="none" stroke="rgba(191,160,106,0.09)" stroke-width="0.5"/>`);
+/* ── Stamp Security ── */
+function generateStamps() {
+  const count = Math.floor(Math.random() * 4) + 1; // 1-4 stamps
+  const stamps = [];
+  // Safe zones: avoid barcode/QR area at bottom, avoid very edges
+  const zones = [
+    {xMin:6,  xMax:30, yMin:18, yMax:36},
+    {xMin:64, xMax:90, yMin:18, yMax:36},
+    {xMin:6,  xMax:30, yMin:50, yMax:80},
+    {xMin:64, xMax:90, yMin:50, yMax:80},
+    {xMin:32, xMax:62, yMin:18, yMax:34},
+    {xMin:32, xMax:62, yMin:52, yMax:78},
+    {xMin:6,  xMax:28, yMin:37, yMax:49},
+    {xMin:66, xMax:90, yMin:37, yMax:49},
+  ];
+  const usedZones = [];
+  for (let i = 0; i < count; i++) {
+    let z;
+    do { z = zones[Math.floor(Math.random() * zones.length)]; } while (usedZones.includes(z) && usedZones.length < zones.length);
+    usedZones.push(z);
+    stamps.push({
+      xPct: z.xMin + Math.random() * (z.xMax - z.xMin),
+      yPct: z.yMin + Math.random() * (z.yMax - z.yMin),
+      rotation: (Math.random() - 0.5) * 38,
+      opacity: 0.12 + Math.random() * 0.10,
+      sizePx: 44 + Math.floor(Math.random() * 40) // 44–83px, varied but never huge
+    });
   }
-
-  /* Layer 2: tighter green waves, offset phase */
-  for (let i = 0; i < 16; i++) {
-    const y0    = (H / 16) * i + H/32;
-    const freq  = 9 + (i % 5);
-    const amp   = 4 + (i % 3);
-    const phase = Math.PI + (i / 16) * Math.PI * 2;
-    let d = '';
-    for (let x = 0; x <= W; x += 1.2) {
-      const y = y0 + amp * Math.sin((x / W) * freq * Math.PI * 2 + phase);
-      d += x === 0 ? `M${x.toFixed(1)},${y.toFixed(2)}`
-                   : ` L${x.toFixed(1)},${y.toFixed(2)}`;
-    }
-    parts.push(`<path d="${d}" fill="none" stroke="rgba(62,207,142,0.055)" stroke-width="0.45"/>`);
-  }
-
-  /* Layer 3: interference / compound waves (dark amber) */
-  for (let i = 0; i < 12; i++) {
-    const y0     = (H / 12) * i + H/24;
-    const f1     = 7, f2 = 13;
-    const a1     = 5, a2 = 2;
-    const phase1 = (i / 12) * Math.PI * 2;
-    const phase2 = phase1 * 1.618034;
-    let d = '';
-    for (let x = 0; x <= W; x += 1.5) {
-      const y = y0
-        + a1 * Math.sin((x / W) * f1 * Math.PI * 2 + phase1)
-        + a2 * Math.sin((x / W) * f2 * Math.PI * 2 + phase2);
-      d += x === 0 ? `M${x.toFixed(1)},${y.toFixed(2)}`
-                   : ` L${x.toFixed(1)},${y.toFixed(2)}`;
-    }
-    parts.push(`<path d="${d}" fill="none" stroke="rgba(107,82,42,0.07)" stroke-width="0.4"/>`);
-  }
-
-  /* Layer 4: vertical undulation bands (blue-ish) */
-  for (let i = 0; i < 8; i++) {
-    const x0    = (W / 8) * i + W/16;
-    const freq  = 6 + (i % 3);
-    const amp   = 5 + (i % 4);
-    const phase = (i / 8) * Math.PI;
-    let d = '';
-    for (let y = 0; y <= H; y += 1.5) {
-      const x = x0 + amp * Math.sin((y / H) * freq * Math.PI * 2 + phase);
-      d += y === 0 ? `M${x.toFixed(2)},${y.toFixed(1)}`
-                   : ` L${x.toFixed(2)},${y.toFixed(1)}`;
-    }
-    parts.push(`<path d="${d}" fill="none" stroke="rgba(30,80,150,0.04)" stroke-width="0.4"/>`);
-  }
-
-  /* Layer 5: tight hairline grid (very subtle) */
-  for (let i = 0; i < 30; i++) {
-    const y = (H / 30) * i;
-    parts.push(`<line x1="0" y1="${y.toFixed(1)}" x2="${W}" y2="${y.toFixed(1)}" stroke="rgba(0,0,0,0.018)" stroke-width="0.3"/>`);
-  }
-
-  svg.innerHTML = parts.join('');
+  return stamps;
 }
 
-/* ─── Microtext Builder ─── */
-const MICRO_PHRASE = '•ATH•STUDIOS•VERIFIED•SECURE•OFFICIAL•AUTHENTIC•SHA256•SEALED•PREMIUM•';
-function buildMicrotext(num, hashHex) {
-  const phrase = (MICRO_PHRASE + (num||'') + '•' + (hashHex||'').slice(0,12).toUpperCase() + '•').repeat(8);
-  document.getElementById('r-micro-top').textContent    = phrase;
-  document.getElementById('r-micro-bottom').textContent = phrase;
-}
-function buildEdgeMicro(num, hashHex) {
-  const phrase = ('•ATHSTUDIOS•'+num+'•'+((hashHex||'').slice(0,16).toUpperCase())+'•VERIFIED•AUTHENTIC•OFFICIAL RECEIPT•').repeat(6);
-  document.getElementById('r-edge-micro-top').textContent    = phrase;
-  document.getElementById('r-edge-micro-bottom').textContent = phrase;
-}
-
-/* ── Company Seal ── */
-function buildSeal() {
-  // Inject the ATHStudios logo into the seal element
-  const sealImg = document.getElementById('r-seal-img');
-  const realLogo = document.querySelector('.r-logo');
-  if (realLogo && realLogo.src) sealImg.src = realLogo.src;
+function renderStamps(stamps, logoSrc) {
+  const layer = document.getElementById('r-stamps-layer');
+  if (!layer) return;
+  layer.innerHTML = '';
+  if (!stamps || !stamps.length || !logoSrc) return;
+  stamps.forEach(s => {
+    const el = document.createElement('div');
+    el.className = 'r-stamp';
+    const sz = s.sizePx || 80;
+    el.style.cssText = `width:${sz}px;height:${sz}px;left:${s.xPct}%;top:${s.yPct}%;transform:translate(-50%,-50%) rotate(${s.rotation}deg);opacity:${s.opacity};`;
+    const img = document.createElement('img');
+    img.src = logoSrc;
+    img.alt = '';
+    el.appendChild(img);
+    layer.appendChild(el);
+  });
 }
 
-/* ── Vertical Serial Margins ── */
-function buildSerialMargins(num) {
-  const txt = `ATH-SECURE · ${num} · VERIFIED · OFFICIAL · `;
-  const txtR = `${num} · ATHStudios · OFFICIAL RECEIPT · SECURE · `;
-  document.getElementById('r-serial-l').textContent = (txt).repeat(4);
-  document.getElementById('r-serial-r').textContent = (txtR).repeat(4);
+async function fetchLogoAsBase64(url) {
+  try {
+    const resp = await fetch(url);
+    const blob = await resp.blob();
+    return await new Promise(res => {
+      const reader = new FileReader();
+      reader.onload = () => res(reader.result);
+      reader.readAsDataURL(blob);
+    });
+  } catch { return null; }
 }
 
-/* ── Void Pantograph — Aggressive Copy-Reveal Security ── */
-/* Technique: fine background dots (invisible to eye) + larger VOID dots        */
-/* On original: both look like cream paper grain — VOID completely invisible     */
-/* On photocopy: dot clusters merge → VOID/COPY tiling appears prominently      */
-function buildVoidPantograph() {
-  const el  = document.getElementById('receipt');
-  const cv  = document.getElementById('r-void-canvas');
-  const W   = el.offsetWidth  || 720;
-  const H   = el.offsetHeight || 900;
-  const DPR = 2;
-  cv.width  = W * DPR;
-  cv.height = H * DPR;
-  cv.style.width  = W + 'px';
-  cv.style.height = H + 'px';
-  const ctx = cv.getContext('2d');
-  ctx.scale(DPR, DPR);
-  ctx.clearRect(0, 0, W, H);
-
-  /* ─── Phase 1: Build full-page VOID/COPY mask ─── */
-  const FONT_SIZE = 52;
-  const ANGLE     = -21 * Math.PI / 180;
-  const COLS = 4, ROWS = 6;
-  const words = ['VOID', 'COPY'];
-
-  const maskCv      = document.createElement('canvas');
-  maskCv.width      = W;
-  maskCv.height     = H;
-  const mCtx        = maskCv.getContext('2d');
-  /* Black background = draw background dots here */
-  mCtx.fillStyle    = '#000';
-  mCtx.fillRect(0, 0, W, H);
-  /* White text = draw VOID dots here (absence of bg dots + presence of void dots) */
-  mCtx.fillStyle    = '#fff';
-  mCtx.font         = `900 ${FONT_SIZE}px 'Geist',sans-serif`;
-  mCtx.textBaseline = 'middle';
-
-  for (let r = 0; r < ROWS; r++) {
-    for (let c = 0; c < COLS; c++) {
-      const word = words[(r + c) % 2];
-      const cx   = (W / COLS) * (c + 0.5);
-      const cy   = (H / ROWS) * (r + 0.5);
-      const tw   = mCtx.measureText(word).width;
-      mCtx.save();
-      mCtx.translate(cx, cy);
-      mCtx.rotate(ANGLE);
-      mCtx.fillText(word, -tw / 2, 0);
-      mCtx.restore();
-    }
-  }
-
-  /* Add a second staggered layer offset by half a tile for denser coverage */
-  for (let r = 0; r < ROWS + 1; r++) {
-    for (let c = 0; c < COLS + 1; c++) {
-      const word = words[(r + c + 1) % 2];
-      const cx   = (W / COLS) * (c + 0.5) - W / (COLS * 2);
-      const cy   = (H / ROWS) * (r + 0.5) - H / (ROWS * 2);
-      const tw   = mCtx.measureText(word).width;
-      mCtx.save();
-      mCtx.translate(cx, cy);
-      mCtx.rotate(ANGLE + 0.04); /* slight angle variation for moiré resistance */
-      mCtx.globalAlpha = 0.7;
-      mCtx.fillText(word, -tw / 2, 0);
-      mCtx.restore();
-    }
-  }
-  mCtx.globalAlpha = 1;
-
-  const mData = mCtx.getImageData(0, 0, W, H).data;
-
-  /* ─── Phase 2: Background dot grid (outside VOID areas) ─── */
-  /* Tiny dots, near-invisible individually, but present everywhere           */
-  /* On photocopy: these merge slightly → darker background, making VOID pop  */
-  const BG_GRID = 4.8;         /* dot grid spacing */
-  const BG_R    = 0.46;        /* hairline — individually sub-pixel at arm's length */
-  const BG_A    = 0.022;       /* extremely faint — just paper grain to the eye */
-
-  ctx.fillStyle = `rgba(95,72,30,${BG_A})`;
-  for (let y = BG_GRID / 2; y < H; y += BG_GRID) {
-    for (let x = BG_GRID / 2; x < W; x += BG_GRID) {
-      const idx = (Math.floor(y) * W + Math.floor(x)) * 4;
-      if (mData[idx] < 128) { /* black = background area */
-        ctx.beginPath();
-        ctx.arc(x, y, BG_R, 0, Math.PI * 2);
-        ctx.fill();
-      }
-    }
-  }
-
-  /* ─── Phase 3: VOID dot grid (inside letter areas) ─── */
-  /* Same dot spacing, but 3× larger radius + higher opacity                  */
-  /* Still invisible individually at arm's length, but photocopy amplifies    */
-  /* the tonal difference vs background → VOID letters pop sharply            */
-  const VD_R = 1.05;           /* ~2.3× background radius — copier threshold, not eye threshold */
-  const VD_A = 0.036;          /* ~1.6× background opacity — below conscious perception */
-
-  ctx.fillStyle = `rgba(90,68,26,${VD_A})`;
-  for (let y = BG_GRID / 2; y < H; y += BG_GRID) {
-    for (let x = BG_GRID / 2; x < W; x += BG_GRID) {
-      const idx = (Math.floor(y) * W + Math.floor(x)) * 4;
-      if (mData[idx] > 128) { /* white = VOID letter area */
-        ctx.beginPath();
-        ctx.arc(x, y, VD_R, 0, Math.PI * 2);
-        ctx.fill();
-      }
-    }
-  }
-
-  /* ─── Phase 4: Ultra-fine diagonal security lines ─── */
-  /* Sub-perception cross-hatch — adds tonal density that shows under copy */
-  ctx.strokeStyle = `rgba(90,68,26,0.009)`;
-  ctx.lineWidth = 0.3;
-  for (let d = -H; d < W + H; d += 5.5) {
-    ctx.beginPath();
-    ctx.moveTo(d, 0);
-    ctx.lineTo(d + H, H);
-    ctx.stroke();
-  }
-}
-
-/* ── Serial Matrix ── */
-function buildSerialMatrix(num) {
-  const el  = document.getElementById('receipt');
-  const cv  = document.getElementById('r-matrix-canvas');
-  const W   = el.offsetWidth  || 720;
-  const H   = el.offsetHeight || 900;
-  cv.width  = W * 2;
-  cv.height = H * 2;
-  cv.style.width  = W + 'px';
-  cv.style.height = H + 'px';
-  const ctx = cv.getContext('2d');
-  ctx.clearRect(0, 0, cv.width, cv.height);
-
-  const SCALE  = 2;
-  const phrase = `${num} · ATH-SECURE · `;
-  ctx.font     = `500 ${7 * SCALE}px 'Geist Mono',monospace`;
-  ctx.fillStyle = 'rgba(107,90,58,0.07)';
-  ctx.textBaseline = 'top';
-
-  const metrics = ctx.measureText(phrase);
-  const tw = metrics.width;
-  const th = 10 * SCALE;
-  const colSpacing = tw + 18 * SCALE;
-  const rowSpacing = th + 8  * SCALE;
-
-  let row = 0;
-  for (let y = 0; y < cv.height + rowSpacing; y += rowSpacing) {
-    const xOffset = (row % 2 === 0) ? 0 : colSpacing / 2;
-    for (let x = -colSpacing + xOffset; x < cv.width + colSpacing; x += colSpacing) {
-      ctx.save();
-      ctx.translate(x + colSpacing / 2, y);
-      ctx.fillText(phrase, 0, 0);
-      ctx.restore();
-    }
-    row++;
-  }
-}
 async function sha256(str) {
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
   return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
 }
 function f(n){return parseFloat(n).toLocaleString('en-PH',{minimumFractionDigits:2,maximumFractionDigits:2})}
 
-/* ─── Export as A4 JPG ─── */
+/* ─── Export & Register to Firebase ─── */
 async function doExport() {
   const btn = document.getElementById('export-btn');
-  btn.disabled = true; btn.textContent = 'Registering...';
-  showToast('Registering receipt to secure ledger...', 'info');
+  btn.disabled = true;
+  btn.textContent = 'Registering...';
+  showToast('Registering receipt to secure ledger...','info');
 
-  const client  = document.getElementById('clientName').value || '—';
-  const dv      = document.getElementById('rdate').value;
-  const svc     = document.getElementById('svc').value || '—';
-  const amt     = parseFloat(document.getElementById('totalAmt').value)||0;
-  const status  = document.getElementById('status').value;
-  const method  = document.getElementById('method').value;
-  const remarks = document.getElementById('remarks').value.trim();
-  const date    = dv ? new Date(dv+'T00:00:00').toLocaleDateString('en-PH',{year:'numeric',month:'long',day:'numeric'}) : '—';
+  const client = document.getElementById('clientName').value || '—';
+  const dv     = document.getElementById('rdate').value;
+  const svc    = document.getElementById('svc').value || '—';
+  const amt    = parseFloat(document.getElementById('totalAmt').value)||0;
+  const status = document.getElementById('status').value;
+  const method = document.getElementById('method').value;
+  const remarks= document.getElementById('remarks').value.trim();
+  const date   = dv ? new Date(dv+'T00:00:00').toLocaleDateString('en-PH',{year:'numeric',month:'long',day:'numeric'}) : '—';
 
   let calc=0;
   items.forEach(it=>calc+=(it.qty||1)*(it.price||0));
-  const subtotal   = amt>0 ? amt : calc;
-  const vatEnabled = document.getElementById('vatEnabled').checked;
-  const vatRate    = parseFloat(document.getElementById('vatRate').value) || 12;
-  const vatAmt     = vatEnabled ? subtotal * (vatRate / 100) : 0;
-  const total      = subtotal + vatAmt;
+  const subtotal = amt>0 ? amt : calc;
+  const total    = subtotal;
 
   const now = new Date();
   const issuedAt = now.toISOString();
   const docId = currentNo.replace(/ATH-/,'')+'-'+sessionId.replace('SES-','');
 
   const record = {
-    receiptNo: currentNo, barcodeVal: currentBarcodeVal,
-    hash: currentHash, chainHash: currentChainHash,
-    seal: currentSeal, fingerprint: currentFingerprint,
-    antiTamper: currentAntiTamper, validityToken: currentValidityToken,
-    client, date, service: svc, total, status, method, remarks,
-    issuedAt, sessionId, docId,
-    securityTier: 'PREMIUM', securityVer: 'v4.0', createdAt: Date.now()
+    receiptNo: currentNo,
+    barcodeVal: currentBarcodeVal,
+    hash: currentHash,
+    chainHash: currentChainHash,
+    seal: currentSeal,
+    client, date, service: svc,
+    total, status, method, remarks,
+    issuedAt,
+    sessionId,
+    docId,
+    securityTier: 'PREMIUM',
+    securityVer: 'v3.0',
+    createdAt: Date.now(),
+    stamps: currentStamps.map(s => ({xPct:s.xPct,yPct:s.yPct,rotation:s.rotation,opacity:s.opacity,sizePx:s.sizePx})),
+    stampLogoBase64: currentStampLogoBase64 || (document.querySelector('.r-logo') ? document.querySelector('.r-logo').src : '')
   };
 
   if (!currentBarcodeVal) {
-    showToast('Generate a receipt first before exporting', 'error');
-    btn.disabled=false; btn.textContent='Export A4 JPG & Register'; return;
-  }
-
-  /* ── Duplicate Guard ── */
-  try {
-    const snap = await db.ref('receipts/'+currentBarcodeVal).once('value');
-    if (snap.exists()) {
-      const confirmed = await showDuplicateModal(currentNo);
-      if (!confirmed) {
-        btn.disabled=false; btn.textContent='Export A4 JPG & Register'; return;
-      }
-    }
-  } catch(e) {
-    /* Firebase read failed — proceed anyway (offline / rules) */
+    showToast('Generate a receipt first before exporting','error');
+    btn.disabled=false; btn.textContent='Export & Register Receipt';
+    return;
   }
 
   try {
     await db.ref('receipts/'+currentBarcodeVal).set(record);
+    // Write reverse-lookup index so verify page can find by DocID without needing a Firebase index rule
     await db.ref('docindex/'+docId).set(currentBarcodeVal);
-    showToast('✓ Registered on secure ledger', 'success');
+    showToast('✓ Registered on secure ledger','success');
+
+    btn.textContent = 'Exporting PNG...';
+    const el = document.getElementById('receipt');
+    html2canvas(el,{scale:3,useCORS:true,allowTaint:true,backgroundColor:'#fcf8f1',logging:false}).then(canvas=>{
+      const a=document.createElement('a');
+      a.download=`ATHStudios_${currentNo}.png`;
+      a.href=canvas.toDataURL('image/png');
+      a.click();
+      showToast('✓ Receipt exported & secured','success');
+      btn.disabled=false;
+      btn.textContent='Export & Register Receipt';
+    });
   } catch(err) {
-    const reason = err.code==='PERMISSION_DENIED'
-      ? 'Firebase rules blocked — check rules'
-      : (err.message||'Unknown error');
-    showToast('Firebase: '+reason+' — exporting anyway', 'error');
-  }
-
-  btn.textContent = 'Rendering at 480 DPI…';
-
-  try {
-    const a4 = await renderReceiptJPG('ORIGINAL');
-    downloadCanvas(a4, `ATHStudios_${currentNo}_ORIGINAL.jpg`);
-    showToast('✓ ORIGINAL exported — A4 · 400 DPI · JPG', 'success');
-    /* Unlock copy downloads now that receipt is registered */
-    ['btn-dup','btn-tri','btn-zip'].forEach(id => document.getElementById(id).disabled = false);
-  } catch(err2) {
-    showToast('JPG error: '+err2.message, 'error');
-    console.error(err2);
-  }
-
-  btn.disabled=false; btn.textContent='Export A4 JPG & Register';
-}
-
-/* ─── Copy badge helper ─── */
-function setCopyBadge(type) {
-  const b = document.getElementById('r-copy-badge');
-  b.textContent = type;
-  b.className = 'r-copy-badge r-copy-'+type.toLowerCase();
-}
-
-/* ─── Canvas-to-JPG download helper ─── */
-function downloadCanvas(canvas, filename) {
-  canvas.toBlob(blob => {
-    const url = URL.createObjectURL(blob);
-    const a   = document.createElement('a');
-    a.href = url; a.download = filename;
-    document.body.appendChild(a); a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  }, 'image/jpeg', 0.95);
-}
-
-/* ─── Shared JPG renderer — A4 at 400 DPI (3307 × 4677 px) ─── */
-async function renderReceiptJPG(copyType) {
-  setCopyBadge(copyType);
-  /* Small delay so the DOM paints the badge before capture */
-  await new Promise(r => setTimeout(r, 60));
-  const el       = document.getElementById('receipt');
-  const displayW = el.offsetWidth || 720;
-
-  /* Scale for html2canvas → ~480 DPI internal render (above 400 DPI floor) */
-  const scale = Math.ceil((400 * 190) / (25.4 * displayW)); // = 5
-
-  const canvas = await html2canvas(el, {
-    scale, useCORS: true, allowTaint: true,
-    backgroundColor: '#fcf8f1', logging: false, imageTimeout: 0, removeContainer: true
-  });
-
-  /* A4 width at 400 DPI */
-  const A4_W = 3307;
-
-  /* Scale by width to fill A4_W exactly — height follows actual receipt content */
-  const ratio = A4_W / canvas.width;
-  const drawW = A4_W;
-  const drawH = Math.round(canvas.height * ratio);
-
-  /* Canvas: A4 width, full receipt height (no crop) */
-  const a4  = document.createElement('canvas');
-  a4.width  = A4_W;
-  a4.height = drawH;
-  const ctx = a4.getContext('2d');
-
-  ctx.fillStyle = '#fcf8f1';
-  ctx.fillRect(0, 0, A4_W, drawH);
-  ctx.drawImage(canvas, 0, 0, drawW, drawH);
-  return a4;
-}
-
-/* ─── Download single copy ─── */
-async function downloadCopy(type) {
-  if (!currentBarcodeVal) { showToast('Export the original first', 'error'); return; }
-  const btn = document.getElementById('btn-'+type.slice(0,3).toLowerCase());
-  const origLabel = btn.textContent;
-  btn.disabled = true; btn.textContent = 'Rendering…';
-  showToast(`Rendering ${type}…`, 'info');
-
-  const prevText  = document.getElementById('r-copy-badge').textContent;
-  const prevClass = document.getElementById('r-copy-badge').className;
-  try {
-    const a4 = await renderReceiptJPG(type);
-    downloadCanvas(a4, `ATHStudios_${currentNo}_${type}.jpg`);
-    showToast(`✓ ${type} downloaded`, 'success');
-  } catch(e) {
-    showToast('Error: '+e.message, 'error');
-  } finally {
-    const b = document.getElementById('r-copy-badge');
-    b.textContent = prevText; b.className = prevClass;
-    btn.disabled = false; btn.textContent = origLabel;
+    console.error('Firebase save error:', err.code, err.message);
+    const reason = err.code === 'PERMISSION_DENIED'
+      ? 'Firebase rules blocked the save — check database rules'
+      : (err.message || 'Unknown error');
+    showToast('Firebase: ' + reason + ' — exporting anyway','error');
+    btn.disabled=false;
+    btn.textContent='Export & Register Receipt';
+    const el=document.getElementById('receipt');
+    html2canvas(el,{scale:3,useCORS:true,allowTaint:true,backgroundColor:'#fcf8f1',logging:false}).then(canvas=>{
+      const a=document.createElement('a');
+      a.download=`ATHStudios_${currentNo}.png`;
+      a.href=canvas.toDataURL('image/png');
+      a.click();
+    });
   }
 }
 
-/* ─── Download ZIP of all 3 copies ─── */
-async function downloadZip() {
-  if (!currentBarcodeVal) { showToast('Export the original first', 'error'); return; }
-  const btn = document.getElementById('btn-zip');
-  btn.disabled = true; btn.textContent = 'Building ZIP…';
-
-  const prevText  = document.getElementById('r-copy-badge').textContent;
-  const prevClass = document.getElementById('r-copy-badge').className;
-  try {
-    const zip   = new JSZip();
-    const types = ['ORIGINAL','DUPLICATE','TRIPLICATE'];
-    for (const type of types) {
-      showToast(`Rendering ${type} (${types.indexOf(type)+1}/3)…`, 'info');
-      const a4 = await renderReceiptJPG(type);
-      const blob = await new Promise(res => a4.toBlob(res, 'image/jpeg', 0.95));
-      zip.file(`ATHStudios_${currentNo}_${type}.jpg`, blob);
-    }
-    showToast('Compressing ZIP…', 'info');
-    const blob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } });
-    const url  = URL.createObjectURL(blob);
-    const a    = document.createElement('a');
-    a.href = url; a.download = `ATHStudios_${currentNo}_AllCopies.zip`;
-    document.body.appendChild(a); a.click();
-    document.body.removeChild(a); URL.revokeObjectURL(url);
-    showToast(`✓ ZIP ready — 3 copies · ${currentNo}`, 'success');
-  } catch(e) {
-    showToast('ZIP error: '+e.message, 'error');
-  } finally {
-    const b = document.getElementById('r-copy-badge');
-    b.textContent = prevText; b.className = prevClass;
-    btn.disabled = false; btn.textContent = '⬇ ZIP — All 3 Copies';
-  }
+function showToast(msg,type='info') {
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.className='toast '+type+' on';
+  setTimeout(()=>t.classList.remove('on'),3200);
 }
 
-/* ─── Toast ─── */
-function showToast(msg, type='info') {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = 'toast '+type+' on';
-  setTimeout(()=>t.classList.remove('on'), 3400);
-}
-
-/* ─── Duplicate Guard Modal ─── */
-function showDuplicateModal(no) {
-  return new Promise(resolve => {
-    const modal = document.getElementById('dup-modal');
-    document.getElementById('dup-no').textContent = no;
-    modal.classList.add('on');
-    const onOverwrite = () => { cleanup(); resolve(true); };
-    const onCancel    = () => { cleanup(); resolve(false); };
-    const onBg        = (e) => { if(e.target===modal){ cleanup(); resolve(false); } };
-    function cleanup() {
-      modal.classList.remove('on');
-      document.getElementById('dup-overwrite').removeEventListener('click', onOverwrite);
-      document.getElementById('dup-cancel').removeEventListener('click', onCancel);
-      modal.removeEventListener('click', onBg);
-    }
-    document.getElementById('dup-overwrite').addEventListener('click', onOverwrite);
-    document.getElementById('dup-cancel').addEventListener('click', onCancel);
-    modal.addEventListener('click', onBg);
-  });
-}
-
-/* ─── Sidebar Toggle ─── */
-function toggleSidebar() {
-  const side = document.querySelector('.side');
-  const btn  = document.getElementById('sidebarToggle');
-  const collapsed = side.classList.toggle('collapsed');
-  btn.textContent = collapsed ? '›' : '‹';
-  btn.title = collapsed ? 'Expand sidebar' : 'Collapse sidebar';
-}
-
-/* ─── Calculator ─── */
+/* ── Calculator ── */
 (function(){
   let expr='', done=false;
   const dv=document.getElementById('calc-val');
@@ -1906,27 +937,11 @@ function toggleSidebar() {
   };
   document.addEventListener('keydown',e=>{
     if(['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName))return;
-    const m={'0':'0','1':'1','2':'2','3':'3','4':'4','5':'5','6':'6','7':'7','8':'8','9':'9',
-             '.':'.','%':'%','+':'+','-':'−','*':'×','/':'÷','Enter':'=','=':'=',
-             'Backspace':'⌫','Escape':'C'};
+    const m={'0':'0','1':'1','2':'2','3':'3','4':'4','5':'5','6':'6','7':'7','8':'8','9':'9','.':'.','%':'%','+':'+','-':'−','*':'×','/':'÷','Enter':'=','=':'=','Backspace':'⌫','Escape':'C'};
     if(m[e.key]){e.preventDefault();ci(m[e.key]);}
   });
 })();
-</script>
-<!-- Duplicate Guard Modal -->
-<div class="dup-modal" id="dup-modal">
-  <div class="dup-box">
-    <div class="dup-icon">⚠️</div>
-    <div class="dup-title">Duplicate Receipt Detected</div>
-    <div class="dup-sub">This receipt number already exists in the secure ledger. Overwriting will replace the existing record.</div>
-    <span class="dup-no" id="dup-no">—</span>
-    <div class="dup-sub" style="font-size:10px;color:rgba(255,160,80,.7);margin-bottom:0">Do you want to overwrite it, or cancel and regenerate a new number?</div>
-    <div class="dup-actions" style="margin-top:16px">
-      <button class="dup-btn dup-cancel" id="dup-cancel">↩ Cancel</button>
-      <button class="dup-btn dup-overwrite" id="dup-overwrite">⚠ Overwrite Anyway</button>
-    </div>
-  </div>
-</div>
 
+</script>
 </body>
 </html>
