@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ATSYS 4.5.6 — Early Access Roster</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#141F1C;
+    --paper:#F7F2E4;
+    --paper-2:#FFFDF6;
+    --teal:#0C3634;
+    --teal-2:#0F4644;
+    --teal-wash:rgba(12,54,52,0.07);
+    --brass:#B07C24;
+    --brass-2:#8C6118;
+    --brass-wash:rgba(176,124,36,0.12);
+    --sage:#D6E1D2;
+    --brick:#9C3B29;
+    --line:rgba(20,31,28,0.15);
+    --line-soft:rgba(20,31,28,0.09);
+  }
+  *{box-sizing:border-box;}
+  html{ scroll-behavior:smooth; }
+  body{
+    margin:0;
+    background:
+      linear-gradient(180deg, rgba(12,54,52,0.035), transparent 340px),
+      var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+  .wrap{ max-width:760px; margin:0 auto; padding:52px 22px 90px; }
+
+  header.memo{
+    position:relative;
+    display:grid;
+    grid-template-columns:1fr auto;
+    gap:24px;
+    align-items:start;
+    padding-bottom:22px;
+    margin-bottom:38px;
+  }
+  header.memo::after{
+    content:"";
+    position:absolute; left:0; right:0; bottom:0; height:3px;
+    background:repeating-linear-gradient(90deg, var(--ink) 0 10px, transparent 10px 16px);
+    opacity:.55;
+  }
+  .eyebrow{
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;
+    letter-spacing:.16em;
+    text-transform:uppercase;
+    color:var(--teal-2);
+    font-weight:700;
+  }
+  .eyebrow .file-no{ color:rgba(20,31,28,0.4); font-weight:500; }
+  h1{
+    font-family:'Fraunces',serif;
+    font-optical-sizing:auto;
+    font-weight:600;
+    font-size:clamp(32px,6.4vw,46px);
+    line-height:1.02;
+    margin:12px 0 10px;
+    letter-spacing:-0.015em;
+  }
+  .sub{
+    font-size:14.5px;
+    color:rgba(20,31,28,0.68);
+    max-width:48ch;
+    line-height:1.55;
+  }
+  #countdownTag{
+    display:inline-block;
+    margin-top:14px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:11.5px;
+    font-weight:700;
+    letter-spacing:.04em;
+    color:var(--brick);
+    background:rgba(156,59,41,0.09);
+    padding:5px 11px;
+    border-radius:20px;
+  }
+
+  .seal{
+    width:128px; height:128px; border-radius:50%;
+    border:2px solid var(--teal);
+    position:relative;
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0;
+    transform:rotate(6deg);
+  }
+  .seal::before{
+    content:"";
+    position:absolute; inset:7px;
+    border:1px dashed var(--teal);
+    border-radius:50%;
+    opacity:.5;
+  }
+  .seal-inner{
+    text-align:center;
+    font-family:'JetBrains Mono',monospace;
+    color:var(--teal);
+    text-transform:uppercase;
+    letter-spacing:.05em;
+    line-height:1.3;
+  }
+  .seal-inner .k{ font-size:8.5px; font-weight:700; opacity:.75; }
+  .seal-inner .v{ font-size:15px; font-weight:700; margin-top:3px; }
+  @media (max-width:600px){
+    header.memo{ grid-template-columns:1fr; }
+    .seal{ transform:rotate(-3deg); margin-top:6px; }
+  }
+
+  .dossier{
+    display:grid;
+    grid-template-columns:34px 1fr;
+    gap:0 18px;
+  }
+  .step{ display:contents; }
+  .step .idx{
+    font-family:'JetBrains Mono',monospace;
+    font-size:12px;
+    font-weight:700;
+    color:var(--brass);
+    padding-top:2px;
+    position:relative;
+  }
+  .step .idx::after{
+    content:"";
+    position:absolute;
+    top:26px; bottom:-22px; left:50%;
+    width:1px;
+    background:var(--line);
+    transform:translateX(-50%);
+  }
+  .step:last-of-type .idx::after{ display:none; }
+  .step .body{ padding-bottom:26px; }
+
+  label{
+    display:block;
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--teal);
+    font-weight:700;
+    margin:0 0 8px;
+  }
+  .hint{
+    font-size:12px;
+    color:rgba(20,31,28,0.5);
+    margin-top:6px;
+    line-height:1.45;
+  }
+  input[type=text], select{
+    width:100%;
+    font-family:'Inter',sans-serif;
+    font-size:15.5px;
+    padding:13px 14px;
+    border:1.5px solid var(--ink);
+    border-radius:3px;
+    background:var(--paper-2);
+    color:var(--ink);
+    outline:none;
+    transition:border-color .15s, box-shadow .15s;
+  }
+  input[type=text]:focus, select:focus{
+    border-color:var(--teal);
+    box-shadow:0 0 0 3px var(--teal-wash);
+  }
+
+  .tiers{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:10px;
+  }
+  @media (max-width:640px){
+    .tiers{ grid-template-columns:repeat(2,1fr); }
+  }
+  .tier{
+    border:1.5px solid var(--line);
+    background:var(--paper-2);
+    border-radius:5px;
+    padding:16px 14px 14px;
+    cursor:pointer;
+    position:relative;
+    transition:border-color .15s, background .15s, transform .1s;
+  }
+  .tier:hover{ border-color:var(--teal); }
+  .tier.selected{
+    border-color:var(--teal);
+    background:var(--teal-wash);
+  }
+  .tier.selected::before{
+    content:"✓";
+    position:absolute; top:10px; right:10px;
+    width:18px; height:18px; border-radius:50%;
+    background:var(--teal); color:var(--paper-2);
+    font-size:11px; font-weight:700;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .tier .name{
+    font-family:'Fraunces',serif; font-weight:600; font-size:16.5px;
+    color:var(--ink);
+  }
+  .tier .note{
+    font-family:'JetBrains Mono',monospace;
+    font-size:9.5px;
+    font-weight:700;
+    color:var(--brass-2);
+    background:var(--brass-wash);
+    display:inline-block;
+    padding:3px 7px;
+    border-radius:20px;
+    margin-top:8px;
+    letter-spacing:.02em;
+  }
+  .tier input[type=radio]{ position:absolute; opacity:0; pointer-events:none; }
+
+  button.submit{
+    width:100%;
+    background:var(--teal);
+    color:var(--paper-2);
+    border:none;
+    border-radius:3px;
+    font-family:'Inter',sans-serif;
+    font-weight:700;
+    font-size:15.5px;
+    padding:16px 18px;
+    cursor:pointer;
+    transition:background .15s, transform .1s;
+    letter-spacing:.01em;
+  }
+  button.submit:hover{ background:var(--teal-2); }
+  button.submit:active{ transform:translateY(1px); }
+  button.submit:disabled{ opacity:.5; cursor:not-allowed; }
+
+  .msg{
+    margin-top:16px;
+    font-size:13.5px;
+    padding:12px 14px;
+    border-radius:3px;
+    display:none;
+    line-height:1.5;
+  }
+  .msg.show{ display:block; }
+  .msg.ok{ background:var(--teal-wash); color:var(--teal); border:1px solid rgba(12,54,52,0.25); }
+  .msg.err{ background:rgba(156,59,41,0.08); color:var(--brick); border:1px solid rgba(156,59,41,0.25); }
+
+  .confirmed{
+    display:none;
+    text-align:center;
+    padding:20px 20px 8px;
+  }
+  .confirmed.show{ display:block; }
+  .confirmed .check{
+    width:54px; height:54px; border-radius:50%;
+    background:var(--teal); color:var(--paper-2);
+    display:flex; align-items:center; justify-content:center;
+    margin:0 auto 18px; font-size:26px;
+  }
+  .confirmed h2{
+    font-family:'Fraunces',serif; font-weight:600; font-size:25px; margin:0 0 8px;
+  }
+  .confirmed p{ font-size:14px; color:rgba(20,31,28,0.68); line-height:1.55; margin:0 0 4px; max-width:42ch; margin-inline:auto; }
+  .confirmed .plan-echo{
+    display:inline-block; margin-top:14px;
+    font-family:'JetBrains Mono',monospace; font-size:11.5px; font-weight:700;
+    color:var(--teal); background:var(--sage); padding:6px 13px; border-radius:20px;
+  }
+
+  .roster-preview{ margin-top:44px; }
+  .roster-preview .eyebrow{
+    font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.1em;
+    text-transform:uppercase; color:rgba(20,31,28,0.48); font-weight:700; margin-bottom:12px;
+  }
+  .chips{ display:flex; flex-wrap:wrap; gap:8px; }
+  .chip{
+    font-size:12.5px; padding:6px 12px; background:var(--sage);
+    border-radius:20px; color:var(--teal); font-weight:600; white-space:nowrap;
+  }
+  .chip .n{ font-family:'JetBrains Mono',monospace; font-weight:400; opacity:.7; margin-left:5px; }
+  .empty-note{ font-size:13px; color:rgba(20,31,28,0.4); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="memo">
+    <div>
+      <div class="eyebrow">ATH Studios · Internal Memo <span class="file-no">№ ATSYS-456-RSTR</span></div>
+      <h1>Early Access<br>Roster</h1>
+      <p class="sub">Reserve your spot for ATSYS 4.5.6. Choose your school and plan tier below — sign up before the cutoff to be included in this rollout.</p>
+      <div id="countdownTag">—</div>
+    </div>
+    <div class="seal">
+      <div class="seal-inner">
+        <div class="k">Roster closes</div>
+        <div class="v" id="stampDate">—</div>
+      </div>
+    </div>
+  </header>
+
+  <div id="formCard">
+    <form id="signupForm" autocomplete="off">
+      <div class="dossier">
+
+        <div class="step">
+          <div class="idx">01</div>
+          <div class="body">
+            <label for="school">School</label>
+            <input type="text" id="school" list="schoolList" placeholder="e.g. Dr. Alfredo Pio De Roda ES" required>
+            <datalist id="schoolList"></datalist>
+            <div class="hint">Type your school's full name. If it's suggested as you type, pick that exact entry — this keeps everyone from the same school grouped together correctly.</div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="idx">02</div>
+          <div class="body">
+            <label for="fullName">Full Name</label>
+            <input type="text" id="fullName" placeholder="e.g. Juan Dela Cruz" required>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="idx">03</div>
+          <div class="body">
+            <label for="role">Role</label>
+            <select id="role" required>
+              <option value="" disabled selected>Select one</option>
+              <option>Teacher</option>
+              <option>Admin Staff</option>
+              <option>School Head / Principal</option>
+              <option>Other</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="idx">04</div>
+          <div class="body">
+            <label>Plan</label>
+            <div class="tiers" id="tiers">
+              <label class="tier" data-plan="Basic">
+                <input type="radio" name="plan" value="Basic">
+                <div class="name">Basic</div>
+              </label>
+              <label class="tier" data-plan="Amateur">
+                <input type="radio" name="plan" value="Amateur">
+                <div class="name">Amateur</div>
+              </label>
+              <label class="tier" data-plan="Professional">
+                <input type="radio" name="plan" value="Professional">
+                <div class="name">Professional</div>
+                <div class="note">(Gets 4.5.6 update)</div>
+              </label>
+              <label class="tier" data-plan="Enterprise">
+                <input type="radio" name="plan" value="Enterprise">
+                <div class="name">Enterprise</div>
+                <div class="note">(Gets 4.5.6 update)</div>
+              </label>
+            </div>
+            <div class="hint">Only Professional and Enterprise plans receive the 4.5.6 update.</div>
+          </div>
+        </div>
+
+      </div>
+
+      <button type="submit" class="submit" id="submitBtn">Reserve My Spot</button>
+      <div class="msg" id="formMsg"></div>
+    </form>
+
+    <div class="confirmed" id="confirmed">
+      <div class="check">✓</div>
+      <h2>You're on the roster</h2>
+      <p id="confirmedText">Locked in.</p>
+      <div class="plan-echo" id="planEcho"></div>
+    </div>
+  </div>
+
+  <div class="roster-preview">
+    <div class="eyebrow">Schools already on the roster</div>
+    <div class="chips" id="chips"><span class="empty-note">Loading…</span></div>
+  </div>
+
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script>
+  // ── EDIT ME: roster deadline (local time) ──────────────────────────────
+  const DEADLINE = new Date('2026-08-15T23:59:59+08:00');
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDD-fr24tSTymu9HwDNSTygLzYhQzyiOkM",
+    authDomain: "athstudios-18004.firebaseapp.com",
+    databaseURL: "https://athstudios-18004-default-rtdb.firebaseio.com",
+    projectId: "athstudios-18004",
+    storageBucket: "athstudios-18004.firebasestorage.app",
+    messagingSenderId: "840599967098",
+    appId: "1:840599967098:web:a163597be910187460b2c3",
+    measurementId: "G-YTGCRF71J5"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+
+  function normalizeKey(s){
+    return s.trim().toLowerCase().replace(/\s+/g,' ').replace(/[^a-z0-9 ]/g,'');
+  }
+
+  const tierEls = document.querySelectorAll('.tier');
+  let selectedPlan = null;
+  tierEls.forEach(el => {
+    el.addEventListener('click', () => {
+      tierEls.forEach(t => t.classList.remove('selected'));
+      el.classList.add('selected');
+      el.querySelector('input[type=radio]').checked = true;
+      selectedPlan = el.dataset.plan;
+    });
+  });
+
+  const countdownTag = document.getElementById('countdownTag');
+  const stampDate = document.getElementById('stampDate');
+  const submitBtn = document.getElementById('submitBtn');
+  let isPastDeadline = false;
+
+  function fmtDate(d){
+    return d.toLocaleDateString('en-US',{month:'short', day:'numeric', year:'numeric'});
+  }
+  stampDate.textContent = fmtDate(DEADLINE);
+
+  function tickCountdown(){
+    const now = new Date();
+    const diff = DEADLINE - now;
+    if(diff <= 0){
+      isPastDeadline = true;
+      countdownTag.textContent = 'Roster closed';
+      submitBtn.textContent = 'Roster Closed';
+      submitBtn.disabled = true;
+      return;
+    }
+    const days = Math.floor(diff / 86400000);
+    const hrs = Math.floor((diff % 86400000) / 3600000);
+    countdownTag.textContent = days > 0
+      ? `${days}d ${hrs}h left to sign up`
+      : `${hrs}h left to sign up`;
+  }
+  tickCountdown();
+  setInterval(tickCountdown, 60000);
+
+  const schoolListEl = document.getElementById('schoolList');
+  const chipsEl = document.getElementById('chips');
+
+  db.ref('signups').once('value').then(snap => {
+    const counts = {};
+    snap.forEach(child => {
+      const v = child.val();
+      if(!v || !v.schoolKey) return;
+      if(!counts[v.schoolKey]) counts[v.schoolKey] = { display: v.school, count: 0 };
+      counts[v.schoolKey].count++;
+    });
+    const entries = Object.values(counts).sort((a,b) => b.count - a.count);
+
+    if(entries.length === 0){
+      chipsEl.innerHTML = '<span class="empty-note">No one has signed up yet — be the first for your school.</span>';
+    } else {
+      chipsEl.innerHTML = '';
+      entries.forEach(e => {
+        const opt = document.createElement('option');
+        opt.value = e.display;
+        schoolListEl.appendChild(opt);
+
+        const chip = document.createElement('span');
+        chip.className = 'chip';
+        chip.textContent = e.display;
+        const n = document.createElement('span');
+        n.className = 'n';
+        n.textContent = e.count;
+        chip.appendChild(n);
+        chipsEl.appendChild(chip);
+      });
+    }
+  }).catch(() => {
+    chipsEl.innerHTML = '<span class="empty-note">Couldn\'t load the roster preview right now.</span>';
+  });
+
+  const form = document.getElementById('signupForm');
+  const msgEl = document.getElementById('formMsg');
+
+  function showMsg(text, kind){
+    msgEl.textContent = text;
+    msgEl.className = 'msg show ' + kind;
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if(isPastDeadline){
+      showMsg('The roster closed on ' + fmtDate(DEADLINE) + '. Talk to your ATSYS coordinator if you still need access.', 'err');
+      return;
+    }
+    const school = document.getElementById('school').value.trim();
+    const fullName = document.getElementById('fullName').value.trim();
+    const role = document.getElementById('role').value;
+    const plan = selectedPlan;
+
+    if(!school || !fullName || !role || !plan){
+      showMsg('Please fill in every field, including a plan.', 'err');
+      return;
+    }
+
+    const schoolKey = normalizeKey(school);
+    const nameKey = normalizeKey(fullName);
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Checking…';
+
+    try {
+      const snap = await db.ref('signups').orderByChild('schoolKey').equalTo(schoolKey).once('value');
+      let dup = false;
+      snap.forEach(child => {
+        const v = child.val();
+        if(v && normalizeKey(v.name || '') === nameKey) dup = true;
+      });
+
+      if(dup){
+        showMsg('You\'re already on the roster for ' + school + ' — no need to sign up twice.', 'err');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Reserve My Spot';
+        return;
+      }
+
+      await db.ref('signups').push({
+        school: school,
+        schoolKey: schoolKey,
+        name: fullName,
+        role: role,
+        plan: plan,
+        ts: firebase.database.ServerValue.TIMESTAMP
+      });
+
+      document.getElementById('formCard').querySelector('form').style.display = 'none';
+      const confirmed = document.getElementById('confirmed');
+      document.getElementById('confirmedText').textContent =
+        fullName + ' — locked in for ' + school + '. Your ATSYS coordinator will confirm access.';
+      const planEcho = document.getElementById('planEcho');
+      const getsUpdate = (plan === 'Professional' || plan === 'Enterprise');
+      planEcho.textContent = plan + (getsUpdate ? ' — includes 4.5.6 update' : ' — 4.5.6 update not included');
+      confirmed.classList.add('show');
+
+    } catch(err){
+      showMsg('Something went wrong submitting your entry. Please try again.', 'err');
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Reserve My Spot';
+    }
+  });
+</script>
+</body>
+</html>
