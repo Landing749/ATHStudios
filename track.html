@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>InkResetTool — Track Your Order</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMjAwIDIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iZ3JhZCIgeDE9IjAlIiB5MT0iMCUiIHgyPSIxMDAlIiB5Mj0iMTAwJSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiMyZGQ0YzgiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjZWU1ZmE3Ii8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogICAgPGxpbmVhckdyYWRpZW50IGlkPSJkcm9wU2hpbmUiIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMCUiIHkyPSIxMDAlIj4KICAgICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iI2ZmZmZmZiIgc3RvcC1vcGFjaXR5PSIwLjM1Ii8+CiAgICAgIDxzdG9wIG9mZnNldD0iMTAwJSIgc3RvcC1jb2xvcj0iI2ZmZmZmZiIgc3RvcC1vcGFjaXR5PSIwIi8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogIDwvZGVmcz4KCiAgPCEtLSBiYWRnZSBiYWNrZ3JvdW5kIC0tPgogIDxyZWN0IHg9IjgiIHk9IjgiIHdpZHRoPSIxODQiIGhlaWdodD0iMTg0IiByeD0iNDIiIGZpbGw9IiMwZDExMTciIHN0cm9rZT0iIzI0MmIzOCIgc3Ryb2tlLXdpZHRoPSIyIi8+CgogIDwhLS0gcmVzZXQgYXJjIC0tPgogIDxwYXRoIGQ9Ik0gMTYyLjMgNjQuMCBBIDcyIDcyIDAgMSAxIDc1LjQgMzIuMyIKICAgICAgICBmaWxsPSJub25lIiBzdHJva2U9InVybCgjZ3JhZCkiIHN0cm9rZS13aWR0aD0iOSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+CiAgPHBvbHlnb24gcG9pbnRzPSI4NC44LDI4LjkgNzcuOCwzOC45IDczLjAsMjUuNyIgZmlsbD0iI2VlNWZhNyIvPgoKICA8IS0tIGluayBkcm9wbGV0IC0tPgogIDxwYXRoIGQ9Ik0xMDAsNTggQzEwMCw1OCAxMzIsMTA2IDEzMiwxMzIgQzEzMiwxNTAuNiAxMTcuNywxNjQgMTAwLDE2NAogICAgICAgICAgIEM4Mi4zLDE2NCA2OCwxNTAuNiA2OCwxMzIgQzY4LDEwNiAxMDAsNTggMTAwLDU4IFoiCiAgICAgICAgZmlsbD0idXJsKCNncmFkKSIvPgogIDxwYXRoIGQ9Ik0xMDAsNTggQzEwMCw1OCAxMzIsMTA2IDEzMiwxMzIgQzEzMiwxNTAuNiAxMTcuNywxNjQgMTAwLDE2NAogICAgICAgICAgIEM4Mi4zLDE2NCA2OCwxNTAuNiA2OCwxMzIgQzY4LDEwNiAxMDAsNTggMTAwLDU4IFoiCiAgICAgICAgZmlsbD0idXJsKCNkcm9wU2hpbmUpIi8+CgogIDwhLS0gc21hbGwgaGlnaGxpZ2h0IC0tPgogIDxlbGxpcHNlIGN4PSI4OSIgY3k9IjExOCIgcng9IjYiIHJ5PSIxMCIgZmlsbD0iI2ZmZmZmZiIgZmlsbC1vcGFjaXR5PSIwLjI1IiB0cmFuc2Zvcm09InJvdGF0ZSgtMjAgODkgMTE4KSIvPgo8L3N2Zz4K">
+<style>
+  :root {
+    --bg: #0a0c11; --card: #12161f; --card-elevated: #171d28; --card-border: #232b39;
+    --text: #f1f4f9; --text-muted: #8a92a5; --text-faint: #4f5768;
+    --cyan: #25d6c8; --cyan-hover: #1cb6aa; --cyan-dim: #123330;
+    --magenta: #f36bad; --magenta-hover: #d6579a;
+    --good: #3ee08b; --bad: #fb7378;
+    --mono: 'Cascadia Mono', 'Consolas', 'SFMono-Regular', Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; min-height: 100vh; }
+  a { color: var(--cyan); }
+  .wrap { max-width: 640px; margin: 0 auto; padding: 48px 20px 80px; }
+  .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 36px; }
+  .brand img { width: 36px; height: 36px; border-radius: 8px; }
+  .brand .name { font-size: 15px; font-weight: 700; }
+  .brand-links { margin-left: auto; font-size: 12px; display:flex; gap:14px; }
+  .brand-links a { color: var(--text-muted); text-decoration: none; }
+  .brand-links a:hover { color: var(--text); }
+  h1 { font-size: 24px; margin: 0 0 8px; }
+  p.lead { color: var(--text-muted); font-size: 13.5px; margin: 0 0 24px; line-height: 1.6; }
+  .tabs { display: flex; gap: 8px; margin-bottom: 18px; }
+  .tab-btn {
+    flex: 1; font-family: inherit; font-size: 13px; font-weight: 700;
+    background: var(--card); border: 1px solid var(--card-border); color: var(--text-muted);
+    border-radius: 10px; padding: 10px; cursor: pointer;
+  }
+  .tab-btn.active { background: var(--cyan-dim); border-color: var(--cyan); color: var(--cyan); }
+  .card { background: var(--card); border: 1px solid var(--card-border); border-radius: 14px; padding: 24px; }
+  label { display: block; font-size: 12px; color: var(--text-muted); margin: 0 0 6px; }
+  input {
+    font-family: var(--mono); font-size: 13px;
+    background: #0d1016; border: 1px solid var(--card-border); color: var(--text);
+    border-radius: 8px; padding: 10px 12px; width: 100%; outline: none;
+  }
+  input:focus { border-color: var(--cyan); }
+  .lookup-row { display: flex; gap: 10px; margin-top: 4px; }
+  .lookup-row input { flex: 1; }
+  button.go {
+    font-family: inherit; font-size: 13px; font-weight: 700;
+    background: var(--magenta); color: #08090c; border: none; border-radius: 8px;
+    padding: 0 20px; cursor: pointer;
+  }
+  button.go:hover { background: var(--magenta-hover); }
+  button.go:disabled { opacity: 0.5; cursor: not-allowed; }
+  .status-line { font-size: 12.5px; margin-top: 12px; min-height: 16px; }
+  .status-line.error { color: var(--bad); }
+  .status-line.ok { color: var(--good); }
+  .recent { margin-top: 14px; }
+  .recent .label { font-size: 11px; color: var(--text-faint); margin-bottom: 6px; }
+  .recent-chip {
+    display: inline-block; font-family: var(--mono); font-size: 11px;
+    background: #0d1016; border: 1px solid var(--card-border); color: var(--text-muted);
+    border-radius: 999px; padding: 4px 10px; margin: 0 6px 6px 0; cursor: pointer;
+  }
+  .recent-chip:hover { border-color: var(--cyan); color: var(--text); }
+  .result { margin-top: 22px; }
+  .result-card {
+    background: var(--card-elevated); border: 1px solid var(--card-border); border-radius: 14px; padding: 22px;
+  }
+  .result-card .row { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--card-border); font-size: 13px; }
+  .result-card .row:last-child { border-bottom: none; }
+  .result-card .row .k { color: var(--text-muted); }
+  .result-card .row .v { text-align: right; max-width: 60%; word-break: break-word; }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; }
+  .badge.pending { background: rgba(243,107,173,0.15); color: var(--magenta); }
+  .badge.paid { background: rgba(37,214,200,0.15); color: var(--cyan); }
+  .badge.fulfilled, .badge.resolved { background: rgba(62,224,139,0.15); color: var(--good); }
+  .badge.rejected { background: rgba(251,115,120,0.15); color: var(--bad); }
+  .badge.open { background: rgba(243,107,173,0.15); color: var(--magenta); }
+  .license-box {
+    margin-top: 16px; background: #0d1016; border: 1px solid var(--good); border-radius: 10px; padding: 16px;
+  }
+  .license-box .label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+  .license-box .key-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .license-box code { font-family: var(--mono); font-size: 15px; color: var(--good); word-break: break-all; }
+  .copy-btn {
+    font-family: inherit; font-size: 12px; background: transparent; border: 1px solid var(--card-border);
+    color: var(--text); padding: 6px 12px; border-radius: 8px; cursor: pointer;
+  }
+  .copy-btn:hover { border-color: var(--good); }
+  .reply-box {
+    margin-top: 16px; background: #0d1016; border: 1px solid var(--cyan); border-radius: 10px; padding: 16px;
+  }
+  .reply-box .label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+  .reply-box .text { font-size: 13px; line-height: 1.6; white-space: pre-wrap; }
+  .empty-hint { color: var(--text-faint); font-size: 11px; margin-top: 10px; line-height: 1.6; }
+  footer { margin-top: 50px; text-align: center; color: var(--text-faint); font-size: 12px; }
+  footer a { color: var(--text-faint); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand">
+    <img src="data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMjAwIDIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iZ3JhZCIgeDE9IjAlIiB5MT0iMCUiIHgyPSIxMDAlIiB5Mj0iMTAwJSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiMyZGQ0YzgiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjZWU1ZmE3Ii8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogICAgPGxpbmVhckdyYWRpZW50IGlkPSJkcm9wU2hpbmUiIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMCUiIHkyPSIxMDAlIj4KICAgICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iI2ZmZmZmZiIgc3RvcC1vcGFjaXR5PSIwLjM1Ii8+CiAgICAgIDxzdG9wIG9mZnNldD0iMTAwJSIgc3RvcC1jb2xvcj0iI2ZmZmZmZiIgc3RvcC1vcGFjaXR5PSIwIi8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogIDwvZGVmcz4KCiAgPCEtLSBiYWRnZSBiYWNrZ3JvdW5kIC0tPgogIDxyZWN0IHg9IjgiIHk9IjgiIHdpZHRoPSIxODQiIGhlaWdodD0iMTg0IiByeD0iNDIiIGZpbGw9IiMwZDExMTciIHN0cm9rZT0iIzI0MmIzOCIgc3Ryb2tlLXdpZHRoPSIyIi8+CgogIDwhLS0gcmVzZXQgYXJjIC0tPgogIDxwYXRoIGQ9Ik0gMTYyLjMgNjQuMCBBIDcyIDcyIDAgMSAxIDc1LjQgMzIuMyIKICAgICAgICBmaWxsPSJub25lIiBzdHJva2U9InVybCgjZ3JhZCkiIHN0cm9rZS13aWR0aD0iOSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+CiAgPHBvbHlnb24gcG9pbnRzPSI4NC44LDI4LjkgNzcuOCwzOC45IDczLjAsMjUuNyIgZmlsbD0iI2VlNWZhNyIvPgoKICA8IS0tIGluayBkcm9wbGV0IC0tPgogIDxwYXRoIGQ9Ik0xMDAsNTggQzEwMCw1OCAxMzIsMTA2IDEzMiwxMzIgQzEzMiwxNTAuNiAxMTcuNywxNjQgMTAwLDE2NAogICAgICAgICAgIEM4Mi4zLDE2NCA2OCwxNTAuNiA2OCwxMzIgQzY4LDEwNiAxMDAsNTggMTAwLDU4IFoiCiAgICAgICAgZmlsbD0idXJsKCNncmFkKSIvPgogIDxwYXRoIGQ9Ik0xMDAsNTggQzEwMCw1OCAxMzIsMTA2IDEzMiwxMzIgQzEzMiwxNTAuNiAxMTcuNywxNjQgMTAwLDE2NAogICAgICAgICAgIEM4Mi4zLDE2NCA2OCwxNTAuNiA2OCwxMzIgQzY4LDEwNiAxMDAsNTggMTAwLDU4IFoiCiAgICAgICAgZmlsbD0idXJsKCNkcm9wU2hpbmUpIi8+CgogIDwhLS0gc21hbGwgaGlnaGxpZ2h0IC0tPgogIDxlbGxpcHNlIGN4PSI4OSIgY3k9IjExOCIgcng9IjYiIHJ5PSIxMCIgZmlsbD0iI2ZmZmZmZiIgZmlsbC1vcGFjaXR5PSIwLjI1IiB0cmFuc2Zvcm09InJvdGF0ZSgtMjAgODkgMTE4KSIvPgo8L3N2Zz4K" alt="">
+    <div class="name">InkResetTool</div>
+    <div class="brand-links"><a href="buy.html">Buy a license</a><a href="support.html">Support</a></div>
+  </div>
+
+  <h1>Track your order or ticket</h1>
+  <p class="lead">Paste the ID you were given after checking out or sending a support message. Your license key (once issued) or support reply shows up right here — no account needed, no email required.</p>
+
+  <div class="tabs">
+    <button class="tab-btn active" id="tab-order" type="button">Order → License</button>
+    <button class="tab-btn" id="tab-ticket" type="button">Support ticket</button>
+  </div>
+
+  <div class="card">
+    <div id="panel-order">
+      <label for="order-id-input">Order ID</label>
+      <div class="lookup-row">
+        <input type="text" id="order-id-input" placeholder="-NxAbCdEfGhIjKlMnOp">
+        <button class="go" id="order-go-btn">Track</button>
+      </div>
+      <div id="order-status" class="status-line"></div>
+      <div class="recent" id="order-recent" style="display:none;">
+        <div class="label">Recent on this device</div>
+        <div id="order-recent-chips"></div>
+      </div>
+      <div class="empty-hint">Order IDs look like a short random code starting with a dash — it was shown right after you submitted your order on the buy page.</div>
+    </div>
+
+    <div id="panel-ticket" style="display:none;">
+      <label for="ticket-id-input">Ticket ID</label>
+      <div class="lookup-row">
+        <input type="text" id="ticket-id-input" placeholder="-NxAbCdEfGhIjKlMnOp">
+        <button class="go" id="ticket-go-btn">Track</button>
+      </div>
+      <div id="ticket-status" class="status-line"></div>
+      <div class="recent" id="ticket-recent" style="display:none;">
+        <div class="label">Recent on this device</div>
+        <div id="ticket-recent-chips"></div>
+      </div>
+      <div class="empty-hint">Ticket IDs were shown right after you sent your message on the support page.</div>
+    </div>
+  </div>
+
+  <div class="result" id="result-area"></div>
+
+  <footer>InkResetTool — ATHStudios &middot; <a href="buy.html">Buy</a> &middot; <a href="support.html">Support</a></footer>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-database-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyCunWsb-15r-1mL3qpnKfVqqmrTj1oeOp4",
+  authDomain: "ink-2ca90.firebaseapp.com",
+  projectId: "ink-2ca90",
+  databaseURL: "https://ink-2ca90-default-rtdb.firebaseio.com",
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+// ---------- tabs ----------
+const tabOrder = document.getElementById('tab-order');
+const tabTicket = document.getElementById('tab-ticket');
+const panelOrder = document.getElementById('panel-order');
+const panelTicket = document.getElementById('panel-ticket');
+
+tabOrder.addEventListener('click', () => switchTab('order'));
+tabTicket.addEventListener('click', () => switchTab('ticket'));
+
+function switchTab(which) {
+  const isOrder = which === 'order';
+  tabOrder.classList.toggle('active', isOrder);
+  tabTicket.classList.toggle('active', !isOrder);
+  panelOrder.style.display = isOrder ? 'block' : 'none';
+  panelTicket.style.display = isOrder ? 'none' : 'block';
+  document.getElementById('result-area').innerHTML = '';
+}
+
+// ---------- recent chips ----------
+function renderRecent(storageKey, containerId, wrapId, inputId, kind) {
+  let list = [];
+  try { list = JSON.parse(localStorage.getItem(storageKey) || '[]'); } catch (e) {}
+  const wrap = document.getElementById(wrapId);
+  const container = document.getElementById(containerId);
+  if (!list.length) { wrap.style.display = 'none'; return; }
+  wrap.style.display = 'block';
+  container.innerHTML = '';
+  list.forEach(id => {
+    const chip = document.createElement('span');
+    chip.className = 'recent-chip';
+    chip.textContent = id;
+    chip.addEventListener('click', () => {
+      document.getElementById(inputId).value = id;
+      if (kind === 'order') lookupOrder(id); else lookupTicket(id);
+    });
+    container.appendChild(chip);
+  });
+}
+
+// ---------- url params ----------
+const params = new URLSearchParams(window.location.search);
+if (params.get('ticket')) {
+  switchTab('ticket');
+  document.getElementById('ticket-id-input').value = params.get('ticket');
+  lookupTicket(params.get('ticket'));
+} else if (params.get('order')) {
+  document.getElementById('order-id-input').value = params.get('order');
+  lookupOrder(params.get('order'));
+}
+
+renderRecent('irt_recent_orders', 'order-recent-chips', 'order-recent', 'order-id-input', 'order');
+renderRecent('irt_recent_tickets', 'ticket-recent-chips', 'ticket-recent', 'ticket-id-input', 'ticket');
+
+// ---------- order lookup ----------
+document.getElementById('order-go-btn').addEventListener('click', () => {
+  const id = document.getElementById('order-id-input').value.trim();
+  if (id) lookupOrder(id);
+});
+document.getElementById('order-id-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('order-go-btn').click();
+});
+
+async function lookupOrder(id) {
+  const statusEl = document.getElementById('order-status');
+  const resultArea = document.getElementById('result-area');
+  statusEl.textContent = 'Looking up…';
+  statusEl.className = 'status-line';
+  resultArea.innerHTML = '';
+
+  if (!id) {
+    statusEl.textContent = 'Enter your order ID first.';
+    statusEl.className = 'status-line error';
+    return;
+  }
+
+  try {
+    const snap = await db.ref('orders/' + id).get();
+    if (!snap.exists()) {
+      statusEl.textContent = 'No order found with that ID. Double-check it and try again.';
+      statusEl.className = 'status-line error';
+      return;
+    }
+    statusEl.textContent = '';
+    const order = snap.val();
+    renderOrderResult(id, order);
+  } catch (err) {
+    statusEl.textContent = 'Could not look that up: ' + err.message;
+    statusEl.className = 'status-line error';
+  }
+}
+
+function renderOrderResult(id, order) {
+  const resultArea = document.getElementById('result-area');
+  const created = order.createdAt ? new Date(order.createdAt).toLocaleString() : '—';
+  const statusBadge = '<span class="badge ' + (order.status || 'pending') + '">' + (order.status || 'pending') + '</span>';
+
+  let html = '<div class="result-card">';
+  html += '<div class="row"><span class="k">Order ID</span><span class="v" style="font-family:var(--mono); font-size:11px;">' + escapeHtml(id) + '</span></div>';
+  html += '<div class="row"><span class="k">Status</span><span class="v">' + statusBadge + '</span></div>';
+  html += '<div class="row"><span class="k">Name</span><span class="v">' + escapeHtml(order.name || '—') + '</span></div>';
+  html += '<div class="row"><span class="k">Payment method</span><span class="v">' + escapeHtml(order.paymentMethod || '—') + '</span></div>';
+  html += '<div class="row"><span class="k">Reference #</span><span class="v" style="font-family:var(--mono);">' + escapeHtml(order.referenceNumber || '—') + '</span></div>';
+  if (order.price) html += '<div class="row"><span class="k">Price</span><span class="v">' + escapeHtml(order.price) + '</span></div>';
+  html += '<div class="row"><span class="k">Submitted</span><span class="v">' + created + '</span></div>';
+  if (order.adminNote) html += '<div class="row"><span class="k">Note from us</span><span class="v">' + escapeHtml(order.adminNote) + '</span></div>';
+  html += '</div>';
+
+  if (order.assignedLicenseKey) {
+    html += '<div class="license-box"><div class="label">Your license key</div><div class="key-row"><code id="lic-key-val">' + escapeHtml(order.assignedLicenseKey) + '</code><button class="copy-btn" id="copy-lic-btn" type="button">Copy</button></div></div>';
+  } else {
+    html += '<p class="empty-hint" style="margin-top:14px;">No license key yet — orders are usually reviewed and a key issued within a day of payment. Check back here, no need to re-submit.</p>';
+  }
+
+  resultArea.innerHTML = html;
+
+  const copyBtn = document.getElementById('copy-lic-btn');
+  if (copyBtn) {
+    copyBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText(document.getElementById('lic-key-val').textContent).catch(() => {});
+      copyBtn.textContent = 'Copied!';
+      setTimeout(() => { copyBtn.textContent = 'Copy'; }, 1500);
+    });
+  }
+}
+
+// ---------- ticket lookup ----------
+document.getElementById('ticket-go-btn').addEventListener('click', () => {
+  const id = document.getElementById('ticket-id-input').value.trim();
+  if (id) lookupTicket(id);
+});
+document.getElementById('ticket-id-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('ticket-go-btn').click();
+});
+
+async function lookupTicket(id) {
+  const statusEl = document.getElementById('ticket-status');
+  const resultArea = document.getElementById('result-area');
+  statusEl.textContent = 'Looking up…';
+  statusEl.className = 'status-line';
+  resultArea.innerHTML = '';
+
+  if (!id) {
+    statusEl.textContent = 'Enter your ticket ID first.';
+    statusEl.className = 'status-line error';
+    return;
+  }
+
+  try {
+    const snap = await db.ref('support_tickets/' + id).get();
+    if (!snap.exists()) {
+      statusEl.textContent = 'No ticket found with that ID. Double-check it and try again.';
+      statusEl.className = 'status-line error';
+      return;
+    }
+    statusEl.textContent = '';
+    renderTicketResult(id, snap.val());
+  } catch (err) {
+    statusEl.textContent = 'Could not look that up: ' + err.message;
+    statusEl.className = 'status-line error';
+  }
+}
+
+function renderTicketResult(id, ticket) {
+  const resultArea = document.getElementById('result-area');
+  const created = ticket.createdAt ? new Date(ticket.createdAt).toLocaleString() : '—';
+  const statusBadge = '<span class="badge ' + (ticket.status || 'open') + '">' + (ticket.status || 'open') + '</span>';
+
+  let html = '<div class="result-card">';
+  html += '<div class="row"><span class="k">Ticket ID</span><span class="v" style="font-family:var(--mono); font-size:11px;">' + escapeHtml(id) + '</span></div>';
+  html += '<div class="row"><span class="k">Status</span><span class="v">' + statusBadge + '</span></div>';
+  html += '<div class="row"><span class="k">Topic</span><span class="v">' + escapeHtml(ticket.topic || '—') + '</span></div>';
+  html += '<div class="row"><span class="k">Your message</span><span class="v">' + escapeHtml(ticket.message || '—') + '</span></div>';
+  html += '<div class="row"><span class="k">Submitted</span><span class="v">' + created + '</span></div>';
+  html += '</div>';
+
+  if (ticket.adminReply) {
+    html += '<div class="reply-box"><div class="label">Reply from support</div><div class="text">' + escapeHtml(ticket.adminReply) + '</div></div>';
+  } else {
+    html += '<p class="empty-hint" style="margin-top:14px;">No reply yet — check back soon. No need to send another ticket.</p>';
+  }
+
+  resultArea.innerHTML = html;
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+</script>
+</body>
+</html>
