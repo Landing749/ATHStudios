@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>InkResetTool — Support</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMjAwIDIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iZ3JhZCIgeDE9IjAlIiB5MT0iMCUiIHgyPSIxMDAlIiB5Mj0iMTAwJSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiMyZGQ0YzgiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjZWU1ZmE3Ii8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogICAgPGxpbmVhckdyYWRpZW50IGlkPSJkcm9wU2hpbmUiIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMCUiIHkyPSIxMDAlIj4KICAgICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iI2ZmZmZmZiIgc3RvcC1vcGFjaXR5PSIwLjM1Ii8+CiAgICAgIDxzdG9wIG9mZnNldD0iMTAwJSIgc3RvcC1jb2xvcj0iI2ZmZmZmZiIgc3RvcC1vcGFjaXR5PSIwIi8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogIDwvZGVmcz4KCiAgPCEtLSBiYWRnZSBiYWNrZ3JvdW5kIC0tPgogIDxyZWN0IHg9IjgiIHk9IjgiIHdpZHRoPSIxODQiIGhlaWdodD0iMTg0IiByeD0iNDIiIGZpbGw9IiMwZDExMTciIHN0cm9rZT0iIzI0MmIzOCIgc3Ryb2tlLXdpZHRoPSIyIi8+CgogIDwhLS0gcmVzZXQgYXJjIC0tPgogIDxwYXRoIGQ9Ik0gMTYyLjMgNjQuMCBBIDcyIDcyIDAgMSAxIDc1LjQgMzIuMyIKICAgICAgICBmaWxsPSJub25lIiBzdHJva2U9InVybCgjZ3JhZCkiIHN0cm9rZS13aWR0aD0iOSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+CiAgPHBvbHlnb24gcG9pbnRzPSI4NC44LDI4LjkgNzcuOCwzOC45IDczLjAsMjUuNyIgZmlsbD0iI2VlNWZhNyIvPgoKICA8IS0tIGluayBkcm9wbGV0IC0tPgogIDxwYXRoIGQ9Ik0xMDAsNTggQzEwMCw1OCAxMzIsMTA2IDEzMiwxMzIgQzEzMiwxNTAuNiAxMTcuNywxNjQgMTAwLDE2NAogICAgICAgICAgIEM4Mi4zLDE2NCA2OCwxNTAuNiA2OCwxMzIgQzY4LDEwNiAxMDAsNTggMTAwLDU4IFoiCiAgICAgICAgZmlsbD0idXJsKCNncmFkKSIvPgogIDxwYXRoIGQ9Ik0xMDAsNTggQzEwMCw1OCAxMzIsMTA2IDEzMiwxMzIgQzEzMiwxNTAuNiAxMTcuNywxNjQgMTAwLDE2NAogICAgICAgICAgIEM4Mi4zLDE2NCA2OCwxNTAuNiA2OCwxMzIgQzY4LDEwNiAxMDAsNTggMTAwLDU4IFoiCiAgICAgICAgZmlsbD0idXJsKCNkcm9wU2hpbmUpIi8+CgogIDwhLS0gc21hbGwgaGlnaGxpZ2h0IC0tPgogIDxlbGxpcHNlIGN4PSI4OSIgY3k9IjExOCIgcng9IjYiIHJ5PSIxMCIgZmlsbD0iI2ZmZmZmZiIgZmlsbC1vcGFjaXR5PSIwLjI1IiB0cmFuc2Zvcm09InJvdGF0ZSgtMjAgODkgMTE4KSIvPgo8L3N2Zz4K">
+<style>
+  :root {
+    --bg: #0a0c11; --card: #12161f; --card-border: #232b39;
+    --text: #f1f4f9; --text-muted: #8a92a5; --text-faint: #4f5768;
+    --cyan: #25d6c8; --magenta: #f36bad; --magenta-hover: #d6579a;
+    --good: #3ee08b; --bad: #fb7378;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+  .wrap { max-width: 640px; margin: 0 auto; padding: 48px 20px 80px; }
+  .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 36px; }
+  .brand img { width: 36px; height: 36px; border-radius: 8px; }
+  .brand .name { font-size: 15px; font-weight: 700; }
+  .brand-links { margin-left: auto; font-size: 12px; }
+  .brand-links a { color: var(--text-muted); text-decoration: none; }
+  .brand-links a:hover { color: var(--text); }
+  h1 { font-size: 24px; margin: 0 0 8px; }
+  p.lead { color: var(--text-muted); font-size: 13.5px; margin: 0 0 28px; line-height: 1.6; }
+  .card { background: var(--card); border: 1px solid var(--card-border); border-radius: 14px; padding: 24px; }
+  label { display: block; font-size: 12px; color: var(--text-muted); margin: 14px 0 6px; }
+  label:first-child { margin-top: 0; }
+  input, textarea, select {
+    font-family: inherit; font-size: 13px;
+    background: #0d1016; border: 1px solid var(--card-border); color: var(--text);
+    border-radius: 8px; padding: 10px 12px; width: 100%; outline: none;
+  }
+  input:focus, textarea:focus, select:focus { border-color: var(--cyan); }
+  textarea { resize: vertical; min-height: 110px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 520px) { .form-row { grid-template-columns: 1fr; } }
+  button {
+    font-family: inherit; font-size: 13px; font-weight: 700;
+    background: var(--magenta); color: #08090c; border: none; border-radius: 10px;
+    padding: 12px 20px; cursor: pointer; width: 100%; margin-top: 18px;
+  }
+  button:hover { background: var(--magenta-hover); }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  .status-line { font-size: 12.5px; margin-top: 14px; min-height: 16px; }
+  .status-line.error { color: var(--bad); }
+  .status-line.ok { color: var(--good); }
+  .fine-print { font-size: 11px; color: var(--text-faint); margin-top: 12px; line-height: 1.6; }
+  footer { margin-top: 50px; text-align: center; color: var(--text-faint); font-size: 12px; }
+  footer a { color: var(--text-faint); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand">
+    <img src="data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMjAwIDIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iZ3JhZCIgeDE9IjAlIiB5MT0iMCUiIHgyPSIxMDAlIiB5Mj0iMTAwJSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiMyZGQ0YzgiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjZWU1ZmE3Ii8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogICAgPGxpbmVhckdyYWRpZW50IGlkPSJkcm9wU2hpbmUiIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMCUiIHkyPSIxMDAlIj4KICAgICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iI2ZmZmZmZiIgc3RvcC1vcGFjaXR5PSIwLjM1Ii8+CiAgICAgIDxzdG9wIG9mZnNldD0iMTAwJSIgc3RvcC1jb2xvcj0iI2ZmZmZmZiIgc3RvcC1vcGFjaXR5PSIwIi8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogIDwvZGVmcz4KCiAgPCEtLSBiYWRnZSBiYWNrZ3JvdW5kIC0tPgogIDxyZWN0IHg9IjgiIHk9IjgiIHdpZHRoPSIxODQiIGhlaWdodD0iMTg0IiByeD0iNDIiIGZpbGw9IiMwZDExMTciIHN0cm9rZT0iIzI0MmIzOCIgc3Ryb2tlLXdpZHRoPSIyIi8+CgogIDwhLS0gcmVzZXQgYXJjIC0tPgogIDxwYXRoIGQ9Ik0gMTYyLjMgNjQuMCBBIDcyIDcyIDAgMSAxIDc1LjQgMzIuMyIKICAgICAgICBmaWxsPSJub25lIiBzdHJva2U9InVybCgjZ3JhZCkiIHN0cm9rZS13aWR0aD0iOSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+CiAgPHBvbHlnb24gcG9pbnRzPSI4NC44LDI4LjkgNzcuOCwzOC45IDczLjAsMjUuNyIgZmlsbD0iI2VlNWZhNyIvPgoKICA8IS0tIGluayBkcm9wbGV0IC0tPgogIDxwYXRoIGQ9Ik0xMDAsNTggQzEwMCw1OCAxMzIsMTA2IDEzMiwxMzIgQzEzMiwxNTAuNiAxMTcuNywxNjQgMTAwLDE2NAogICAgICAgICAgIEM4Mi4zLDE2NCA2OCwxNTAuNiA2OCwxMzIgQzY4LDEwNiAxMDAsNTggMTAwLDU4IFoiCiAgICAgICAgZmlsbD0idXJsKCNncmFkKSIvPgogIDxwYXRoIGQ9Ik0xMDAsNTggQzEwMCw1OCAxMzIsMTA2IDEzMiwxMzIgQzEzMiwxNTAuNiAxMTcuNywxNjQgMTAwLDE2NAogICAgICAgICAgIEM4Mi4zLDE2NCA2OCwxNTAuNiA2OCwxMzIgQzY4LDEwNiAxMDAsNTggMTAwLDU4IFoiCiAgICAgICAgZmlsbD0idXJsKCNkcm9wU2hpbmUpIi8+CgogIDwhLS0gc21hbGwgaGlnaGxpZ2h0IC0tPgogIDxlbGxpcHNlIGN4PSI4OSIgY3k9IjExOCIgcng9IjYiIHJ5PSIxMCIgZmlsbD0iI2ZmZmZmZiIgZmlsbC1vcGFjaXR5PSIwLjI1IiB0cmFuc2Zvcm09InJvdGF0ZSgtMjAgODkgMTE4KSIvPgo8L3N2Zz4K" alt="">
+    <div class="name">InkResetTool</div>
+    <div class="brand-links"><a href="track.html">Track order/ticket</a> &middot; <a href="buy.html">← Back to buy a license</a></div>
+  </div>
+
+  <h1>Support</h1>
+  <p class="lead">Didn't get your key, printer not detected, reset didn't take — whatever it is, describe it below. If this is about an order, include the email you used to pay so it can be matched up.</p>
+
+  <div class="card">
+    <div class="form-row">
+      <div>
+        <label for="f-name">Name</label>
+        <input type="text" id="f-name" placeholder="Juan Dela Cruz">
+      </div>
+      <div>
+        <label for="f-email">Email (for the reply)</label>
+        <input type="email" id="f-email" placeholder="you@email.com">
+      </div>
+    </div>
+    <div class="form-row">
+      <div>
+        <label for="f-key">License key (if you have one)</label>
+        <input type="text" id="f-key" placeholder="Optional">
+      </div>
+      <div>
+        <label for="f-topic">Topic</label>
+        <select id="f-topic">
+          <option value="Didn't receive key">Didn't receive key</option>
+          <option value="Printer not detected">Printer not detected</option>
+          <option value="Reset failed / didn't work">Reset failed / didn't work</option>
+          <option value="License key issue">License key issue (activation, HWID)</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+    </div>
+    <label for="f-message">What's going on?</label>
+    <textarea id="f-message" placeholder="Printer model, what you tried, any error message you saw…"></textarea>
+
+    <button id="submit-btn">Send ticket</button>
+    <div id="form-status" class="status-line"></div>
+    <p class="fine-print">This sends your name, email, and message so it can be answered — nothing else is collected.</p>
+
+    <div id="ticket-id-box" style="display:none; margin-top:18px; background:#0d1016; border:1px solid var(--cyan); border-radius:10px; padding:16px;">
+      <div style="font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:6px;">Save this — it's how you'll check for a reply</div>
+      <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+        <code id="ticket-id-value" style="font-family:monospace; font-size:14px; color:var(--cyan); word-break:break-all;"></code>
+        <button type="button" id="copy-ticket-id" style="width:auto; margin-top:0; background:transparent; border:1px solid var(--card-border); color:var(--text); padding:6px 12px; font-size:12px;">Copy</button>
+      </div>
+      <a id="track-ticket-link" style="display:block; text-align:center; margin-top:12px; background:var(--magenta); color:#08090c; text-decoration:none; font-weight:700; border-radius:10px; padding:10px 0;" href="track.html">Track this ticket →</a>
+    </div>
+  </div>
+
+  <footer>InkResetTool — ATHStudios &middot; <a href="track.html">Track order/ticket</a></footer>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-database-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyCunWsb-15r-1mL3qpnKfVqqmrTj1oeOp4",
+  authDomain: "ink-2ca90.firebaseapp.com",
+  projectId: "ink-2ca90",
+  databaseURL: "https://ink-2ca90-default-rtdb.firebaseio.com",
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+document.getElementById('submit-btn').addEventListener('click', submitTicket);
+
+async function submitTicket() {
+  const btn = document.getElementById('submit-btn');
+  const statusEl = document.getElementById('form-status');
+  const name = document.getElementById('f-name').value.trim();
+  const email = document.getElementById('f-email').value.trim();
+  const key = document.getElementById('f-key').value.trim();
+  const topic = document.getElementById('f-topic').value;
+  const message = document.getElementById('f-message').value.trim();
+
+  statusEl.textContent = '';
+  statusEl.className = 'status-line';
+
+  if (!name || !email || !message) {
+    statusEl.textContent = 'Please fill in your name, email, and message.';
+    statusEl.className = 'status-line error';
+    return;
+  }
+  if (!/^\S+@\S+\.\S+$/.test(email)) {
+    statusEl.textContent = 'That email doesn\'t look right.';
+    statusEl.className = 'status-line error';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Sending…';
+
+  try {
+    const ticket = {
+      name, email,
+      licenseKey: key || '',
+      topic,
+      message,
+      status: 'open',
+      adminReply: '',
+      createdAt: firebase.database.ServerValue.TIMESTAMP,
+    };
+    const ref2 = await db.ref('support_tickets').push(ticket);
+    const ticketId = ref2.key;
+    statusEl.textContent = 'Ticket sent! Save your ticket ID below to check for a reply.';
+    statusEl.className = 'status-line ok';
+    document.getElementById('f-name').value = '';
+    document.getElementById('f-email').value = '';
+    document.getElementById('f-key').value = '';
+    document.getElementById('f-message').value = '';
+    showTicketId(ticketId);
+  } catch (err) {
+    statusEl.textContent = 'Could not send: ' + err.message;
+    statusEl.className = 'status-line error';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Send ticket';
+  }
+}
+
+function showTicketId(ticketId) {
+  const box = document.getElementById('ticket-id-box');
+  document.getElementById('ticket-id-value').textContent = ticketId;
+  document.getElementById('track-ticket-link').href = 'track.html?ticket=' + encodeURIComponent(ticketId);
+  box.style.display = 'block';
+  box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  saveRecentId('irt_recent_tickets', ticketId);
+}
+
+document.getElementById('copy-ticket-id').addEventListener('click', () => {
+  const val = document.getElementById('ticket-id-value').textContent;
+  navigator.clipboard.writeText(val).catch(() => {});
+  const btn = document.getElementById('copy-ticket-id');
+  const original = btn.textContent;
+  btn.textContent = 'Copied!';
+  setTimeout(() => { btn.textContent = original; }, 1500);
+});
+
+// Same convenience-only local list pattern as buy.html/track.html — an
+// opaque ticket ID, nothing sensitive, never the source of truth.
+function saveRecentId(storageKey, id) {
+  try {
+    const list = JSON.parse(localStorage.getItem(storageKey) || '[]');
+    if (!list.includes(id)) {
+      list.unshift(id);
+      localStorage.setItem(storageKey, JSON.stringify(list.slice(0, 10)));
+    }
+  } catch (e) { /* localStorage unavailable — non-fatal */ }
+}
+</script>
+</body>
+</html>
