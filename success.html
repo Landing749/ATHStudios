@@ -40,7 +40,7 @@
     word-break: break-all;
     margin-bottom: 16px;
   }
-  button.copy {
+  button.copy, button.receipt {
     background: #3b82f6;
     color: white;
     border: none;
@@ -49,7 +49,14 @@
     font-size: 0.95rem;
     cursor: pointer;
   }
-  button.copy:active { transform: scale(0.98); }
+  button.receipt {
+    background: transparent;
+    border: 1px solid #2a2f36;
+    color: #e8e8e8;
+    margin-left: 8px;
+  }
+  .btn-row { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+  button.copy:active, button.receipt:active { transform: scale(0.98); }
   .spinner {
     width: 28px; height: 28px;
     border: 3px solid #2a2f36;
@@ -82,7 +89,10 @@
       <h1>You're all set 🎉</h1>
       <p class="sub">Here's your InkResetTool license key:</p>
       <div class="key-box" id="keyText">${key}</div>
-      <button class="copy" id="copyBtn">Copy key</button>
+      <div class="btn-row">
+        <button class="copy" id="copyBtn">Copy key</button>
+        <button class="receipt" id="receiptBtn">Download receipt (PNG)</button>
+      </div>
       <p class="note">We've also emailed this to you — keep it somewhere safe.
       You'll need it to activate InkResetTool, and again if you reinstall
       or move to a new PC.</p>
@@ -93,6 +103,134 @@
       btn.textContent = "Copied!";
       setTimeout(() => (btn.textContent = "Copy key"), 1500);
     });
+    document.getElementById("receiptBtn").addEventListener("click", () => {
+      downloadReceipt(key);
+    });
+  }
+
+  function downloadReceipt(key) {
+    const W = 900, H = 560;
+    const canvas = document.createElement("canvas");
+    canvas.width = W;
+    canvas.height = H;
+    const ctx = canvas.getContext("2d");
+
+    // background
+    ctx.fillStyle = "#0b0d10";
+    ctx.fillRect(0, 0, W, H);
+
+    // card
+    const pad = 40;
+    ctx.fillStyle = "#14171b";
+    ctx.strokeStyle = "#24282e";
+    ctx.lineWidth = 2;
+    roundRect(ctx, pad, pad, W - pad * 2, H - pad * 2, 20);
+    ctx.fill();
+    ctx.stroke();
+
+    let y = pad + 70;
+
+    // brand
+    ctx.fillStyle = "#3b82f6";
+    ctx.font = "bold 20px sans-serif";
+    ctx.textAlign = "left";
+    ctx.fillText("InkResetTool", pad + 40, y);
+    ctx.fillStyle = "#9aa0a6";
+    ctx.font = "13px sans-serif";
+    ctx.fillText("by ATHStudios", pad + 40, y + 20);
+
+    // title
+    y += 70;
+    ctx.fillStyle = "#e8e8e8";
+    ctx.font = "bold 26px sans-serif";
+    ctx.fillText("Purchase Receipt", pad + 40, y);
+
+    // date
+    y += 34;
+    const dateStr = new Date().toLocaleString();
+    ctx.fillStyle = "#9aa0a6";
+    ctx.font = "14px sans-serif";
+    ctx.fillText(dateStr, pad + 40, y);
+
+    // divider
+    y += 30;
+    ctx.strokeStyle = "#24282e";
+    ctx.beginPath();
+    ctx.moveTo(pad + 40, y);
+    ctx.lineTo(W - pad - 40, y);
+    ctx.stroke();
+
+    // license key label
+    y += 50;
+    ctx.fillStyle = "#9aa0a6";
+    ctx.font = "13px sans-serif";
+    ctx.fillText("LICENSE KEY", pad + 40, y);
+
+    // key box
+    y += 20;
+    const keyBoxH = 60;
+    ctx.fillStyle = "#0b0d10";
+    ctx.strokeStyle = "#2a2f36";
+    ctx.lineWidth = 1;
+    roundRect(ctx, pad + 40, y, W - (pad + 40) * 2, keyBoxH, 10);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.fillStyle = "#e8e8e8";
+    ctx.font = "20px monospace";
+    ctx.textAlign = "center";
+    ctx.fillText(key, W / 2, y + keyBoxH / 2 + 7);
+
+    // footer note
+    y += keyBoxH + 50;
+    ctx.textAlign = "left";
+    ctx.fillStyle = "#9aa0a6";
+    ctx.font = "12px sans-serif";
+    wrapText(
+      ctx,
+      "Keep this key somewhere safe. You'll need it to activate InkResetTool, and again if you reinstall or move to a new PC.",
+      pad + 40,
+      y,
+      W - (pad + 40) * 2,
+      18
+    );
+
+    canvas.toBlob((blob) => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "InkResetTool-receipt.png";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }, "image/png");
+  }
+
+  function roundRect(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+  }
+
+  function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
+    const words = text.split(" ");
+    let line = "";
+    for (let i = 0; i < words.length; i++) {
+      const test = line + words[i] + " ";
+      if (ctx.measureText(test).width > maxWidth && i > 0) {
+        ctx.fillText(line, x, y);
+        line = words[i] + " ";
+        y += lineHeight;
+      } else {
+        line = test;
+      }
+    }
+    ctx.fillText(line, x, y);
   }
 
   function renderPending() {
