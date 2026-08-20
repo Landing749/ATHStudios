@@ -1,159 +1,315 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Buy InkResetTool License</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>InkResetTool — Get a License</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMjAwIDIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iZ3JhZCIgeDE9IjAlIiB5MT0iMCUiIHgyPSIxMDAlIiB5Mj0iMTAwJSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiMyZGQ0YzgiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjZWU1ZmE3Ii8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogICAgPGxpbmVhckdyYWRpZW50IGlkPSJkcm9wU2hpbmUiIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMCUiIHkyPSIxMDAlIj4KICAgICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iI2ZmZmZmZiIgc3RvcC1vcGFjaXR5PSIwLjM1Ii8+CiAgICAgIDxzdG9wIG9mZnNldD0iMTAwJSIgc3RvcC1jb2xvcj0iI2ZmZmZmZiIgc3RvcC1vcGFjaXR5PSIwIi8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogIDwvZGVmcz4KCiAgPCEtLSBiYWRnZSBiYWNrZ3JvdW5kIC0tPgogIDxyZWN0IHg9IjgiIHk9IjgiIHdpZHRoPSIxODQiIGhlaWdodD0iMTg0IiByeD0iNDIiIGZpbGw9IiMwZDExMTciIHN0cm9rZT0iIzI0MmIzOCIgc3Ryb2tlLXdpZHRoPSIyIi8+CgogIDwhLS0gcmVzZXQgYXJjIC0tPgogIDxwYXRoIGQ9Ik0gMTYyLjMgNjQuMCBBIDcyIDcyIDAgMSAxIDc1LjQgMzIuMyIKICAgICAgICBmaWxsPSJub25lIiBzdHJva2U9InVybCgjZ3JhZCkiIHN0cm9rZS13aWR0aD0iOSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+CiAgPHBvbHlnb24gcG9pbnRzPSI4NC44LDI4LjkgNzcuOCwzOC45IDczLjAsMjUuNyIgZmlsbD0iI2VlNWZhNyIvPgoKICA8IS0tIGluayBkcm9wbGV0IC0tPgogIDxwYXRoIGQ9Ik0xMDAsNTggQzEwMCw1OCAxMzIsMTA2IDEzMiwxMzIgQzEzMiwxNTAuNiAxMTcuNywxNjQgMTAwLDE2NAogICAgICAgICAgIEM4Mi4zLDE2NCA2OCwxNTAuNiA2OCwxMzIgQzY4LDEwNiAxMDAsNTggMTAwLDU4IFoiCiAgICAgICAgZmlsbD0idXJsKCNncmFkKSIvPgogIDxwYXRoIGQ9Ik0xMDAsNTggQzEwMCw1OCAxMzIsMTA2IDEzMiwxMzIgQzEzMiwxNTAuNiAxMTcuNywxNjQgMTAwLDE2NAogICAgICAgICAgIEM4Mi4zLDE2NCA2OCwxNTAuNiA2OCwxMzIgQzY4LDEwNiAxMDAsNTggMTAwLDU4IFoiCiAgICAgICAgZmlsbD0idXJsKCNkcm9wU2hpbmUpIi8+CgogIDwhLS0gc21hbGwgaGlnaGxpZ2h0IC0tPgogIDxlbGxpcHNlIGN4PSI4OSIgY3k9IjExOCIgcng9IjYiIHJ5PSIxMCIgZmlsbD0iI2ZmZmZmZiIgZmlsbC1vcGFjaXR5PSIwLjI1IiB0cmFuc2Zvcm09InJvdGF0ZSgtMjAgODkgMTE4KSIvPgo8L3N2Zz4K">
 <style>
-  :root { color-scheme: dark; }
+  :root {
+    --bg: #0a0c11;
+    --card: #12161f;
+    --card-elevated: #171d28;
+    --card-border: #232b39;
+    --text: #f1f4f9;
+    --text-muted: #8a92a5;
+    --text-faint: #4f5768;
+    --cyan: #25d6c8;
+    --cyan-hover: #1cb6aa;
+    --cyan-dim: #123330;
+    --magenta: #f36bad;
+    --magenta-hover: #d6579a;
+    --magenta-dim: #341a29;
+    --good: #3ee08b;
+    --bad: #fb7378;
+    --mono: 'Cascadia Mono', 'Consolas', 'SFMono-Regular', Menlo, monospace;
+  }
   * { box-sizing: border-box; }
   body {
     margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
     min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #0b0d10;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    color: #e8e8e8;
-    padding: 24px;
   }
-  .card {
-    width: 100%;
-    max-width: 480px;
-    background: #14171b;
-    border: 1px solid #24282e;
-    border-radius: 16px;
-    padding: 32px;
-    text-align: center;
+  a { color: var(--cyan); }
+  .wrap { max-width: 920px; margin: 0 auto; padding: 48px 20px 80px; }
+
+  /* ---------- header / hero ---------- */
+  .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 40px; }
+  .brand img { width: 40px; height: 40px; border-radius: 9px; }
+  .brand .name { font-size: 16px; font-weight: 700; }
+  .brand .tag { font-size: 11px; color: var(--text-muted); }
+  .brand-links { margin-left: auto; display: flex; gap: 18px; font-size: 12px; }
+  .brand-links a { color: var(--text-muted); text-decoration: none; }
+  .brand-links a:hover { color: var(--text); }
+
+  .hero { text-align: center; padding: 20px 0 44px; }
+  .hero h1 { font-size: 34px; line-height: 1.25; margin: 0 0 14px; }
+  .hero h1 span { background: linear-gradient(90deg, var(--cyan), var(--magenta)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .hero p { color: var(--text-muted); font-size: 15px; max-width: 560px; margin: 0 auto 24px; line-height: 1.6; }
+  .hero-ctas { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: inherit; font-size: 13px; font-weight: 700;
+    padding: 12px 22px; border-radius: 10px; border: none; cursor: pointer;
+    text-decoration: none;
   }
-  .logo {
-    width: 56px;
-    height: 56px;
-    margin: 0 auto 16px;
-    display: block;
-  }
-  h1 { font-size: 1.4rem; margin: 0 0 8px; }
-  p.sub { color: #9aa0a6; margin: 0 0 24px; font-size: 0.95rem; line-height: 1.5; }
-  .price-box {
-    background: #0b0d10;
-    border: 1px solid #2a2f36;
-    border-radius: 10px;
+  .btn-primary { background: var(--magenta); color: #08090c; }
+  .btn-primary:hover { background: var(--magenta-hover); }
+  .btn-ghost { background: transparent; color: var(--text); border: 1px solid var(--card-border); }
+  .btn-ghost:hover { background: var(--card-elevated); }
+  .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  /* ---------- sections ---------- */
+  section { margin-top: 56px; }
+  .section-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--cyan); font-weight: 700; margin-bottom: 8px; }
+  h2 { font-size: 22px; margin: 0 0 20px; }
+
+  /* feature showcase */
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; }
+  .feature-card {
+    background: var(--card); border: 1px solid var(--card-border); border-radius: 12px;
     padding: 20px;
-    margin-bottom: 20px;
   }
-  .price {
-    font-size: 2rem;
-    font-weight: 700;
-    margin: 0;
+  .feature-card .icon {
+    width: 36px; height: 36px; border-radius: 9px; display: flex; align-items: center; justify-content: center;
+    font-size: 16px; margin-bottom: 12px;
   }
-  .price-note {
-    color: #9aa0a6;
-    font-size: 0.85rem;
-    margin: 6px 0 0;
+  .feature-card.free .icon { background: var(--cyan-dim); color: var(--cyan); }
+  .feature-card.paid .icon { background: var(--magenta-dim); color: var(--magenta); }
+  .feature-card h3 { font-size: 14px; margin: 0 0 6px; }
+  .feature-card p { font-size: 12.5px; color: var(--text-muted); margin: 0; line-height: 1.5; }
+  .pill { display: inline-block; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; padding: 2px 8px; border-radius: 999px; margin-bottom: 10px; }
+  .pill.free { background: var(--cyan-dim); color: var(--cyan); }
+  .pill.paid { background: var(--magenta-dim); color: var(--magenta); }
+
+  /* comparison table */
+  table.compare { width: 100%; border-collapse: collapse; background: var(--card); border: 1px solid var(--card-border); border-radius: 12px; overflow: hidden; font-size: 13px; }
+  table.compare th, table.compare td { text-align: left; padding: 12px 16px; border-bottom: 1px solid var(--card-border); }
+  table.compare th { color: var(--text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.03em; }
+  table.compare td.us { color: var(--good); font-weight: 600; }
+  table.compare tr:last-child td { border-bottom: none; }
+  .compare-note { font-size: 11px; color: var(--text-faint); margin-top: 10px; }
+
+  /* pricing / order card */
+  .price-card {
+    background: var(--card); border: 1px solid var(--card-border); border-radius: 14px;
+    padding: 28px; display: flex; align-items: center; gap: 24px; flex-wrap: wrap;
   }
-  ul.features {
-    list-style: none;
-    padding: 0;
-    margin: 0 0 24px;
-    text-align: left;
-    font-size: 0.9rem;
-    color: #c7cbd1;
+  .price-card .amount { font-size: 40px; font-weight: 800; color: var(--text); }
+  .price-card .amount small { font-size: 14px; color: var(--text-muted); font-weight: 500; }
+  .price-card .desc { flex: 1; min-width: 200px; color: var(--text-muted); font-size: 13px; line-height: 1.6; }
+  .price-card .desc ul { margin: 8px 0 0; padding-left: 18px; }
+
+  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-top: 20px; }
+  .step-card { background: var(--card); border: 1px solid var(--card-border); border-radius: 12px; padding: 18px; }
+  .step-card .num { width: 26px; height: 26px; border-radius: 999px; background: var(--card-elevated); border: 1px solid var(--card-border); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: var(--cyan); margin-bottom: 10px; }
+  .step-card h3 { font-size: 13px; margin: 0 0 6px; }
+  .step-card p { font-size: 12px; color: var(--text-muted); margin: 0; line-height: 1.5; }
+
+  /* checkout card */
+  .checkout-card {
+    background: var(--card); border: 1px solid var(--card-border); border-radius: 14px;
+    padding: 28px; margin-top: 24px; text-align: center;
   }
-  ul.features li {
-    padding: 6px 0 6px 24px;
-    position: relative;
+  .checkout-card .pay-methods { display: flex; gap: 8px; justify-content: center; margin-bottom: 18px; flex-wrap: wrap; }
+  .method-chip {
+    font-size: 11px; font-weight: 700; color: var(--text-muted);
+    border: 1px solid var(--card-border); border-radius: 999px; padding: 5px 12px;
   }
-  ul.features li::before {
-    content: "✓";
-    position: absolute;
-    left: 0;
-    color: #3b82f6;
-  }
-  button.buy {
-    width: 100%;
-    background: #3b82f6;
-    color: white;
-    border: none;
-    padding: 14px 20px;
-    border-radius: 8px;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-  }
-  button.buy:active { transform: scale(0.98); }
-  button.buy:disabled { opacity: 0.6; cursor: default; }
-  .error {
-    color: #f87171;
-    font-size: 0.85rem;
-    margin-top: 14px;
-    display: none;
-  }
-  .note { color: #9aa0a6; font-size: 0.8rem; margin-top: 20px; line-height: 1.5; }
+  #buy-btn { width: 100%; max-width: 320px; justify-content: center; font-size: 14px; padding: 15px 22px; }
   .spinner-inline {
-    display: inline-block;
-    width: 16px; height: 16px;
-    border: 2px solid rgba(255,255,255,0.4);
-    border-top-color: #fff;
-    border-radius: 50%;
-    margin-right: 8px;
-    vertical-align: -3px;
-    animation: spin 0.8s linear infinite;
+    display: inline-block; width: 14px; height: 14px;
+    border: 2px solid rgba(8,9,12,0.35); border-top-color: #08090c;
+    border-radius: 50%; animation: spin 0.8s linear infinite;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
+  .checkout-status { font-size: 12.5px; margin-top: 14px; min-height: 16px; }
+  .checkout-status.error { color: var(--bad); }
+  .fine-print { font-size: 11px; color: var(--text-faint); margin-top: 16px; line-height: 1.6; max-width: 440px; margin-left: auto; margin-right: auto; }
+
+  footer { margin-top: 70px; text-align: center; color: var(--text-faint); font-size: 12px; }
+  footer a { color: var(--text-faint); }
 </style>
 </head>
 <body>
-  <div class="card">
-    <h1>InkResetTool License</h1>
-    <p class="sub">One-time purchase. Resets waste ink counters on supported Epson printers.</p>
 
-    <div class="price-box">
-      <p class="price">₱199</p>
-      <p class="price-note">One license key = one reset. Not unlimited resets.</p>
+<div class="wrap">
+
+  <div class="brand">
+    <img src="data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMjAwIDIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iZ3JhZCIgeDE9IjAlIiB5MT0iMCUiIHgyPSIxMDAlIiB5Mj0iMTAwJSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiMyZGQ0YzgiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjZWU1ZmE3Ii8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogICAgPGxpbmVhckdyYWRpZW50IGlkPSJkcm9wU2hpbmUiIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMCUiIHkyPSIxMDAlIj4KICAgICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iI2ZmZmZmZiIgc3RvcC1vcGFjaXR5PSIwLjM1Ii8+CiAgICAgIDxzdG9wIG9mZnNldD0iMTAwJSIgc3RvcC1jb2xvcj0iI2ZmZmZmZiIgc3RvcC1vcGFjaXR5PSIwIi8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogIDwvZGVmcz4KCiAgPCEtLSBiYWRnZSBiYWNrZ3JvdW5kIC0tPgogIDxyZWN0IHg9IjgiIHk9IjgiIHdpZHRoPSIxODQiIGhlaWdodD0iMTg0IiByeD0iNDIiIGZpbGw9IiMwZDExMTciIHN0cm9rZT0iIzI0MmIzOCIgc3Ryb2tlLXdpZHRoPSIyIi8+CgogIDwhLS0gcmVzZXQgYXJjIC0tPgogIDxwYXRoIGQ9Ik0gMTYyLjMgNjQuMCBBIDcyIDcyIDAgMSAxIDc1LjQgMzIuMyIKICAgICAgICBmaWxsPSJub25lIiBzdHJva2U9InVybCgjZ3JhZCkiIHN0cm9rZS13aWR0aD0iOSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+CiAgPHBvbHlnb24gcG9pbnRzPSI4NC44LDI4LjkgNzcuOCwzOC45IDczLjAsMjUuNyIgZmlsbD0iI2VlNWZhNyIvPgoKICA8IS0tIGluayBkcm9wbGV0IC0tPgogIDxwYXRoIGQ9Ik0xMDAsNTggQzEwMCw1OCAxMzIsMTA2IDEzMiwxMzIgQzEzMiwxNTAuNiAxMTcuNywxNjQgMTAwLDE2NAogICAgICAgICAgIEM4Mi4zLDE2NCA2OCwxNTAuNiA2OCwxMzIgQzY4LDEwNiAxMDAsNTggMTAwLDU4IFoiCiAgICAgICAgZmlsbD0idXJsKCNncmFkKSIvPgogIDxwYXRoIGQ9Ik0xMDAsNTggQzEwMCw1OCAxMzIsMTA2IDEzMiwxMzIgQzEzMiwxNTAuNiAxMTcuNywxNjQgMTAwLDE2NAogICAgICAgICAgIEM4Mi4zLDE2NCA2OCwxNTAuNiA2OCwxMzIgQzY4LDEwNiAxMDAsNTggMTAwLDU4IFoiCiAgICAgICAgZmlsbD0idXJsKCNkcm9wU2hpbmUpIi8+CgogIDwhLS0gc21hbGwgaGlnaGxpZ2h0IC0tPgogIDxlbGxpcHNlIGN4PSI4OSIgY3k9IjExOCIgcng9IjYiIHJ5PSIxMCIgZmlsbD0iI2ZmZmZmZiIgZmlsbC1vcGFjaXR5PSIwLjI1IiB0cmFuc2Zvcm09InJvdGF0ZSgtMjAgODkgMTE4KSIvPgo8L3N2Zz4K" alt="">
+    <div>
+      <div class="name">InkResetTool</div>
+      <div class="tag">by ATHStudios</div>
     </div>
-
-    <ul class="features">
-      <li>Instant key delivery after payment</li>
-      <li>Pay with card, GCash, or Maya</li>
-      <li>Key emailed to you as backup</li>
-    </ul>
-
-    <button class="buy" id="buyBtn">Buy Now — ₱199</button>
-    <p class="error" id="errorMsg">Something went wrong. Please try again in a moment.</p>
-
-    <p class="note">By purchasing, you agree that one key is valid for a single
-    reset on a single device. Need another reset later? You'll need another key.</p>
+    <div class="brand-links">
+      <a href="support.html">Support</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#order">Get a key</a>
+    </div>
   </div>
 
+  <div class="hero">
+    <h1>Reset your Epson's waste ink counter<br>without paying <span>WIC Reset prices</span></h1>
+    <p>InkResetTool detects your printer, runs free nozzle checks and head cleaning on the spot, and clears the waste ink EEPROM counter with a one-time license key — no subscriptions, no bloated suite, no reinstall-to-reset tricks.</p>
+    <div class="hero-ctas">
+      <a class="btn btn-primary" href="#order">⚿ Get a License Key</a>
+      <a class="btn btn-ghost" href="#showcase">See what it does</a>
+    </div>
+  </div>
+
+  <section id="showcase">
+    <div class="section-label">Showcase</div>
+    <h2>Two tiers. Only pay for the part that needs a key.</h2>
+    <div class="grid">
+      <div class="feature-card free">
+        <span class="pill free">Free — no key needed</span>
+        <div class="icon">▤</div>
+        <h3>Nozzle Check</h3>
+        <p>Prints a small test pattern so you can see exactly which nozzles are clogged before you do anything else.</p>
+      </div>
+      <div class="feature-card free">
+        <span class="pill free">Free — no key needed</span>
+        <div class="icon">✦</div>
+        <h3>Head Cleaning</h3>
+        <p>Runs the same cleaning cycle as the Epson driver's own Utility tab — clears light clogs in a couple of minutes.</p>
+      </div>
+      <div class="feature-card free">
+        <span class="pill free">Free — no key needed</span>
+        <div class="icon">⚡</div>
+        <h3>Power Cleaning</h3>
+        <p>A more aggressive pass for stubborn clogs, with a clear heads-up that it uses noticeably more ink.</p>
+      </div>
+      <div class="feature-card paid">
+        <span class="pill paid">Licensed</span>
+        <div class="icon">↻</div>
+        <h3>Waste Ink Counter Reset</h3>
+        <p>Writes directly to the printer's EEPROM to clear the "service required / end of service life" waste ink error — the fix WIC Reset charges per-key for.</p>
+      </div>
+      <div class="feature-card paid">
+        <span class="pill paid">Licensed</span>
+        <div class="icon">◆</div>
+        <h3>766 Epson Models</h3>
+        <p>Artisan, B/BX, ET, K, L, M, PM, PX, SC, Stylus, T/TX, WF, WP and XP families — search by model, not by memorizing part numbers.</p>
+      </div>
+      <div class="feature-card paid">
+        <span class="pill paid">Licensed</span>
+        <div class="icon">⚿</div>
+        <h3>One Key, One Machine</h3>
+        <p>Each key binds to a hardware fingerprint on first use, so a key can't quietly get shared across a shop full of printers.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-label">Why switch</div>
+    <h2>InkResetTool vs. the usual WIC Reset route</h2>
+    <table class="compare">
+      <thead><tr><th></th><th>InkResetTool</th><th>WIC Reset Utility</th></tr></thead>
+      <tbody>
+        <tr><td>Reset key price</td><td class="us" id="cmp-price">₱199 per key</td><td>Typically $4–$10 per single-use key</td></tr>
+        <tr><td>Free maintenance tools</td><td class="us">Nozzle check + head/power cleaning, no key</td><td>Also free, same idea</td></tr>
+        <tr><td>Interface</td><td class="us">Clean, guided, one printer flow at a time</td><td>Dense multi-window legacy UI</td></tr>
+        <tr><td>Model database</td><td class="us">766 Epson models, searchable by name</td><td>Broad Epson + Canon coverage</td></tr>
+        <tr><td>Key delivery</td><td class="us">Automatic — issued the moment payment clears</td><td>Instant automated email</td></tr>
+      </tbody>
+    </table>
+    <p class="compare-note">Competitor pricing is approximate and changes over time — check WIC Reset's own site for their current rate. InkResetTool is a solo, independent project (ATHStudios), not affiliated with WIC Reset or Epson.</p>
+  </section>
+
+  <section id="pricing">
+    <div class="section-label">Pricing</div>
+    <h2>One-time key, one printer</h2>
+    <div class="price-card">
+      <div class="amount" id="price-amount">₱199 <small>/ key</small></div>
+      <div class="desc">
+        A key is single-use and binds to one machine on activation.
+        <ul>
+          <li>Works with any of the 766 supported Epson models</li>
+          <li>No subscription — pay once per printer you need to reset</li>
+          <li>Need more than one printer? Just come back and buy another key</li>
+        </ul>
+      </div>
+      <a class="btn btn-primary" href="#order">Order now</a>
+    </div>
+  </section>
+
+  <section id="order">
+    <div class="section-label">Get a license</div>
+    <h2>How it works</h2>
+    <div class="steps">
+      <div class="step-card">
+        <div class="num">1</div>
+        <h3>Pay</h3>
+        <p>Hit Buy Now below — you're taken to a secure PayMongo checkout page, no account needed.</p>
+      </div>
+      <div class="step-card">
+        <div class="num">2</div>
+        <h3>Confirm</h3>
+        <p>Pay with whatever's active at checkout. Payment is confirmed automatically, no manual review.</p>
+      </div>
+      <div class="step-card">
+        <div class="num">3</div>
+        <h3>Get your key</h3>
+        <p>You're redirected straight back with your license key on screen, and it's emailed to you as backup.</p>
+      </div>
+    </div>
+
+    <div class="checkout-card">
+      <div class="pay-methods" id="pay-methods">
+        <span class="method-chip">QRPh</span>
+      </div>
+      <button class="btn btn-primary" id="buy-btn">Buy Now — <span id="buy-price">₱199</span></button>
+      <div id="checkout-status" class="checkout-status"></div>
+      <p class="fine-print">You're redirected to PayMongo's hosted checkout to pay — InkResetTool never sees or stores your card, GCash, or bank details. Your key is issued automatically once PayMongo confirms the payment.</p>
+    </div>
+  </section>
+
+  <footer>
+    InkResetTool — ATHStudios &middot; <a href="support.html">Support</a>
+  </footer>
+</div>
+
 <script>
-  // Point this at your deployed Worker.
-  const CHECKOUT_ENDPOINT = "https://inkreset-license-webhook.paymongo.workers.dev/api/create-checkout";
+// =====================================================================
+// EDIT THIS BLOCK — point at your deployed Worker. Everything else can stay.
+// =====================================================================
+const SHOP_CONFIG = {
+  priceDisplay: "₱199",
+  checkoutEndpoint: "https://inkreset-license-webhook.paymongo.workers.dev/api/create-checkout",
+};
+document.getElementById('buy-price').textContent = SHOP_CONFIG.priceDisplay;
 
-  const buyBtn = document.getElementById("buyBtn");
-  const errorMsg = document.getElementById("errorMsg");
+const buyBtn = document.getElementById('buy-btn');
+const statusEl = document.getElementById('checkout-status');
+const buyBtnDefaultHTML = buyBtn.innerHTML;
 
-  buyBtn.addEventListener("click", async () => {
-    buyBtn.disabled = true;
-    errorMsg.style.display = "none";
-    buyBtn.innerHTML = '<span class="spinner-inline"></span>Redirecting…';
+buyBtn.addEventListener('click', startCheckout);
 
-    try {
-      const resp = await fetch(CHECKOUT_ENDPOINT, { method: "POST" });
-      const data = await resp.json();
+async function startCheckout() {
+  buyBtn.disabled = true;
+  statusEl.textContent = '';
+  statusEl.className = 'checkout-status';
+  buyBtn.innerHTML = '<span class="spinner-inline"></span> Redirecting…';
 
-      if (!resp.ok || !data.checkoutUrl) {
-        throw new Error(data.error || "No checkout URL returned");
-      }
+  try {
+    const resp = await fetch(SHOP_CONFIG.checkoutEndpoint, { method: 'POST' });
+    const data = await resp.json();
 
-      window.location.href = data.checkoutUrl;
-    } catch (e) {
-      console.error(e);
-      errorMsg.style.display = "block";
-      buyBtn.disabled = false;
-      buyBtn.textContent = "Buy Now — ₱199";
+    if (!resp.ok || !data.checkoutUrl) {
+      throw new Error(data.error || 'No checkout URL returned');
     }
-  });
+
+    window.location.href = data.checkoutUrl;
+  } catch (err) {
+    statusEl.textContent = 'Could not start checkout: ' + err.message + '. Please try again in a moment.';
+    statusEl.className = 'checkout-status error';
+    buyBtn.disabled = false;
+    buyBtn.innerHTML = buyBtnDefaultHTML;
+  }
+}
 </script>
 </body>
 </html>
