@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Thank you — InkResetTool</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #0b0d10;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: #e8e8e8;
+    padding: 24px;
+  }
+  .card {
+    width: 100%;
+    max-width: 480px;
+    background: #14171b;
+    border: 1px solid #24282e;
+    border-radius: 16px;
+    padding: 32px;
+    text-align: center;
+  }
+  h1 { font-size: 1.4rem; margin: 0 0 8px; }
+  p.sub { color: #9aa0a6; margin: 0 0 24px; font-size: 0.95rem; }
+  .key-box {
+    background: #0b0d10;
+    border: 1px solid #2a2f36;
+    border-radius: 10px;
+    padding: 18px;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 1.1rem;
+    letter-spacing: 0.5px;
+    word-break: break-all;
+    margin-bottom: 16px;
+  }
+  button.copy {
+    background: #3b82f6;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+  button.copy:active { transform: scale(0.98); }
+  .spinner {
+    width: 28px; height: 28px;
+    border: 3px solid #2a2f36;
+    border-top-color: #3b82f6;
+    border-radius: 50%;
+    margin: 0 auto 20px;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .note { color: #9aa0a6; font-size: 0.85rem; margin-top: 20px; line-height: 1.5; }
+</style>
+</head>
+<body>
+  <div class="card" id="card">
+    <div class="spinner"></div>
+    <h1>Confirming your payment…</h1>
+    <p class="sub">This usually takes a few seconds.</p>
+  </div>
+
+<script>
+  // Point this at your deployed Worker.
+  const CLAIM_ENDPOINT = "https://inkreset-license-webhook.paymongo.workers.dev/api/claim";
+
+  const params = new URLSearchParams(window.location.search);
+  const ref = params.get("ref");
+  const card = document.getElementById("card");
+
+  function renderKey(key) {
+    card.innerHTML = `
+      <h1>You're all set 🎉</h1>
+      <p class="sub">Here's your InkResetTool license key:</p>
+      <div class="key-box" id="keyText">${key}</div>
+      <button class="copy" id="copyBtn">Copy key</button>
+      <p class="note">We've also emailed this to you — keep it somewhere safe.
+      You'll need it to activate InkResetTool, and again if you reinstall
+      or move to a new PC.</p>
+    `;
+    document.getElementById("copyBtn").addEventListener("click", () => {
+      navigator.clipboard.writeText(key);
+      const btn = document.getElementById("copyBtn");
+      btn.textContent = "Copied!";
+      setTimeout(() => (btn.textContent = "Copy key"), 1500);
+    });
+  }
+
+  function renderPending() {
+    card.innerHTML = `
+      <h1>Almost there…</h1>
+      <p class="sub">We're finishing up your license. This page will update
+      automatically — you can also just check your email.</p>
+    `;
+  }
+
+  function renderNoRef() {
+    card.innerHTML = `
+      <h1>Payment received</h1>
+      <p class="sub">Check your email for your InkResetTool license key.
+      It should arrive within a minute or two.</p>
+    `;
+  }
+
+  async function poll(attemptsLeft) {
+    try {
+      const resp = await fetch(`${CLAIM_ENDPOINT}?ref=${encodeURIComponent(ref)}`);
+      const data = await resp.json();
+
+      if (data.status === "ready" && data.key) {
+        renderKey(data.key);
+        return;
+      }
+    } catch (e) {
+      console.error(e);
+    }
+
+    if (attemptsLeft <= 0) {
+      renderPending();
+      return;
+    }
+
+    setTimeout(() => poll(attemptsLeft - 1), 2500);
+  }
+
+  if (!ref) {
+    renderNoRef();
+  } else {
+    poll(16); // ~40 seconds of polling before giving up and pointing to email
+  }
+</script>
+</body>
+</html>
