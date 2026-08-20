@@ -119,6 +119,15 @@
     font-size: 11px; font-weight: 700; color: var(--text-muted);
     border: 1px solid var(--card-border); border-radius: 999px; padding: 5px 12px;
   }
+  .email-field { max-width: 320px; margin: 0 auto 16px; text-align: left; }
+  .email-field input {
+    width: 100%; font-family: inherit; font-size: 13.5px; color: var(--text);
+    background: var(--card-elevated); border: 1px solid var(--card-border); border-radius: 10px;
+    padding: 12px 14px; outline: none;
+  }
+  .email-field input:focus { border-color: var(--cyan); }
+  .email-field input.invalid { border-color: var(--bad); }
+  .email-field .email-hint { font-size: 11px; color: var(--text-faint); margin: 6px 2px 0; line-height: 1.5; }
   #buy-btn { width: 100%; max-width: 320px; justify-content: center; font-size: 14px; padding: 15px 22px; }
   .spinner-inline {
     display: inline-block; width: 14px; height: 14px;
@@ -152,7 +161,7 @@
   </div>
 
   <div class="hero">
-    <h1>Reset your Epson's waste ink counter<br>without paying <span>WIC Reset prices</span></h1>
+    <h1>Reset your Epson's waste ink counter<br><span>without the usual reset-tool markup</span></h1>
     <p>InkResetTool detects your printer, runs free nozzle checks and head cleaning on the spot, and clears the waste ink EEPROM counter with a one-time license key — no subscriptions, no bloated suite, no reinstall-to-reset tricks.</p>
     <div class="hero-ctas">
       <a class="btn btn-primary" href="#order">⚿ Get a License Key</a>
@@ -186,7 +195,7 @@
         <span class="pill paid">Licensed</span>
         <div class="icon">↻</div>
         <h3>Waste Ink Counter Reset</h3>
-        <p>Writes directly to the printer's EEPROM to clear the "service required / end of service life" waste ink error — the fix WIC Reset charges per-key for.</p>
+        <p>Writes directly to the printer's EEPROM to clear the "service required / end of service life" waste ink error, for a fraction of what a print shop would charge for the same fix.</p>
       </div>
       <div class="feature-card paid">
         <span class="pill paid">Licensed</span>
@@ -204,19 +213,19 @@
   </section>
 
   <section>
-    <div class="section-label">Why switch</div>
-    <h2>InkResetTool vs. the usual WIC Reset route</h2>
+    <div class="section-label">Why InkResetTool</div>
+    <h2>What you're actually paying for</h2>
     <table class="compare">
-      <thead><tr><th></th><th>InkResetTool</th><th>WIC Reset Utility</th></tr></thead>
+      <thead><tr><th></th><th>InkResetTool</th></tr></thead>
       <tbody>
-        <tr><td>Reset key price</td><td class="us" id="cmp-price">₱199 per key</td><td>Typically $4–$10 per single-use key</td></tr>
-        <tr><td>Free maintenance tools</td><td class="us">Nozzle check + head/power cleaning, no key</td><td>Also free, same idea</td></tr>
-        <tr><td>Interface</td><td class="us">Clean, guided, one printer flow at a time</td><td>Dense multi-window legacy UI</td></tr>
-        <tr><td>Model database</td><td class="us">766 Epson models, searchable by name</td><td>Broad Epson + Canon coverage</td></tr>
-        <tr><td>Key delivery</td><td class="us">Automatic — issued the moment payment clears</td><td>Instant automated email</td></tr>
+        <tr><td>Reset key price</td><td class="us" id="cmp-price">₱199 per key</td></tr>
+        <tr><td>Free maintenance tools</td><td class="us">Nozzle check + head/power cleaning, no key</td></tr>
+        <tr><td>Interface</td><td class="us">Clean, guided, one printer flow at a time</td></tr>
+        <tr><td>Model database</td><td class="us">766 Epson models, searchable by name</td></tr>
+        <tr><td>Key delivery</td><td class="us">Automatic — issued the moment payment clears</td></tr>
       </tbody>
     </table>
-    <p class="compare-note">Competitor pricing is approximate and changes over time — check WIC Reset's own site for their current rate. InkResetTool is a solo, independent project (ATHStudios), not affiliated with WIC Reset or Epson.</p>
+    <p class="compare-note">InkResetTool is a solo, independent project (ATHStudios) and isn't affiliated with Epson or any other printer maintenance tool maker.</p>
   </section>
 
   <section id="pricing">
@@ -261,6 +270,10 @@
       <div class="pay-methods" id="pay-methods">
         <span class="method-chip">QRPh</span>
       </div>
+      <div class="email-field">
+        <input type="email" id="buy-email" placeholder="you@email.com" autocomplete="email" required>
+        <p class="email-hint">Your license key gets emailed here as backup — QRPh doesn't collect it at checkout.</p>
+      </div>
       <button class="btn btn-primary" id="buy-btn">Buy Now — <span id="buy-price">₱199</span></button>
       <div id="checkout-status" class="checkout-status"></div>
       <p class="fine-print">You're redirected to PayMongo's hosted checkout to pay — InkResetTool never sees or stores your card, GCash, or bank details. Your key is issued automatically once PayMongo confirms the payment.</p>
@@ -284,18 +297,34 @@ document.getElementById('buy-price').textContent = SHOP_CONFIG.priceDisplay;
 
 const buyBtn = document.getElementById('buy-btn');
 const statusEl = document.getElementById('checkout-status');
+const emailInput = document.getElementById('buy-email');
 const buyBtnDefaultHTML = buyBtn.innerHTML;
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 buyBtn.addEventListener('click', startCheckout);
+emailInput.addEventListener('input', () => emailInput.classList.remove('invalid'));
 
 async function startCheckout() {
+  const email = emailInput.value.trim();
+  if (!EMAIL_RE.test(email)) {
+    emailInput.classList.add('invalid');
+    emailInput.focus();
+    statusEl.textContent = 'Enter a valid email so we can send your key as backup.';
+    statusEl.className = 'checkout-status error';
+    return;
+  }
+
   buyBtn.disabled = true;
   statusEl.textContent = '';
   statusEl.className = 'checkout-status';
   buyBtn.innerHTML = '<span class="spinner-inline"></span> Redirecting…';
 
   try {
-    const resp = await fetch(SHOP_CONFIG.checkoutEndpoint, { method: 'POST' });
+    const resp = await fetch(SHOP_CONFIG.checkoutEndpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    });
     const data = await resp.json();
 
     if (!resp.ok || !data.checkoutUrl) {
