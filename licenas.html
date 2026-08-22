@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ATStudios | License Command Center</title>
+    <title>ATHStudios | License Command Center</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono&display=swap" rel="stylesheet">
     <style>
@@ -95,6 +95,43 @@
             z-index: 100;
             display: flex; align-items: center; justify-content: center;
         }
+
+        /* ── Loading screen ─────────────────────────────────────────────── */
+        #loadingScreen {
+            position: fixed; inset: 0;
+            background: var(--at-black);
+            background-image: radial-gradient(circle at 50% 40%, #1a1a1a 0%, #0a0a0a 70%);
+            z-index: 200;
+            display: flex; align-items: center; justify-content: center;
+            transition: opacity 0.4s ease;
+        }
+        #loadingScreen.fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .loading-inner { text-align: center; }
+        .loading-spinner {
+            width: 46px; height: 46px;
+            margin: 0 auto 22px;
+            border-radius: 50%;
+            border: 3px solid rgba(0,212,255,0.15);
+            border-top-color: var(--at-blue);
+            animation: spin 0.85s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-title {
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            font-size: 1.5rem;
+            color: white;
+        }
+        .loading-sub {
+            margin-top: 8px;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            color: #555;
+        }
         .auth-card {
             background: #111;
             border: 1px solid rgba(0,212,255,0.15);
@@ -185,13 +222,25 @@
 <body class="p-4 md:p-8">
 
 <!-- ════════════════════════════════════════════════════════════
+     LOADING SCREEN  (z-200 — sits above everything until Firebase
+     resolves whether we're signed in)
+════════════════════════════════════════════════════════════ -->
+<div id="loadingScreen">
+    <div class="loading-inner">
+        <div class="loading-spinner"></div>
+        <div class="loading-title">ATH<span style="color:var(--at-blue)">STUDIOS</span></div>
+        <div class="loading-sub">Connecting to License Server…</div>
+    </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════
      AUTH OVERLAY  (z-50)
 ════════════════════════════════════════════════════════════ -->
 <div id="authOverlay">
     <div class="auth-card animate-fadeIn">
         <div class="mb-8 text-center">
             <h1 class="text-2xl font-extrabold tracking-tighter text-white mb-1">
-                AT<span style="color:var(--at-blue)">STUDIOS</span>
+                ATH<span style="color:var(--at-blue)">STUDIOS</span>
             </h1>
             <p class="text-gray-600 text-xs uppercase tracking-widest">License Command Center</p>
         </div>
@@ -231,7 +280,7 @@
         </div>
 
         <p class="text-[10px] text-gray-700 text-center mt-6">
-            Access restricted to authorised ATStudios personnel.
+            Access restricted to authorised ATHStudios personnel.
         </p>
     </div>
 </div>
@@ -265,7 +314,7 @@
     <header class="flex flex-col md:flex-row justify-between items-center mb-10 gap-4">
         <div>
             <h1 class="text-3xl font-extrabold tracking-tighter text-white">
-                AT<span style="color:var(--at-blue)">STUDIOS</span>
+                ATH<span style="color:var(--at-blue)">STUDIOS</span>
             </h1>
             <p class="text-gray-500 text-sm font-medium uppercase tracking-widest text-center md:text-left">
                 License Command Center
@@ -319,9 +368,16 @@
                                class="at-input w-full p-2.5 rounded-lg text-sm">
                     </div>
                     <div>
-                        <label class="text-[10px] uppercase text-gray-500 font-bold mb-1 block">Individual User</label>
-                        <input type="text" id="userInput" placeholder="e.g. John Doe"
+                        <label class="text-[10px] uppercase text-gray-500 font-bold mb-1 block">Seats (devices allowed)</label>
+                        <input type="number" id="seatsInput" min="1" step="1" value="10" placeholder="e.g. 10"
                                class="at-input w-full p-2.5 rounded-lg text-sm">
+                        <p class="text-[9px] text-gray-600 mt-1">Anyone with this key can activate a device until seats run out. Each new device enters their own name.</p>
+                    </div>
+                    <div>
+                        <label class="text-[10px] uppercase text-gray-500 font-bold mb-1 block">Portal Password <span class="text-gray-700 normal-case">(optional — auto-generated if blank)</span></label>
+                        <input type="text" id="portalPasswordInput" placeholder="Leave blank to auto-generate"
+                               class="at-input w-full p-2.5 rounded-lg text-sm mono">
+                        <p class="text-[9px] text-gray-600 mt-1">Give this + the license key to the org/school head so they can free seats themselves from the Seat Portal.</p>
                     </div>
                     <button onclick="handleIssue()" id="issueBtn"
                             class="at-btn-primary w-full py-3 rounded-lg flex items-center justify-center gap-2 mt-2 text-sm">
@@ -402,9 +458,9 @@
                     <table class="w-full text-left border-collapse">
                         <thead class="bg-black/50 text-[10px] uppercase text-gray-500 font-bold">
                             <tr>
-                                <th class="px-6 py-4">Client / Individual</th>
+                                <th class="px-6 py-4">Organization</th>
                                 <th class="px-6 py-4">Key ID</th>
-                                <th class="px-6 py-4">Devices</th>
+                                <th class="px-6 py-4">Seats</th>
                                 <th class="px-6 py-4 text-center">Status</th>
                                 <th class="px-6 py-4 text-right">Actions</th>
                             </tr>
@@ -453,10 +509,22 @@
     const auth     = getAuth(app);
     const gProvider = new GoogleAuthProvider();
 
+    /* ── Loading screen ────────────────────────────────────────────────── */
+    function hideLoadingScreen() {
+        const el = document.getElementById('loadingScreen');
+        if (!el) return;
+        el.classList.add('fade-out');
+        setTimeout(() => { el.style.display = 'none'; }, 450);
+    }
+    // Safety net: if Firebase auth is slow (bad connection), don't leave the
+    // user staring at a spinner forever — reveal the sign-in screen anyway.
+    setTimeout(hideLoadingScreen, 6000);
+
     /* ── Auth state ────────────────────────────────────────────────────── */
     let unsubscribeLicenses = null;
 
     onAuthStateChanged(auth, (user) => {
+        hideLoadingScreen();
         if (user) {
             document.getElementById('authOverlay').style.display = 'none';
             document.getElementById('authUserEmail').textContent  = user.email || user.displayName || 'Admin';
@@ -605,28 +673,97 @@
         while (log.children.length > 30) log.removeChild(log.lastChild);
     }
 
-    /* ── Issue single license ──────────────────────────────────────────── */
+    /* ── Generate a readable portal password (not the crypto key charset) ── */
+    const generatePortalPassword = () => {
+        const chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; // no ambiguous chars
+        const rng   = new Uint32Array(10);
+        window.crypto.getRandomValues(rng);
+        return Array.from(rng, v => chars[v % chars.length]).join('');
+    };
+
+    /* ── Issue single organization license ───────────────────────────────
+       One key, N seats. The org/school distributes the SAME key to every
+       device; each device claims one seat by entering a name. The portal
+       password lets the org head free seats themselves later. ─────────── */
     window.handleIssue = async () => {
-        const org  = document.getElementById('orgInput').value.trim();
-        const user = document.getElementById('userInput').value.trim();
-        const btn  = document.getElementById('issueBtn');
-        if (!org || !user) return alert('Fill all fields.');
+        const org      = document.getElementById('orgInput').value.trim();
+        const seatsRaw = document.getElementById('seatsInput').value.trim();
+        let   password = document.getElementById('portalPasswordInput').value.trim();
+        const btn      = document.getElementById('issueBtn');
+
+        const seats = parseInt(seatsRaw, 10);
+        if (!org)  return alert('Enter an organization name.');
+        if (!seats || seats < 1) return alert('Enter a valid seat count (1 or more).');
+
+        if (!password) password = generatePortalPassword();
+
         btn.disabled = true; btn.textContent = 'Deploying…';
         const newKey = generateKey();
         try {
             await set(ref(db, 'licenses/' + newKey), {
-                org, user, active: true,
+                org, active: true,
                 issuedAt: new Date().toISOString(),
-                hardware: {}, _seeded: false
+                seats_total: seats,
+                portal_password: password,
+                seats: {}, _seeded: false
             });
             document.getElementById('orgInput').value  = '';
-            document.getElementById('userInput').value = '';
-            logActivity(`🔑 Issued to ${escHtml(user)} @ ${escHtml(org)}`);
+            document.getElementById('seatsInput').value = '10';
+            document.getElementById('portalPasswordInput').value = '';
+            logActivity(`🔑 Issued ${seats}-seat license to ${escHtml(org)} · key ${shortKey(newKey)} · portal password ${escHtml(password)}`);
+            alert(
+                `License created for ${org}\n\n` +
+                `License Key:\n${newKey}\n\n` +
+                `Seats: ${seats}\n\n` +
+                `Portal Password: ${password}\n\n` +
+                `Give the key + password to the org/school head so they can manage seats at the Seat Portal.`
+            );
         } catch (err) {
             alert('Database Error: ' + err.message);
         } finally {
             btn.disabled = false; btn.textContent = 'Generate & Deploy';
         }
+    };
+
+    /* ── Update seat count for an existing license ───────────────────────── */
+    window.updateSeatTotal = async (e, key, currentTotal) => {
+        e.stopPropagation();
+        const val = prompt('New total seat count:', currentTotal);
+        if (val === null) return;
+        const n = parseInt(val, 10);
+        if (!n || n < 1) return alert('Enter a valid number.');
+        try {
+            await update(ref(db, 'licenses/' + key), { seats_total: n });
+            logActivity(`🪑 Seat count for ${shortKey(key)} set to ${n}`);
+        } catch (err) {
+            alert('Database Error: ' + err.message);
+        }
+    };
+
+    /* ── Regenerate the org/school portal password ───────────────────────── */
+    window.regeneratePortalPassword = async (e, key) => {
+        e.stopPropagation();
+        showConfirm(
+            `Regenerate the portal password for ${shortKey(key)}?\n\nThe old password will stop working immediately.`,
+            async () => {
+                const newPass = generatePortalPassword();
+                await update(ref(db, 'licenses/' + key), { portal_password: newPass });
+                logActivity(`🔁 New portal password for ${shortKey(key)}: ${newPass}`);
+                alert(`New portal password for this license:\n\n${newPass}\n\nShare it with the org/school head.`);
+            }
+        );
+    };
+
+    /* ── Free a single seat (org head can also do this from the portal) ──── */
+    window.freeSeat = (e, key, seatId, seatName) => {
+        e.stopPropagation();
+        showConfirm(
+            `Free the seat held by "${seatName}"?\n\nThat device will lose access and the seat becomes available for someone else.`,
+            async () => {
+                await remove(ref(db, 'licenses/' + key + '/seats/' + seatId));
+                logActivity(`🪑 Freed seat "${escHtml(seatName)}" on ${shortKey(key)}`);
+            }
+        );
     };
 
 
@@ -672,54 +809,89 @@
 
             let total = 0, active = 0;
 
+            const maskMac = str => String(str ?? '').replace(/([0-9A-Fa-f]{2}[:\-]){3}([0-9A-Fa-f]{2}[:\-][0-9A-Fa-f]{2}[:\-][0-9A-Fa-f]{2})/g, 'XX:XX:XX:$2');
+            const maskHwid = hwid => maskMac(hwid).replace(/([0-9A-Fa-f]{2}[:\-]){5}[0-9A-Fa-f]{2}/g, m => 'XX:XX:XX:' + m.split(/[:\-]/).slice(-3).join(':'));
+            const maskStats = stats => maskMac(stats);
+
             Object.keys(data).reverse().forEach(key => {
                 const item      = data[key];
                 total++;
                 if (item.active) active++;
 
-                const hwList    = item.hardware ? Object.keys(item.hardware) : [];
-                const hwCount   = hwList.length;
-                const isFlagged = hwCount >= 2;
-                const hasLock   = !!(item.device_lock && item.device_lock.machine_id);
-                const isSeeded  = !!item._seeded;
-                const rowId     = key.substring(0, 8);
+                const isOrgLicense = item.seats_total !== undefined && item.seats_total !== null;
+                const isSeeded      = !!item._seeded;
+                const rowId         = key.substring(0, 8);
 
                 /* ── Main row ─────────────────────────────────────────── */
                 const mainRow = document.createElement('tr');
                 mainRow.className = 'license-row group border-b border-white/5';
                 mainRow.onclick   = () => toggleExpand(rowId);
-                mainRow.innerHTML = `
-                    <td class="px-6 py-5">
+
+                let seatsCell, nameCell, actionsCell;
+
+                if (isOrgLicense) {
+                    const seats      = item.seats || {};
+                    const seatIds    = Object.keys(seats).filter(id => seats[id] && seats[id].active !== false);
+                    const seatsUsed  = seatIds.length;
+                    const seatsTotal = item.seats_total;
+                    const isFull     = seatsUsed >= seatsTotal;
+
+                    nameCell = `
+                        <div class="flex items-center gap-2">
+                            <div>
+                                <div class="font-bold text-white text-sm">${escHtml(item.org)}</div>
+                                <div class="text-[11px] text-blue-400/70 font-medium">Organization license</div>
+                            </div>
+                            ${isSeeded ? '<span class="text-[8px] bg-purple-500/20 text-purple-400 border border-purple-500/30 px-1.5 py-0.5 rounded font-bold">SEED</span>' : ''}
+                        </div>`;
+
+                    seatsCell = `
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-semibold ${isFull ? 'text-yellow-400' : 'text-gray-400'}">${seatsUsed} / ${seatsTotal}</span>
+                            ${isFull ? '<span class="text-[8px] flag-warning px-1.5 py-0.5 rounded-full font-bold" style="background:rgba(234,179,8,0.1);border-color:rgba(234,179,8,0.3);color:#facc15;">FULL</span>' : ''}
+                        </div>`;
+
+                    actionsCell = `
+                        <div class="flex items-center justify-end gap-2">
+                            <button onclick="regeneratePortalPassword(event,'${key}')"
+                                    class="text-[10px] font-bold uppercase py-1.5 px-2.5 rounded border border-white/10 text-gray-400 hover:text-[#00d4ff] hover:border-[#00d4ff]/40 transition-all">
+                                🔑 Portal Pass
+                            </button>
+                            <button onclick="updateSeatTotal(event,'${key}',${seatsTotal})"
+                                    class="text-[10px] font-bold uppercase py-1.5 px-2.5 rounded border border-yellow-500/20 text-yellow-500/70 hover:text-yellow-400 hover:border-yellow-500/50 transition-all">
+                                🪑 Seats
+                            </button>
+                            <button onclick="toggleStatus(event,'${key}',${item.active})"
+                                    class="text-[10px] font-bold uppercase py-1.5 px-2.5 rounded border border-white/10 hover:border-white/40 transition-all
+                                           ${item.active ? 'text-gray-400 hover:text-red-400' : 'text-blue-400 hover:text-white'}">
+                                ${item.active ? 'Revoke' : 'Restore'}
+                            </button>
+                        </div>`;
+                } else {
+                    /* ── Legacy single-device license (pre-org-licensing) ── */
+                    const hwList    = item.hardware ? Object.keys(item.hardware) : [];
+                    const hwCount   = hwList.length;
+                    const isFlagged = hwCount >= 2;
+                    const hasLock   = !!(item.device_lock && item.device_lock.machine_id);
+
+                    nameCell = `
                         <div class="flex items-center gap-2">
                             <div>
                                 <div class="font-bold text-white text-sm">${escHtml(item.org)}</div>
                                 <div class="text-[11px] text-blue-400/70 font-medium">${escHtml(item.user)}</div>
                             </div>
+                            <span class="text-[8px] bg-white/5 text-gray-500 border border-white/10 px-1.5 py-0.5 rounded font-bold">LEGACY</span>
                             ${isSeeded ? '<span class="text-[8px] bg-purple-500/20 text-purple-400 border border-purple-500/30 px-1.5 py-0.5 rounded font-bold">SEED</span>' : ''}
-                        </div>
-                    </td>
-                    <td class="px-6 py-5">
-                        <div class="flex items-center gap-2">
-                            <span class="mono text-[9px] bg-black px-2 py-1.5 rounded border border-white/10 text-gray-500 tracking-tighter">${key}</span>
-                            <button onclick="copyKey(event,'${key}')" class="copy-btn p-1.5 rounded" title="Copy Key">
-                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"/></svg>
-                            </button>
-                        </div>
-                    </td>
-                    <td class="px-6 py-5">
+                        </div>`;
+
+                    seatsCell = `
                         <div class="flex items-center gap-2">
                             <span class="text-xs font-semibold ${isFlagged ? 'text-red-400' : 'text-gray-400'}">${hwCount}</span>
                             ${isFlagged ? '<span class="text-[8px] flag-warning px-1.5 py-0.5 rounded-full font-bold">FLAG</span>' : ''}
                             <span class="text-xs" title="${hasLock ? 'Hardware locked' : 'No lock yet'}">${hasLock ? '🔒' : '<span class="text-gray-700">🔓</span>'}</span>
-                        </div>
-                    </td>
-                    <td class="px-6 py-5 text-center">
-                        <span class="text-[10px] font-bold tracking-widest py-1 px-3 rounded-full bg-black border
-                              ${item.active ? 'status-active border-blue-500/30' : 'status-revoked border-red-500/30'}">
-                            ${item.active ? 'ACTIVE' : 'REVOKED'}
-                        </span>
-                    </td>
-                    <td class="px-6 py-5 text-right">
+                        </div>`;
+
+                    actionsCell = `
                         <div class="flex items-center justify-end gap-2">
                             ${hasLock ? `
                             <button onclick="deleteLock(event,'${key}')"
@@ -731,8 +903,27 @@
                                            ${item.active ? 'text-gray-400 hover:text-red-400' : 'text-blue-400 hover:text-white'}">
                                 ${item.active ? 'Revoke' : 'Restore'}
                             </button>
+                        </div>`;
+                }
+
+                mainRow.innerHTML = `
+                    <td class="px-6 py-5">${nameCell}</td>
+                    <td class="px-6 py-5">
+                        <div class="flex items-center gap-2">
+                            <span class="mono text-[9px] bg-black px-2 py-1.5 rounded border border-white/10 text-gray-500 tracking-tighter">${key}</span>
+                            <button onclick="copyKey(event,'${key}')" class="copy-btn p-1.5 rounded" title="Copy Key">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"/></svg>
+                            </button>
                         </div>
                     </td>
+                    <td class="px-6 py-5">${seatsCell}</td>
+                    <td class="px-6 py-5 text-center">
+                        <span class="text-[10px] font-bold tracking-widest py-1 px-3 rounded-full bg-black border
+                              ${item.active ? 'status-active border-blue-500/30' : 'status-revoked border-red-500/30'}">
+                            ${item.active ? 'ACTIVE' : 'REVOKED'}
+                        </span>
+                    </td>
+                    <td class="px-6 py-5 text-right">${actionsCell}</td>
                 `;
 
                 /* ── Detail row ───────────────────────────────────────── */
@@ -740,43 +931,81 @@
                 detailRow.id        = 'details-' + rowId;
                 detailRow.className = 'hidden expanded-details';
 
-                const maskMac = str => str.replace(/([0-9A-Fa-f]{2}[:\-]){3}([0-9A-Fa-f]{2}[:\-][0-9A-Fa-f]{2}[:\-][0-9A-Fa-f]{2})/g, 'XX:XX:XX:$2');
-                const maskHwid = hwid => {
-                    // mask any MAC-like patterns in the ID itself
-                    return maskMac(hwid).replace(/([0-9A-Fa-f]{2}[:\-]){5}[0-9A-Fa-f]{2}/g, m => 'XX:XX:XX:' + m.split(/[:\-]/).slice(-3).join(':'));
-                };
-                const maskStats = stats => maskMac(stats);
+                let detailBody;
 
-                const hwMarkup = hwCount > 0
-                    ? hwList.map(hwid => `
-                        <div class="p-3 bg-black/40 rounded border border-white/5 flex flex-col gap-1">
-                            <span class="text-[10px] text-blue-400 font-mono">ID: ${escHtml(maskHwid(hwid))}</span>
-                            <span class="text-[11px] text-gray-300">${escHtml(maskStats(item.hardware[hwid].stats || 'No detail'))}</span>
-                            <span class="text-[9px] text-gray-600">Linked: ${item.hardware[hwid].linkedAt ? new Date(item.hardware[hwid].linkedAt).toLocaleString() : '—'}</span>
-                        </div>`).join('')
-                    : '<div class="text-xs text-gray-600 italic">No hardware fingerprints recorded.</div>';
+                if (isOrgLicense) {
+                    const seats   = item.seats || {};
+                    const seatIds = Object.keys(seats);
 
-                const lockMarkup = hasLock
-                    ? `<div class="mt-4">
-                           <h4 class="text-[10px] uppercase font-bold text-yellow-500/60 mb-2 tracking-widest">Device Lock</h4>
-                           <div class="mono text-[11px] text-yellow-400/80 bg-black/40 px-3 py-2 rounded border border-yellow-500/10 flex flex-wrap gap-4">
-                               <span>Machine ID: ${escHtml(item.device_lock.machine_id)}</span>
-                               <span class="text-gray-600">Locked: ${item.device_lock.locked_at ? new Date(item.device_lock.locked_at).toLocaleString() : '—'}</span>
-                           </div>
-                       </div>`
-                    : '<div class="mt-4 text-[11px] text-gray-700 italic">No hardware lock set — first activation will lock this license.</div>';
+                    const seatMarkup = seatIds.length > 0
+                        ? seatIds.map(seatId => {
+                            const seat = seats[seatId] || {};
+                            const isFreed = seat.active === false;
+                            return `
+                            <div class="p-3 bg-black/40 rounded border border-white/5 flex flex-col gap-1 ${isFreed ? 'opacity-40' : ''}">
+                                <div class="flex items-start justify-between gap-2">
+                                    <span class="text-[12px] text-white font-semibold">${escHtml(seat.name || 'Unnamed')}</span>
+                                    ${!isFreed ? `<button onclick="freeSeat(event,'${key}','${seatId}','${escHtml(seat.name || 'Unnamed')}')"
+                                        class="text-[9px] font-bold uppercase px-2 py-1 rounded border border-red-500/20 text-red-400/80 hover:text-red-400 hover:border-red-500/50 transition-all">Free</button>` : '<span class="text-[9px] text-gray-600 italic">Freed</span>'}
+                                </div>
+                                <span class="text-[10px] text-blue-400 font-mono">ID: ${escHtml(maskHwid(seatId))}</span>
+                                <span class="text-[11px] text-gray-300">${escHtml(maskStats(seat.stats || 'No detail'))}</span>
+                                <span class="text-[9px] text-gray-600">Activated: ${seat.activatedAt ? new Date(seat.activatedAt).toLocaleString() : '—'}</span>
+                            </div>`;
+                        }).join('')
+                        : '<div class="text-xs text-gray-600 italic">No seats claimed yet.</div>';
+
+                    detailBody = `
+                        <h4 class="text-[10px] uppercase font-bold text-gray-500 mb-4 tracking-widest">Seats</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">${seatMarkup}</div>
+                        <div class="mt-4">
+                            <h4 class="text-[10px] uppercase font-bold text-[#00d4ff]/60 mb-2 tracking-widest">Seat Portal Access</h4>
+                            <div class="mono text-[11px] text-[#00d4ff]/80 bg-black/40 px-3 py-2 rounded border border-[#00d4ff]/10 flex flex-wrap items-center gap-4">
+                                <span>Password: ${escHtml(item.portal_password || '—')}</span>
+                                <button onclick="copyKey(event,'${escHtml(item.portal_password || '')}')" class="copy-btn px-2 py-1 rounded text-[9px]">Copy</button>
+                                <span class="text-gray-600">Give the license key above + this password to the org/school head.</span>
+                            </div>
+                        </div>
+                        <div class="mt-4 text-[10px] text-gray-700 mono">
+                            Issued: ${item.issuedAt ? new Date(item.issuedAt).toLocaleString() : '—'}
+                            ${isSeeded ? ' · <span class="text-purple-500/50">Seeded record</span>' : ''}
+                        </div>`;
+                } else {
+                    const hwList  = item.hardware ? Object.keys(item.hardware) : [];
+                    const hasLock = !!(item.device_lock && item.device_lock.machine_id);
+
+                    const hwMarkup = hwList.length > 0
+                        ? hwList.map(hwid => `
+                            <div class="p-3 bg-black/40 rounded border border-white/5 flex flex-col gap-1">
+                                <span class="text-[10px] text-blue-400 font-mono">ID: ${escHtml(maskHwid(hwid))}</span>
+                                <span class="text-[11px] text-gray-300">${escHtml(maskStats(item.hardware[hwid].stats || 'No detail'))}</span>
+                                <span class="text-[9px] text-gray-600">Linked: ${item.hardware[hwid].linkedAt ? new Date(item.hardware[hwid].linkedAt).toLocaleString() : '—'}</span>
+                            </div>`).join('')
+                        : '<div class="text-xs text-gray-600 italic">No hardware fingerprints recorded.</div>';
+
+                    const lockMarkup = hasLock
+                        ? `<div class="mt-4">
+                               <h4 class="text-[10px] uppercase font-bold text-yellow-500/60 mb-2 tracking-widest">Device Lock</h4>
+                               <div class="mono text-[11px] text-yellow-400/80 bg-black/40 px-3 py-2 rounded border border-yellow-500/10 flex flex-wrap gap-4">
+                                   <span>Machine ID: ${escHtml(item.device_lock.machine_id)}</span>
+                                   <span class="text-gray-600">Locked: ${item.device_lock.locked_at ? new Date(item.device_lock.locked_at).toLocaleString() : '—'}</span>
+                               </div>
+                           </div>`
+                        : '<div class="mt-4 text-[11px] text-gray-700 italic">No hardware lock set — first activation will lock this license.</div>';
+
+                    detailBody = `
+                        <h4 class="text-[10px] uppercase font-bold text-gray-500 mb-4 tracking-widest">Hardware Fingerprints</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">${hwMarkup}</div>
+                        ${lockMarkup}
+                        <div class="mt-4 text-[10px] text-gray-700 mono">
+                            Issued: ${item.issuedAt ? new Date(item.issuedAt).toLocaleString() : '—'}
+                            ${isSeeded ? ' · <span class="text-purple-500/50">Seeded record</span>' : ''}
+                        </div>`;
+                }
 
                 detailRow.innerHTML = `
                     <td colspan="5" class="p-6">
-                        <div class="animate-fadeIn">
-                            <h4 class="text-[10px] uppercase font-bold text-gray-500 mb-4 tracking-widest">Hardware Fingerprints</h4>
-                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">${hwMarkup}</div>
-                            ${lockMarkup}
-                            <div class="mt-4 text-[10px] text-gray-700 mono">
-                                Issued: ${item.issuedAt ? new Date(item.issuedAt).toLocaleString() : '—'}
-                                ${isSeeded ? ' · <span class="text-purple-500/50">Seeded record</span>' : ''}
-                            </div>
-                        </div>
+                        <div class="animate-fadeIn">${detailBody}</div>
                     </td>
                 `;
 
