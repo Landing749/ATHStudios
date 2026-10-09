@@ -1,0 +1,561 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ATSYS Release Admin</title>
+<!--
+  ATSYS Release Admin
+  Publishes the update notice that every ATSYS PC reads from  /app_update  on the
+  licenses Firebase project (licenses-5c397).
+
+  HOW TO RUN
+    - Host it next to your other admin pages, or run:  python -m http.server 8080
+      and open http://localhost:8080/atsys_release_admin.html
+    - Opening it as file:// will NOT work (Google sign-in needs http/https).
+    - If you host it on your own domain, add that domain in
+      Firebase Console > Authentication > Settings > Authorized domains.
+    - Deploy cloud/licenses.database.rules.json first (it already has the app_update rules).
+
+  Only the Google account in ADMIN_EMAIL can publish (enforced by the database rules, not by this page).
+-->
+<style>
+  :root{
+    --bg:#10161a; --card:#18222a; --card2:#1d2a33; --line:#2b3a45; --text:#e6edf1; --muted:#8fa3af;
+    --accent:#3aa0ff; --ok:#43a047; --warn:#fb8c00; --err:#e53935;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 system-ui,"Segoe UI",Roboto,sans-serif}
+  header{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;
+         padding:14px 20px;border-bottom:1px solid var(--line);background:var(--card)}
+  header h1{font-size:17px;margin:0}
+  header small{color:var(--muted)}
+  main{max-width:880px;margin:0 auto;padding:18px 16px 60px;display:grid;gap:16px}
+  section{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px}
+  h2{margin:0 0 10px;font-size:15px}
+  label{display:block;font-size:12px;color:var(--muted);margin:10px 0 4px}
+  input[type=text],textarea{width:100%;background:var(--bg);color:var(--text);border:1px solid var(--line);
+         border-radius:6px;padding:8px 10px;font:inherit}
+  input:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:-1px}
+  textarea{min-height:90px;resize:vertical}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media(max-width:600px){.row{grid-template-columns:1fr}}
+  button{background:var(--accent);color:#fff;border:0;border-radius:6px;padding:8px 14px;font:inherit;cursor:pointer}
+  button.ghost{background:transparent;border:1px solid var(--line);color:var(--text)}
+  button.danger{background:var(--err)}
+  button:disabled{opacity:.45;cursor:not-allowed}
+  .hint{font-size:12px;color:var(--muted);margin-top:4px}
+  .pill{display:inline-block;padding:2px 8px;border-radius:99px;font-size:12px;background:var(--card2);border:1px solid var(--line)}
+  .pill.ok{color:#8bd48e;border-color:#2e5a31}.pill.warn{color:#ffb74d;border-color:#6b4a14}.pill.err{color:#ef9a9a;border-color:#6b2423}
+  .kv{display:grid;grid-template-columns:120px 1fr;gap:4px 12px;font-size:13px}
+  .kv div:nth-child(odd){color:var(--muted)}
+  .mono{font-family:Consolas,"Courier New",monospace;word-break:break-all}
+  .bar{height:6px;background:var(--bg);border-radius:4px;overflow:hidden;margin-top:8px;display:none}
+  .bar i{display:block;height:100%;width:0;background:var(--accent)}
+  .msgs{display:grid;gap:6px;margin-top:10px}
+  .msg{padding:8px 10px;border-radius:6px;font-size:13px;border:1px solid var(--line);background:var(--card2)}
+  .msg.err{border-color:#6b2423;color:#ef9a9a}.msg.warn{border-color:#6b4a14;color:#ffb74d}.msg.ok{border-color:#2e5a31;color:#8bd48e}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+  .hist{display:grid;gap:8px}
+  .hist .item{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;
+              background:var(--card2);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+  .notes{white-space:pre-wrap;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:8px 10px;margin-top:8px}
+  select{width:100%;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:8px 10px;font:inherit}
+  label.check{display:flex;gap:8px;align-items:center;color:var(--text);font-size:13px;margin:14px 0 6px;cursor:pointer}
+  details{margin-top:10px;border:1px solid var(--line);border-radius:8px;padding:8px 12px;background:var(--card2)}
+  summary{cursor:pointer;color:var(--muted);font-size:13px}
+  .hidden{display:none!important}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>ATSYS Release Admin</h1>
+    <small>Publishes <span class="mono">/app_update</span> on licenses-5c397 &mdash; read by every PC</small>
+  </div>
+  <div id="authBox">
+    <button id="btnIn">Sign in with Google</button>
+    <span id="who" class="hidden"></span>
+    <button id="btnOut" class="ghost hidden">Sign out</button>
+  </div>
+</header>
+
+<main>
+  <!-- LIVE -->
+  <section>
+    <h2>Live right now <span id="liveState" class="pill">loading&hellip;</span></h2>
+    <div id="liveBody" class="hint">Reading the current update notice&hellip;</div>
+  </section>
+
+  <!-- PUBLISH -->
+  <section id="pubSec">
+    <h2>Publish a release</h2>
+    <div id="signedOutNote" class="hint">Sign in with the admin Google account to publish.</div>
+
+    <div id="form" class="hidden">
+      <label for="fGh" style="margin-top:0">GitHub release link</label>
+      <div style="display:flex;gap:8px">
+        <input id="fGh" type="text" placeholder="https://github.com/you/repo/releases/tag/v4.5.6   (repo link or you/repo = latest release)" autocomplete="off" spellcheck="false">
+        <button id="btnGh" style="white-space:nowrap">Load release</button>
+      </div>
+      <div class="hint">Upload the <b>silent</b> installer to a <b>public</b> GitHub Release first, then paste its link. Version, download link, hash and notes fill in by themselves.</div>
+      <div id="ghInfo" class="msgs"></div>
+      <div id="assetWrap" class="hidden">
+        <label for="fAsset">Installer file in this release</label>
+        <select id="fAsset"></select>
+      </div>
+
+      <label class="check"><input id="fForce" type="checkbox"> Force everyone to update now (they can't dismiss it)</label>
+
+      <details id="adv">
+        <summary>Details &mdash; auto-filled, edit only if needed</summary>
+
+      <div class="row">
+        <div>
+          <label for="fVer">Version <span class="mono">(e.g. 4.5.6)</span></label>
+          <input id="fVer" type="text" placeholder="4.5.6" autocomplete="off">
+        </div>
+        <div>
+          <label for="fMin">Minimum version <span class="mono">(optional)</span></label>
+          <input id="fMin" type="text" placeholder="leave empty = update is optional" autocomplete="off">
+          <div class="hint">PCs older than this are <b>forced</b> to update (they can't dismiss the banner).</div>
+        </div>
+      </div>
+
+      <label for="fUrl">Installer download URL <span class="mono">(https only)</span></label>
+      <input id="fUrl" type="text" placeholder="https://.../ATStudios_QRAttendance_Setup_v4.5.6.exe" autocomplete="off">
+      <div class="hint">The <b>silent</b> installer the app downloads. Must be a direct link that works without login.</div>
+
+      <label for="fFile">Installer file (to compute the SHA-256)</label>
+      <input id="fFile" type="file" accept=".exe">
+      <div class="bar" id="bar"><i id="barI"></i></div>
+      <div class="hint" id="fileInfo">Pick the exact file you uploaded. Nothing is uploaded from this page &mdash; it only reads the file to fingerprint it.</div>
+
+      <label for="fSha">SHA-256</label>
+      <input id="fSha" type="text" class="mono" placeholder="64 hex characters (filled automatically when you pick the file)" autocomplete="off" spellcheck="false">
+      <div class="hint">The app refuses to run a download whose hash doesn't match.</div>
+
+      <label for="fNotes">Release notes <span class="mono">(shown in the update banner, max 2000 chars)</span></label>
+      <textarea id="fNotes" maxlength="2000" placeholder="- Fixed ...&#10;- Added ..."></textarea>
+
+            </details>
+
+      <div id="msgs" class="msgs"></div>
+
+      <div class="actions">
+        <button id="btnPub">Publish release</button>
+        <button id="btnClear" class="ghost">Withdraw update notice</button>
+        <button id="btnReset" class="ghost">Clear form</button>
+      </div>
+      <div class="hint" style="margin-top:8px">Withdrawing removes the notice, so PCs stop offering an update. It does not undo updates already installed.</div>
+    </div>
+  </section>
+
+  <!-- SIMULATOR -->
+  <section>
+    <h2>What will a PC do?</h2>
+    <label for="simVer" style="margin-top:0">A PC running version</label>
+    <input id="simVer" type="text" value="4.5.5" style="max-width:200px" autocomplete="off">
+    <div id="simOut" class="msgs"></div>
+    <div class="hint">Uses the live notice above. Rule: below minimum &rarr; forced; below version &rarr; optional banner; otherwise nothing.</div>
+  </section>
+
+  <!-- HISTORY -->
+  <section id="histSec" class="hidden">
+    <h2>History <span class="hint">(last 15 publishes)</span></h2>
+    <div id="hist" class="hist"></div>
+  </section>
+</main>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script>
+"use strict";
+
+/* ───────── config (same project the PC app reads licenses from) ───────── */
+const ADMIN_EMAIL = "arhanmeir.obrero@gmail.com";
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyDHOZkF310KaQphFda9rgKBWl2pPmM44Hc",
+  authDomain: "licenses-5c397.firebaseapp.com",
+  databaseURL: "https://licenses-5c397-default-rtdb.firebaseio.com",
+  projectId: "licenses-5c397",
+  storageBucket: "licenses-5c397.firebasestorage.app",
+  messagingSenderId: "811265646295",
+  appId: "1:811265646295:web:771cdfd0af3d3056309a92"
+};
+firebase.initializeApp(FIREBASE_CONFIG);
+const auth = firebase.auth();
+const db = firebase.database();
+
+/* ───────── helpers ───────── */
+const $ = id => document.getElementById(id);
+const VER_RE = /^[0-9]+(\.[0-9]+){1,3}$/;
+const SHA_RE = /^[a-f0-9]{64}$/;
+
+function cmp(a, b) {                       // -1 / 0 / 1
+  const x = a.split(".").map(Number), y = b.split(".").map(Number);
+  for (let i = 0; i < Math.max(x.length, y.length); i++) {
+    const p = x[i] || 0, q = y[i] || 0;
+    if (p !== q) return p < q ? -1 : 1;
+  }
+  return 0;
+}
+function el(tag, props, ...kids) {
+  const e = document.createElement(tag);
+  Object.assign(e, props || {});
+  kids.forEach(k => e.append(k));
+  return e;
+}
+function fmtBytes(n) {
+  return n > 1048576 ? (n / 1048576).toFixed(1) + " MB" : (n / 1024).toFixed(0) + " KB";
+}
+function fmtDate(iso) {
+  const d = new Date(iso);
+  return isNaN(d) ? "—" : d.toLocaleString();
+}
+
+/* ───────── streaming SHA-256 (so a 200 MB installer doesn't need 200 MB of RAM) ───────── */
+const K256 = new Uint32Array([
+0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,
+0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,
+0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,
+0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,
+0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,
+0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,
+0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,
+0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2]);
+
+class Sha256 {
+  constructor() {
+    this.h = new Uint32Array([0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19]);
+    this.buf = new Uint8Array(64); this.bl = 0; this.len = 0; this.w = new Uint32Array(64);
+  }
+  block(d, o) {
+    const w = this.w;
+    for (let t = 0; t < 16; t++) { const j = o + t * 4; w[t] = ((d[j] << 24) | (d[j+1] << 16) | (d[j+2] << 8) | d[j+3]) >>> 0; }
+    for (let t = 16; t < 64; t++) {
+      const a = w[t-15], b = w[t-2];
+      const s0 = (((a >>> 7) | (a << 25)) ^ ((a >>> 18) | (a << 14)) ^ (a >>> 3)) >>> 0;
+      const s1 = (((b >>> 17) | (b << 15)) ^ ((b >>> 19) | (b << 13)) ^ (b >>> 10)) >>> 0;
+      w[t] = (w[t-16] + s0 + w[t-7] + s1) >>> 0;
+    }
+    let [a, b, c, d2, e, f, g, h] = this.h;
+    for (let t = 0; t < 64; t++) {
+      const S1 = (((e >>> 6) | (e << 26)) ^ ((e >>> 11) | (e << 21)) ^ ((e >>> 25) | (e << 7))) >>> 0;
+      const ch = ((e & f) ^ (~e & g)) >>> 0;
+      const t1 = (h + S1 + ch + K256[t] + w[t]) >>> 0;
+      const S0 = (((a >>> 2) | (a << 30)) ^ ((a >>> 13) | (a << 19)) ^ ((a >>> 22) | (a << 10))) >>> 0;
+      const mj = ((a & b) ^ (a & c) ^ (b & c)) >>> 0;
+      const t2 = (S0 + mj) >>> 0;
+      h = g; g = f; f = e; e = (d2 + t1) >>> 0; d2 = c; c = b; b = a; a = (t1 + t2) >>> 0;
+    }
+    const H = this.h;
+    H[0] = (H[0] + a) >>> 0; H[1] = (H[1] + b) >>> 0; H[2] = (H[2] + c) >>> 0; H[3] = (H[3] + d2) >>> 0;
+    H[4] = (H[4] + e) >>> 0; H[5] = (H[5] + f) >>> 0; H[6] = (H[6] + g) >>> 0; H[7] = (H[7] + h) >>> 0;
+  }
+  update(data) {
+    this.len += data.length;
+    let i = 0;
+    if (this.bl) {
+      while (i < data.length && this.bl < 64) this.buf[this.bl++] = data[i++];
+      if (this.bl === 64) { this.block(this.buf, 0); this.bl = 0; }
+    }
+    while (i + 64 <= data.length) { this.block(data, i); i += 64; }
+    while (i < data.length) this.buf[this.bl++] = data[i++];
+  }
+  hex() {
+    const hi = Math.floor(this.len / 0x20000000), lo = (this.len << 3) >>> 0;
+    const pad = new Uint8Array((this.bl < 56 ? 64 : 128) - this.bl);
+    pad[0] = 0x80;
+    const dv = new DataView(pad.buffer);
+    dv.setUint32(pad.length - 8, hi); dv.setUint32(pad.length - 4, lo);
+    this.update(pad);
+    return Array.from(this.h, x => x.toString(16).padStart(8, "0")).join("");
+  }
+}
+
+async function hashFile(file, onProgress) {
+  const sha = new Sha256();
+  const reader = file.stream().getReader();
+  let done = 0;
+  for (;;) {
+    const { value, done: end } = await reader.read();
+    if (end) break;
+    sha.update(value);
+    done += value.length;
+    onProgress(done / file.size);
+  }
+  return sha.hex();
+}
+
+/* ───────── auth ───────── */
+let user = null;
+$("btnIn").onclick = async () => {
+  try { await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
+  catch (e) { showMsgs([["err", "Sign-in failed: " + e.message + " (is this page on http(s) and its domain authorised in Firebase?)"]]); }
+};
+$("btnOut").onclick = () => auth.signOut();
+
+auth.onAuthStateChanged(u => {
+  user = u;
+  const isAdmin = !!u && u.email === ADMIN_EMAIL && u.emailVerified;
+  $("btnIn").classList.toggle("hidden", !!u);
+  $("btnOut").classList.toggle("hidden", !u);
+  $("who").classList.toggle("hidden", !u);
+  $("who").textContent = u ? u.email : "";
+  $("signedOutNote").classList.toggle("hidden", isAdmin);
+  $("signedOutNote").textContent = u && !isAdmin
+    ? "Signed in as " + u.email + " — this account is not the release admin, so publishing is disabled."
+    : "Sign in with the admin Google account to publish.";
+  $("form").classList.toggle("hidden", !isAdmin);
+  $("histSec").classList.toggle("hidden", !isAdmin);
+  if (isAdmin) loadHistory();
+});
+
+/* ───────── live notice ───────── */
+let live = null;
+db.ref("app_update").on("value", snap => {
+  live = snap.val();
+  renderLive();
+  renderSim();
+}, err => {
+  $("liveState").textContent = "error";
+  $("liveState").className = "pill err";
+  $("liveBody").textContent = "Could not read /app_update: " + err.message;
+});
+
+function renderLive() {
+  const body = $("liveBody");
+  body.replaceChildren();
+  if (!live || !live.version) {
+    $("liveState").textContent = "no update published";
+    $("liveState").className = "pill warn";
+    body.textContent = "PCs currently see no update notice.";
+    return;
+  }
+  $("liveState").textContent = "v" + live.version;
+  $("liveState").className = "pill ok";
+  const kv = el("div", { className: "kv" });
+  const add = (k, v, mono) => { kv.append(el("div", { textContent: k }), el("div", { textContent: v, className: mono ? "mono" : "" })); };
+  add("Version", live.version);
+  add("Minimum", live.min_version || "— (optional update)");
+  add("Published", live.published_at ? fmtDate(live.published_at) : "—");
+  add("URL", live.url || "—", true);
+  add("SHA-256", live.sha256 || "—", true);
+  body.append(kv);
+  if (live.notes) body.append(el("div", { className: "notes", textContent: live.notes }));
+}
+
+/* ───────── simulator ───────── */
+function renderSim() {
+  const out = $("simOut");
+  out.replaceChildren();
+  const v = $("simVer").value.trim();
+  const add = (cls, t) => out.append(el("div", { className: "msg " + cls, textContent: t }));
+  if (!VER_RE.test(v)) return add("warn", "Enter a version like 4.5.5");
+  if (!live || !live.version) return add("ok", "No notice published → nothing happens.");
+  if (live.min_version && cmp(v, live.min_version) < 0)
+    return add("err", "v" + v + " is below the minimum (" + live.min_version + ") → FORCED update to " + live.version + ".");
+  if (cmp(v, live.version) < 0)
+    return add("warn", "v" + v + " is behind → optional banner offering " + live.version + ".");
+  add("ok", "v" + v + " is up to date → nothing happens.");
+}
+$("simVer").addEventListener("input", renderSim);
+
+/* ───────── form ───────── */
+function showMsgs(list) {
+  const box = $("msgs");
+  box.replaceChildren(...list.map(([cls, t]) => el("div", { className: "msg " + cls, textContent: t })));
+}
+
+$("fFile").addEventListener("change", async e => {
+  const f = e.target.files[0];
+  if (!f) return;
+  const bar = $("bar"), barI = $("barI");
+  $("fileInfo").textContent = "Fingerprinting " + f.name + " (" + fmtBytes(f.size) + ")…";
+  bar.style.display = "block"; barI.style.width = "0";
+  $("btnPub").disabled = true;
+  try {
+    const hex = await hashFile(f, p => { barI.style.width = (p * 100).toFixed(0) + "%"; });
+    $("fSha").value = hex;
+    $("fileInfo").textContent = f.name + " — " + fmtBytes(f.size) + " — hash filled in below.";
+    const m = f.name.match(/v?(\d+(?:\.\d+){1,3})/);
+    if (m && !$("fVer").value.trim()) $("fVer").value = m[1];
+  } catch (err) {
+    $("fileInfo").textContent = "Could not read the file: " + err.message;
+  } finally {
+    bar.style.display = "none";
+    $("btnPub").disabled = false;
+  }
+});
+
+function collect() {
+  return {
+    version: $("fVer").value.trim(),
+    min_version: $("fMin").value.trim(),
+    url: $("fUrl").value.trim(),
+    sha256: $("fSha").value.trim().toLowerCase(),
+    notes: $("fNotes").value.trim()
+  };
+}
+function collectFinal() {
+  const r = collect();
+  if ($("fForce").checked && !r.min_version) r.min_version = r.version;   // forced = minimum equals this release
+  return r;
+}
+
+function check(r) {
+  const errs = [], warns = [];
+  if (!VER_RE.test(r.version)) errs.push("Version must look like 4.5.6 (digits and dots, 2–4 parts).");
+  if (r.min_version && !VER_RE.test(r.min_version)) errs.push("Minimum version must look like 4.5.0, or be empty.");
+  if (VER_RE.test(r.version) && VER_RE.test(r.min_version || "") && cmp(r.min_version, r.version) > 0)
+    errs.push("Minimum version can't be higher than the release version.");
+  if (!/^https:\/\//.test(r.url) || r.url.length > 600) errs.push("URL must start with https:// (max 600 chars).");
+  if (!SHA_RE.test(r.sha256)) errs.push("SHA-256 must be 64 hex characters — pick the installer file to compute it.");
+  if (r.notes.length > 2000) errs.push("Notes are longer than 2000 characters.");
+  if (!r.notes) warns.push("No release notes — teachers will see a banner with no explanation.");
+  if (live && live.version && VER_RE.test(r.version)) {
+    const c = cmp(r.version, live.version);
+    if (c === 0) warns.push("v" + r.version + " is already live — this will overwrite it.");
+    if (c < 0) warns.push("v" + r.version + " is OLDER than the live v" + live.version + " (rollback). PCs already on the newer version will not downgrade.");
+  }
+  if (r.min_version) warns.push("Minimum version is set: PCs below v" + r.min_version + " will be forced to update.");
+  return { errs, warns };
+}
+
+$("btnPub").onclick = async () => {
+  const r = collectFinal();
+  const { errs, warns } = check(r);
+  showMsgs([...errs.map(t => ["err", t]), ...warns.map(t => ["warn", t])]);
+  if (errs.length) return;
+  const summary = "Publish v" + r.version + " to ALL ATSYS PCs?\n\n" +
+    (r.min_version ? "Forced below v" + r.min_version + "\n" : "Optional update\n") +
+    warns.map(w => "• " + w).join("\n");
+  if (!confirm(summary)) return;
+
+  const rec = { version: r.version, url: r.url, sha256: r.sha256, notes: r.notes, published_at: new Date().toISOString() };
+  if (r.min_version) rec.min_version = r.min_version;
+  const updates = {};
+  updates["app_update"] = rec;                                   // replaces the live notice as a whole
+  updates["app_update_history/" + Date.now()] = Object.assign({ by: user.email }, rec);
+  $("btnPub").disabled = true;
+  try {
+    await db.ref().update(updates);
+    showMsgs([["ok", "Published v" + r.version + ". PCs will see it the next time they check."]]);
+    loadHistory();
+  } catch (e) {
+    showMsgs([["err", "Publish failed: " + e.message + " (database rules deployed? signed in as " + ADMIN_EMAIL + "?)"]]);
+  } finally { $("btnPub").disabled = false; }
+};
+
+$("btnClear").onclick = async () => {
+  if (!live) return showMsgs([["warn", "There is no live notice to withdraw."]]);
+  if (!confirm("Withdraw the live notice (v" + live.version + ")?\nPCs will stop offering an update.")) return;
+  try {
+    await db.ref("app_update").remove();
+    showMsgs([["ok", "Update notice withdrawn."]]);
+  } catch (e) { showMsgs([["err", "Failed: " + e.message]]); }
+};
+
+$("btnReset").onclick = () => {
+  ["fVer", "fMin", "fUrl", "fSha", "fNotes", "fFile"].forEach(id => { $(id).value = ""; });
+  $("fileInfo").textContent = "Pick the exact file you uploaded. Nothing is uploaded from this page — it only reads the file to fingerprint it.";
+  showMsgs([]);
+};
+
+
+/* ───────── load a release straight from GitHub (public repos; api.github.com allows browser requests) ───────── */
+const GH_KEY = "atsys_release_gh_link";
+try { $("fGh").value = localStorage.getItem(GH_KEY) || ""; } catch (e) {}
+
+function parseGh(text) {
+  const t = text.trim();
+  let m = t.match(/github\.com\/([^\/\s]+)\/([^\/\s#?]+)(?:\/releases\/tag\/([^\/\s#?]+))?/i);
+  if (!m) { const s2 = t.match(/^([\w.-]+)\/([\w.-]+)$/); if (s2) m = [t, s2[1], s2[2], undefined]; }
+  if (!m) return null;
+  return { owner: m[1], repo: m[2].replace(/\.git$/, ""), tag: m[3] ? decodeURIComponent(m[3]) : null };
+}
+function showGh(list) {
+  $("ghInfo").replaceChildren(...list.map(([cls, t]) => el("div", { className: "msg " + cls, textContent: t })));
+}
+
+let ghRelease = null, ghAssets = [];
+function applyAsset(rel, asset) {
+  const out = [];
+  const tv = (rel.tag_name || "").match(/(\d+(?:\.\d+){1,3})/) || (asset.name || "").match(/(\d+(?:\.\d+){1,3})/);
+  $("fVer").value = tv ? tv[1] : "";
+  $("fUrl").value = asset.browser_download_url || "";
+  const dg = typeof asset.digest === "string" && asset.digest.startsWith("sha256:") ? asset.digest.slice(7).toLowerCase() : "";
+  $("fSha").value = SHA_RE.test(dg) ? dg : "";
+  let notes = (rel.body || "").replace(/\r\n/g, "\n").trim();
+  if (notes.length > 2000) { notes = notes.slice(0, 1990) + "…"; out.push(["warn", "Release notes were longer than 2000 characters and got shortened."]); }
+  $("fNotes").value = notes;
+  $("fFile").value = "";
+
+  out.unshift(["ok", "v" + ($("fVer").value || "?") + "  ·  " + asset.name + "  ·  " + fmtBytes(asset.size || 0) +
+    (SHA_RE.test(dg) ? "  ·  hash ✔ from GitHub" : "")]);
+  if (!tv) { out.push(["warn", "Couldn't read a version from the tag \"" + rel.tag_name + "\" — type it in Details."]); $("adv").open = true; }
+  if (!SHA_RE.test(dg)) { out.push(["warn", "GitHub gave no hash for this file — open Details and pick the .exe so it can be computed."]); $("adv").open = true; }
+  if (rel.prerelease) out.push(["warn", "This release is marked as a pre-release on GitHub."]);
+  if (!/silent/i.test(asset.name) && ghAssets.length > 1) out.push(["warn", "Make sure \"" + asset.name + "\" is the SILENT installer, not the windowed one."]);
+  showGh(out);
+}
+
+$("btnGh").onclick = async () => {
+  const p = parseGh($("fGh").value);
+  if (!p) return showGh([["err", "Paste a link like https://github.com/owner/repo/releases/tag/v4.5.6"]]);
+  showGh([["ok", "Loading from GitHub…"]]);
+  $("btnGh").disabled = true;
+  try {
+    const api = "https://api.github.com/repos/" + p.owner + "/" + p.repo + "/releases/" + (p.tag ? "tags/" + encodeURIComponent(p.tag) : "latest");
+    const res = await fetch(api, { headers: { Accept: "application/vnd.github+json" } });
+    if (res.status === 404) throw new Error("Release not found. Is the repo public and the release published (not a draft)?");
+    if (res.status === 403) throw new Error("GitHub rate limit hit — wait a few minutes and try again.");
+    if (!res.ok) throw new Error("GitHub answered " + res.status);
+    const rel = await res.json();
+    ghRelease = rel;
+    ghAssets = (rel.assets || []).filter(a => /\.exe$/i.test(a.name))
+      .sort((a, b) => (/silent/i.test(b.name) - /silent/i.test(a.name)));
+    if (!ghAssets.length) throw new Error("That release has no .exe file attached.");
+    $("fAsset").replaceChildren(...ghAssets.map((a, i) => el("option", { value: i, textContent: a.name + "  (" + fmtBytes(a.size || 0) + ")" })));
+    $("assetWrap").classList.toggle("hidden", ghAssets.length < 2);
+    applyAsset(rel, ghAssets[0]);
+    try { localStorage.setItem(GH_KEY, $("fGh").value.trim()); } catch (e) {}
+  } catch (e) {
+    showGh([["err", e.message]]);
+  } finally { $("btnGh").disabled = false; }
+};
+$("fAsset").addEventListener("change", () => applyAsset(ghRelease, ghAssets[+$("fAsset").value]));
+$("fGh").addEventListener("keydown", e => { if (e.key === "Enter") $("btnGh").click(); });
+
+/* ───────── history ───────── */
+async function loadHistory() {
+  const box = $("hist");
+  try {
+    const snap = await db.ref("app_update_history").orderByKey().limitToLast(15).once("value");
+    const rows = [];
+    snap.forEach(c => { rows.push([c.key, c.val()]); });
+    rows.reverse();
+    box.replaceChildren();
+    if (!rows.length) { box.append(el("div", { className: "hint", textContent: "Nothing published from this page yet." })); return; }
+    rows.forEach(([key, v]) => {
+      const left = el("div", {}, el("b", { textContent: "v" + v.version }),
+        el("span", { className: "hint", textContent: "  " + (v.published_at ? fmtDate(v.published_at) : "") + (v.min_version ? "  · min " + v.min_version : "") }));
+      const btn = el("button", { className: "ghost", textContent: "Load into form" });
+      btn.onclick = () => {
+        $("fVer").value = v.version || ""; $("fMin").value = v.min_version || ""; $("fUrl").value = v.url || "";
+        $("fSha").value = v.sha256 || ""; $("fNotes").value = v.notes || "";
+        window.scrollTo({ top: $("pubSec").offsetTop - 10, behavior: "smooth" });
+      };
+      box.append(el("div", { className: "item" }, left, btn));
+    });
+  } catch (e) {
+    box.replaceChildren(el("div", { className: "hint", textContent: "Could not load history: " + e.message }));
+  }
+}
+
+renderSim();
+</script>
+</body>
+</html>
